@@ -1,7 +1,7 @@
-name: bloc_lite
+name: bloc_small
 description: A new flutter plugin project.
-version: 0.0.1
-homepage:
+version: 0.0.3
+homepage: https://github.com/linhnguyen-gt/bloc_lite
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -27,10 +27,10 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.bloc_lite
-        pluginClass: BlocLitePlugin
+        package: com.example.bloc_small
+        pluginClass: BlocSmallPlugin
       ios:
-        pluginClass: BlocLitePlugin
+        pluginClass: BlocSmallPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

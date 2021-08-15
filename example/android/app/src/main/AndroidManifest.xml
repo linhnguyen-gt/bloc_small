@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.bloc_lite_example">
+    package="com.example.bloc_small_example">
    <application
-        android:label="bloc_lite_example"
+        android:label="bloc_small_example"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

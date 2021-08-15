@@ -1,5 +1,8 @@
-import 'package:bloc_lite/bloc_lite.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/services.dart';
+import 'package:bloc_small/bloc_small.dart';
 
 void main() {
   runApp(MyApp());
@@ -145,3 +148,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+

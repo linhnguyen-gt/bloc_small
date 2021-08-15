@@ -1,4 +1,4 @@
-group 'com.example.bloc_lite'
+group 'com.example.bloc_small'
 version '1.0-SNAPSHOT'
 
 buildscript {

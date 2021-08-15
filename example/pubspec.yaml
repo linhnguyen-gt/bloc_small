@@ -1,5 +1,5 @@
-name: bloc_lite_example
-description: Demonstrates how to use the bloc_lite plugin.
+name: bloc_small_example
+description: Demonstrates how to use the bloc_small plugin.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -12,9 +12,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  bloc_lite:
+  bloc_small:
     # When depending on this package from a real application you should use:
-    #   bloc_lite: ^x.y.z
+    #   bloc_small: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints
     # The example app is bundled with the plugin so we use a path dependency on
     # the parent directory to use the current plugin's version.

@@ -1,4 +1,4 @@
-package com.example.bloc_lite
+package com.example.bloc_small
 
 import androidx.annotation.NonNull
 
@@ -8,8 +8,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-/** BlocLitePlugin */
-class BlocLitePlugin: FlutterPlugin, MethodCallHandler {
+/** BlocSmallPlugin */
+class BlocSmallPlugin: FlutterPlugin, MethodCallHandler {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -17,7 +17,7 @@ class BlocLitePlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "bloc_lite")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "bloc_small")
     channel.setMethodCallHandler(this)
   }
 

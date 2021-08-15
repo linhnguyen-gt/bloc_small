@@ -1,6 +1,6 @@
-# bloc_lite_example
+# bloc_small_example
 
-Demonstrates how to use the bloc_lite plugin.
+Demonstrates how to use the bloc_small plugin.
 
 ## Getting Started
 
