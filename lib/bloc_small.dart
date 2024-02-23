@@ -1,17 +1,16 @@
-
 import 'dart:async';
 
-
 class Bloc<T> {
-  Bloc({T initialValue}) : _controller = StreamController<T>() {
+  Bloc({T? initialValue}) : _controller = StreamController<T>() {
     if (initialValue != null) add(initialValue);
   }
 
-  Bloc.broadcast({T initialValue}) : _controller = StreamController<T>.broadcast() {
+  Bloc.broadcast({T? initialValue})
+      : _controller = StreamController<T>.broadcast() {
     if (initialValue != null) add(initialValue);
   }
 
-  T _value;
+  late T _value;
 
   T get value => _value;
 
@@ -28,7 +27,7 @@ class Bloc<T> {
     if (!_controller.isClosed) _controller.sink.add(value);
   }
 
-  void addError(Object error, [StackTrace stackTrace]) {
+  void addError(Object error, [StackTrace? stackTrace]) {
     _controller.sink.addError(error, stackTrace);
   }
 
@@ -36,4 +35,3 @@ class Bloc<T> {
     _controller.close();
   }
 }
-

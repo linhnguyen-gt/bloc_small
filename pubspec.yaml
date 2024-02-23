@@ -1,11 +1,11 @@
 name: bloc_small
 description: A new flutter plugin project.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/linhnguyen-gt/bloc_lite
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.20.0"
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=3.19.0"
 
 dependencies:
   flutter:
