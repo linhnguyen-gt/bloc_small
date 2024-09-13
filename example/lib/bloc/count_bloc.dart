@@ -6,7 +6,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
 part 'count_bloc.freezed.dart';
+
 part 'count_event.dart';
+
 part 'count_state.dart';
 
 @injectable
@@ -16,8 +18,12 @@ class CountBloc extends BaseBloc<CountEvent, CountState> {
     on<Decrement>(_onDecrementCounter);
   }
 
-  void _onIncrementCounter(Increment event, Emitter<CountState> emit) {
-    emit(state.copyWith(count: state.count + 1));
+  Future<void> _onIncrementCounter(
+      Increment event, Emitter<CountState> emit) async {
+    await blocCatch(actions: () async {
+      Future.delayed(Duration(seconds: 3));
+      emit(state.copyWith(count: state.count + 1));
+    });
   }
 
   void _onDecrementCounter(Decrement event, Emitter<CountState> emit) {
