@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/common_bloc.dart';
@@ -69,34 +70,44 @@ abstract class BaseBlocDelegate<E extends BaseBlocEvent,
 
   /// Shows the loading overlay for a specific key.
   ///
-  /// [key] is a unique identifier for the loading state.
+  /// [key] is a unique identifier for the loading state. If not provided, it defaults to [LoadingKeys.global].
+  ///
+  /// This method adds a [SetComponentLoading] event to the [commonBloc] to activate the loading state.
   ///
   /// Usage:
   /// ```dart
   /// void someMethodThatNeedsLoading() {
-  ///   showLoading(key: 'your_loading_key');
-  ///   // Do some work
-  ///   hideLoading(key: 'your_loading_key');
+  ///   showLoading(key: LoadingKeys.global); // Or use a specific key
+  ///   try {
+  ///     // Do some work
+  ///   } finally {
+  ///     hideLoading(key: LoadingKeys.global); // Make sure to use the same key
+  ///   }
   /// }
   /// ```
-  void showLoading({String? key = 'global'}) {
-    commonBloc.add(SetComponentLoading(key: key!, isLoading: true));
+  void showLoading({String key = LoadingKeys.global}) {
+    commonBloc.add(SetComponentLoading(key: key, isLoading: true));
   }
 
   /// Hides the loading overlay for a specific key.
   ///
-  /// [key] is a unique identifier for the loading state.
+  /// [key] is a unique identifier for the loading state. If not provided, it defaults to [LoadingKeys.global].
+  ///
+  /// This method adds a [SetComponentLoading] event to the [commonBloc] to deactivate the loading state.
   ///
   /// Usage:
   /// ```dart
   /// void someMethodThatNeedsLoading() {
-  ///   showLoading(key: 'your_loading_key');
-  ///   // Do some work
-  ///   hideLoading(key: 'your_loading_key');
+  ///   showLoading(key: LoadingKeys.global); // Or use a specific key
+  ///   try {
+  ///     // Do some work
+  ///   } finally {
+  ///     hideLoading(key: LoadingKeys.global); // Make sure to use the same key
+  ///   }
   /// }
   /// ```
-  void hideLoading({String? key = 'global'}) {
-    commonBloc.add(SetComponentLoading(key: key!, isLoading: false));
+  void hideLoading({String key = LoadingKeys.global}) {
+    commonBloc.add(SetComponentLoading(key: key, isLoading: false));
   }
 
   /// Executes a given asynchronous action within a try-catch block, handling loading states.

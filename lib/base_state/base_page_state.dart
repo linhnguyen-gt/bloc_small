@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,9 +67,16 @@ abstract class BasePageStateDelegate<T extends StatefulWidget,
 
   /// Wraps a child widget with a loading overlay that can be shown or hidden based on a loading state.
   ///
-  /// [child] is the main content widget to be displayed.
-  /// [loadingKey] is a unique identifier for the loading state.
-  /// [loadingWidget] is an optional custom widget to show when loading. If not provided, it uses the default loading indicator.
+  /// This method uses a BlocBuilder with CommonBloc to reactively show or hide a loading overlay
+  /// based on the loading state for a specific key.
+  ///
+  /// Parameters:
+  /// - [child]: The main content widget to be displayed.
+  /// - [loadingKey]: A unique identifier for the loading state. Defaults to [LoadingKeys.global].
+  /// - [loadingWidget]: An optional custom widget to show when loading. If not provided, it uses the default loading indicator.
+  ///
+  /// The method creates a stack with the child widget and an animated loading overlay.
+  /// The overlay's visibility is controlled by the loading state in CommonBloc.
   ///
   /// Usage:
   /// ```dart
@@ -76,21 +84,26 @@ abstract class BasePageStateDelegate<T extends StatefulWidget,
   /// Widget buildPage(BuildContext context) {
   ///   return buildLoadingOverlay(
   ///     child: YourPageContent(),
-  ///     loadingKey: 'your_loading_key',
+  ///     loadingKey: LoadingKeys.global, // Optional, this is the default
   ///     loadingWidget: CustomLoadingWidget(), // Optional
   ///   );
   /// }
   /// ```
+  ///
+  /// Note: Ensure that CommonBloc is available in the widget tree and that loading states
+  /// are properly managed using the specified loadingKey.
   Widget buildLoadingOverlay(
-      Widget child, String loadingKey, Widget? loadingWidget) {
+      {required Widget child,
+      String? loadingKey = LoadingKeys.global,
+      Widget? loadingWidget}) {
     return BlocBuilder<CommonBloc, CommonState>(
       buildWhen: (previous, current) =>
-          previous.isLoading(loadingKey) != current.isLoading(loadingKey),
+          previous.isLoading(loadingKey!) != current.isLoading(loadingKey),
       builder: (context, state) {
         return Stack(
           children: [
             child,
-            if (state.isLoading(loadingKey))
+            if (state.isLoading(loadingKey!))
               AnimatedOpacity(
                 opacity: state.isLoading(loadingKey) ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),

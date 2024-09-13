@@ -21,7 +21,7 @@ class CountBloc extends BaseBloc<CountEvent, CountState> {
   Future<void> _onIncrementCounter(
       Increment event, Emitter<CountState> emit) async {
     await blocCatch(actions: () async {
-      Future.delayed(Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: 2));
       emit(state.copyWith(count: state.count + 1));
     });
   }
