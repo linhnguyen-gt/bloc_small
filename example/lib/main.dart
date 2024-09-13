@@ -1,10 +1,14 @@
+import 'package:bloc_small/base_state/base_page_state.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
-import 'package:flutter/services.dart';
-import 'package:bloc_small/bloc_small.dart';
+import 'bloc/count_bloc.dart';
+import 'di/di.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  configureInjectionApp();
   runApp(MyApp());
 }
 
@@ -34,39 +38,14 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState(getIt);
 }
 
-class CounterBloc {
-  var _counter = Bloc<int>.broadcast(initialValue: 0);
-
-  void incrementCounter() {
-    _counter.add(_counter.value + 1);
-  }
-
-  void decrementCounter() {
-    if (_counter.value > 0) _counter.add(_counter.value - 1);
-  }
-
-  void dispose() {
-    _counter.dispose();
-  }
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final bloc = CounterBloc();
+class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
+  _MyHomePageState(GetIt getIt) : super(getIt);
 
   @override
   void initState() {
@@ -78,11 +57,10 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    bloc.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -118,15 +96,13 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               'You have pushed the button this many times:',
             ),
-            StreamBuilder<int>(
-                initialData: bloc._counter.value,
-                stream: bloc._counter.stream,
-                builder: (context, snapshot) {
-                  return Text(
-                    '${snapshot.data}',
-                    style: Theme.of(context).textTheme.headline4,
-                  );
-                }),
+            BlocBuilder<CountBloc, CountState>(
+              builder: (context, state) {
+                return Text(
+                  '${state.count}',
+                );
+              },
+            )
           ],
         ),
       ),
@@ -134,12 +110,12 @@ class _MyHomePageState extends State<MyHomePage> {
         spacing: 5,
         children: [
           FloatingActionButton(
-            onPressed: bloc.incrementCounter,
+            onPressed: () => bloc.add(Increment()),
             tooltip: 'Increment',
             child: Icon(Icons.add),
           ),
           FloatingActionButton(
-            onPressed: bloc.decrementCounter,
+            onPressed: () => bloc.add(Decrement()),
             tooltip: 'decrement',
             child: Icon(Icons.remove),
           ),
