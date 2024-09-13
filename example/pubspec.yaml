@@ -25,6 +25,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_bloc: ^8.1.6
   injectable: ^2.4.4
+  freezed: ^2.5.7
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,7 @@ dev_dependencies:
 
   injectable_generator: ^2.6.2
   build_runner: ^2.4.12
+  freezed_annotation: ^2.4.4
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

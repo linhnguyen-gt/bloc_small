@@ -1,5 +1,5 @@
 import 'package:bloc_small/common/common_bloc.dart';
-import 'package:bloc_small_example/di/di.config.dart';
+import 'di.config.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 

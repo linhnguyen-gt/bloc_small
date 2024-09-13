@@ -48,18 +48,6 @@ class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
   _MyHomePageState(GetIt getIt) : super(getIt);
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
-
-  @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.

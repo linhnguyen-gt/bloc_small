@@ -4,9 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_small/base/base_bloc.dart';
 import 'package:bloc_small/base/base_bloc_event.dart';
 import 'package:bloc_small/base/base_bloc_state.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'common_bloc.freezed.dart';
 part 'common_event.dart';
 part 'common_state.dart';
 

@@ -8,6 +8,26 @@ import 'package:get_it/get_it.dart';
 import '../base/base_bloc.dart';
 import '../common/common_bloc.dart';
 
+/// A base class for all StatefulWidget states in the application that use a Bloc.
+///
+/// This class extends [BasePageStateDelegate] and provides a foundation for creating
+/// state classes that are associated with a specific Bloc.
+///
+/// Type Parameters:
+/// - [T]: The type of the StatefulWidget this state is associated with.
+/// - [B]: The type of Bloc this state will use. Must extend [BaseBloc].
+///
+/// Usage:
+/// ```dart
+/// class MyPageState extends BasePageState<MyPage, MyBloc> {
+///   MyPageState(GetIt getIt) : super(getIt);
+///
+///   @override
+///   Widget buildPage(BuildContext context) {
+///     // Implement your page build logic here
+///   }
+/// }
+/// ```
 abstract class BasePageState<T extends StatefulWidget, B extends BaseBloc>
     extends BasePageStateDelegate<T, B> {
   BasePageState(GetIt getIt) : super(getIt: getIt);
@@ -44,6 +64,23 @@ abstract class BasePageStateDelegate<T extends StatefulWidget,
     );
   }
 
+  /// Wraps a child widget with a loading overlay that can be shown or hidden based on a loading state.
+  ///
+  /// [child] is the main content widget to be displayed.
+  /// [loadingKey] is a unique identifier for the loading state.
+  /// [loadingWidget] is an optional custom widget to show when loading. If not provided, it uses the default loading indicator.
+  ///
+  /// Usage:
+  /// ```dart
+  /// @override
+  /// Widget buildPage(BuildContext context) {
+  ///   return buildLoadingOverlay(
+  ///     child: YourPageContent(),
+  ///     loadingKey: 'your_loading_key',
+  ///     loadingWidget: CustomLoadingWidget(), // Optional
+  ///   );
+  /// }
+  /// ```
   Widget buildLoadingOverlay(
       Widget child, String loadingKey, Widget? loadingWidget) {
     return BlocBuilder<CommonBloc, CommonState>(
