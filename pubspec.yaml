@@ -1,5 +1,5 @@
 name: bloc_small
-description: A new flutter plugin project.
+description: An easy-to-use Flutter package offering a streamlined BLoC pattern implementation for intuitive and efficient state management in Flutter apps.
 version: 1.0.0
 homepage: https://github.com/linhnguyen-gt/bloc_lite
 
