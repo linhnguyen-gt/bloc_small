@@ -1,6 +1,6 @@
 part of 'common_bloc.dart';
 
-abstract class CommonEvent extends BaseBlocEvent {
+abstract class CommonEvent extends MainBlocEvent {
   const CommonEvent();
 }
 

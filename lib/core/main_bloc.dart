@@ -4,8 +4,8 @@ import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/common_bloc.dart';
-import 'base_bloc_event.dart';
-import 'base_bloc_state.dart';
+import 'main_bloc_event.dart';
+import 'main_bloc_state.dart';
 
 /// A base class for all Blocs in the application.
 ///
@@ -13,23 +13,23 @@ import 'base_bloc_state.dart';
 /// with specific event and state types.
 ///
 /// Type Parameters:
-/// - [E]: The type of events this Bloc will handle. Must extend [BaseBlocEvent].
-/// - [S]: The type of states this Bloc will emit. Must extend [BaseBlocState].
+/// - [E]: The type of events this Bloc will handle. Must extend [MainBlocEvent].
+/// - [S]: The type of states this Bloc will emit. Must extend [MainBlocState].
 ///
 /// Usage:
 /// ```dart
-/// class MyBloc extends BaseBloc<MyEvent, MyState> {
+/// class MyBloc extends MainBloc<MyEvent, MyState> {
 ///   MyBloc() : super(MyInitialState());
 ///
 /// }
 /// ```
-abstract class BaseBloc<E extends BaseBlocEvent, S extends BaseBlocState>
+abstract class MainBloc<E extends MainBlocEvent, S extends MainBlocState>
     extends BaseBlocDelegate<E, S> {
-  BaseBloc(super.initialState);
+  MainBloc(super.initialState);
 }
 
-abstract class BaseBlocDelegate<E extends BaseBlocEvent,
-    S extends BaseBlocState> extends Bloc<E, S> {
+abstract class BaseBlocDelegate<E extends MainBlocEvent,
+    S extends MainBlocState> extends Bloc<E, S> {
   BaseBlocDelegate(super.initialState);
 
   late final CommonBloc _commonBloc;
@@ -140,9 +140,11 @@ abstract class BaseBlocDelegate<E extends BaseBlocEvent,
   ///
   /// Note: This method uses [showLoading] and [hideLoading] internally, which should be
   /// implemented in the concrete Bloc class or a mixin.
-  Future<void> blocCatch(
-      {required Future<void> Function() actions,
-      bool? isLoading = true}) async {
+  Future<void> blocCatch({
+    required Future<void> Function() actions,
+    bool? isLoading = true,
+    Function(dynamic)? onError,
+  }) async {
     try {
       if (isLoading!) {
         showLoading();
@@ -155,7 +157,11 @@ abstract class BaseBlocDelegate<E extends BaseBlocEvent,
       if (isLoading!) {
         hideLoading();
       }
-      developer.log('$e', name: 'Error');
+      if (onError != null) {
+        onError(e);
+      } else {
+        developer.log('$e', name: 'Error');
+      }
     }
   }
 }

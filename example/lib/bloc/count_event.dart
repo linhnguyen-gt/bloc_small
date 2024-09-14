@@ -1,6 +1,6 @@
 part of 'count_bloc.dart';
 
-abstract class CountEvent extends BaseBlocEvent {
+abstract class CountEvent extends MainBlocEvent {
   const CountEvent._();
 }
 

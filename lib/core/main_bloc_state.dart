@@ -7,7 +7,7 @@
 ///
 /// Usage:
 /// ```dart
-/// class MySpecificState extends BaseBlocState {
+/// class MySpecificState extends MainBlocState {
 ///   final String someData;
 ///
 ///   const MySpecificState(this.someData);
@@ -24,7 +24,7 @@
 /// part 'my_state.freezed.dart';
 ///
 /// @freezed
-/// class MyState with _$MyState implements BaseBlocState {
+/// class MyState with _$MyState implements MainBlocState {
 ///   const factory MyState.initial() = _Initial;
 ///   const factory MyState.loading() = _Loading;
 ///   const factory MyState.loaded(String data) = _Loaded;
@@ -35,6 +35,6 @@
 /// emit(const MyState.loading());
 /// emit(const MyState.loaded('Some data'));
 /// ```
-abstract class BaseBlocState {
-  const BaseBlocState();
+abstract class MainBlocState {
+  const MainBlocState();
 }

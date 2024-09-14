@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../base/base_bloc.dart';
+import '../core/main_bloc.dart';
 import '../common/common_bloc.dart';
 
 /// A base class for all StatefulWidget states in the application that use a Bloc.
@@ -16,7 +16,7 @@ import '../common/common_bloc.dart';
 ///
 /// Type Parameters:
 /// - [T]: The type of the StatefulWidget this state is associated with.
-/// - [B]: The type of Bloc this state will use. Must extend [BaseBloc].
+/// - [B]: The type of Bloc this state will use. Must extend [MainBloc].
 ///
 /// Usage:
 /// ```dart
@@ -29,13 +29,13 @@ import '../common/common_bloc.dart';
 ///   }
 /// }
 /// ```
-abstract class BasePageState<T extends StatefulWidget, B extends BaseBloc>
+abstract class BasePageState<T extends StatefulWidget, B extends MainBloc>
     extends BasePageStateDelegate<T, B> {
   BasePageState(GetIt getIt) : super(getIt: getIt);
 }
 
 abstract class BasePageStateDelegate<T extends StatefulWidget,
-    B extends BaseBloc> extends State<T> {
+    B extends MainBloc> extends State<T> {
   late final CommonBloc commonBloc;
   late final B bloc;
 

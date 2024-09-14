@@ -1,6 +1,6 @@
 part of 'common_bloc.dart';
 
-class CommonState extends BaseBlocState {
+class CommonState extends MainBlocState {
   final Map<String, bool> loadingStates;
 
   const CommonState({this.loadingStates = const {}});

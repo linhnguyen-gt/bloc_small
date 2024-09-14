@@ -26,6 +26,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   injectable: ^2.4.4
   freezed: ^2.5.7
+  get_it: ^7.7.0
 
 dev_dependencies:
   flutter_test:

@@ -7,7 +7,7 @@
 ///
 /// Usage:
 /// ```dart
-/// class MySpecificEvent extends BaseBlocEvent {
+/// class MySpecificEvent extends MainBlocEvent {
 ///   final String someData;
 ///
 ///   const MySpecificEvent(this.someData);
@@ -24,7 +24,7 @@
 /// part 'my_event.freezed.dart';
 ///
 /// @freezed
-/// class MyEvent with _$MyEvent implements BaseBlocEvent {
+/// class MyEvent with _$MyEvent implements MainBlocEvent {
 ///   const factory MyEvent.started() = _Started;
 ///   const factory MyEvent.dataLoaded(String data) = _DataLoaded;
 /// }
@@ -33,6 +33,6 @@
 /// bloc.add(const MyEvent.started());
 /// bloc.add(const MyEvent.dataLoaded('Some data'));
 /// ```
-abstract class BaseBlocEvent {
-  const BaseBlocEvent();
+abstract class MainBlocEvent {
+  const MainBlocEvent();
 }

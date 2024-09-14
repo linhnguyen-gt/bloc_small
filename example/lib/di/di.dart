@@ -10,6 +10,6 @@ void configureInjectionApp() => getIt.init();
 
 @module
 abstract class RegisterModule {
-  @singleton
+  @injectable
   CommonBloc get commonBloc => CommonBloc();
 }

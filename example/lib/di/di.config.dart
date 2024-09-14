@@ -27,7 +27,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     final registerModule = _$RegisterModule();
     gh.factory<_i517.CountBloc>(() => _i517.CountBloc());
-    gh.singleton<_i423.CommonBloc>(() => registerModule.commonBloc);
+    gh.factory<_i423.CommonBloc>(() => registerModule.commonBloc);
     return this;
   }
 }
