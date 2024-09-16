@@ -23,11 +23,12 @@ common use cases.
 - Simplified BLoC pattern implementation using `flutter_bloc`
 - Easy-to-use reactive programming with Dart streams
 - Automatic resource management and disposal
-- Integration with GetIt for dependency injection
+- Integration with `GetIt` for dependency injection
 - Support for loading states and error handling
 - Streamlined state updates and event handling
 - Built-in support for asynchronous operations
-- Seamless integration with Freezed for immutable state and event classes
+- Seamless integration with `Freezed` for immutable state and event classes
+- Enhanced `ReactiveSubject` with powerful stream transformation methods
 
 ## Installation
 
@@ -327,16 +328,17 @@ await blocCatch(
 
 
 ### Using ReactiveSubject
-> Note: ReactiveSubject uses RxDart internally. Make sure you have `rxdart` in your `pubspec.yaml` dependencies.
+> Note: ReactiveSubject uses RxDart internally.
 
-ReactiveSubject provides a simple way to create and manage streams of data in your application. Here's a guide on how to use it:
-
+`ReactiveSubject` provides a powerful and flexible way to work with streams in your application. It wraps RxDart's `BehaviorSubject` or `PublishSubject`, offering a simplified API with additional stream transformation methods. Here's how to use it:
 1. Creating a ReactiveSubject:
 
+- For a single-subscription subject with an initial value
 ```dart
-// For a single-subscription subject with an initial value
 final counter = ReactiveSubject<int>(initialValue: 0);
-// For a broadcast subject (multiple listeners)
+```
+- For a broadcast subject (multiple listeners)
+```dart
 final broadcastCounter = ReactiveSubject<int>.broadcast(initialValue: 0);
 ```
 
@@ -382,7 +384,258 @@ StreamBuilder<int>(
 }
 ```
 
-ReactiveSubject simplifies working with streams in your application, providing a convenient way to manage and react to changing data. It's particularly useful in BLoCs for handling state changes and in widgets for building reactive UIs.
+7. Stream Transformations
+
+`ReactiveSubject` provides several methods to transform streams, making reactive programming more convenient:
+
+`map<R>(R Function(T event) mapper)`
+
+Transforms each item emitted by the source `ReactiveSubject` by applying a function to it.
+
+```dart
+final celsiusSubject = ReactiveSubject<double>();
+final fahrenheitSubject = celsiusSubject.map((celsius) => celsius * 9 / 5 + 32);
+
+fahrenheitSubject.stream.listen((fahrenheit) {
+  print('Temperature in Fahrenheit: $fahrenheit°F');
+});
+
+celsiusSubject.add(25); // Outputs: Temperature in Fahrenheit: 77.0°F
+```
+
+`where(bool Function(T event) test)`
+
+Filters items emitted by the source `ReactiveSubject` by only emitting those that satisfy a specified predicate.
+
+```dart
+final numbers = ReactiveSubject<int>();
+final evenNumbers = numbers.where((number) => number % 2 == 0);
+
+evenNumbers.stream.listen((evenNumber) {
+  print('Even number: $evenNumber');
+});
+
+numbers.add(1); // No output
+numbers.add(2); // Outputs: Even number: 2
+
+```
+
+`debounceTime(Duration duration)`
+
+Emits items from the source `ReactiveSubject` only after a specified duration has passed without the `ReactiveSubject` emitting any other items.
+
+```dart
+final searchQuery = ReactiveSubject<String>();
+final debouncedQuery = searchQuery.debounceTime(Duration(milliseconds: 500));
+
+debouncedQuery.stream.listen((query) {
+  print('Search for: $query');
+});
+
+searchQuery.add('Flu'); // No immediate output
+searchQuery.add('Flut'); // No immediate output
+searchQuery.add('Flutter'); // After 500ms of inactivity, outputs: Search for: Flutter
+```
+
+`throttleTime(Duration duration)`
+
+Emits the first item emitted by the source `ReactiveSubject` in each time window of a specified duration.
+
+```dart
+final buttonClicks = ReactiveSubject<void>();
+final throttledClicks = buttonClicks.throttleTime(Duration(seconds: 1));
+
+throttledClicks.stream.listen((_) {
+  print('Button clicked');
+});
+
+buttonClicks.add(null); // Outputs: Button clicked
+buttonClicks.add(null); // Ignored (within 1 second)
+```
+
+`distinct([bool Function(T previous, T next)? equals])`
+
+Emits all items emitted by the source `ReactiveSubject` that are distinct from their immediate predecessors.
+
+```dart
+final textInput = ReactiveSubject<String>();
+final distinctInput = textInput.distinct();
+
+distinctInput.stream.listen((input) {
+  print('User typed: $input');
+});
+
+textInput.add('Hello'); // Outputs: User typed: Hello
+textInput.add('Hello'); // Ignored
+textInput.add('World'); // Outputs: User typed: World
+```
+
+`switchMap<R>(Stream<R> Function(T event) mapper)`
+
+Transforms the items emitted by the source `ReactiveSubject` into streams, then flattens the emissions from those into a single stream, emitting values only from the most recently created stream.
+
+```dart
+final selectedUserId = ReactiveSubject<int>();
+final userDetails = selectedUserId.switchMap((id) => getUserDetailsStream(id));
+
+userDetails.stream.listen((details) {
+  print('User Details: $details');
+});
+
+void Function(int id) selectUser = selectedUserId.add;
+```
+
+`combineLatest<T>(List<ReactiveSubject<T>> subjects)`
+
+Combines the latest values of `multiple ReactiveSubjects` into a `single ReactiveSubject` that emits a List of those values.
+
+```dart
+final firstName = ReactiveSubject<String>();
+final lastName = ReactiveSubject<String>();
+
+final fullName = ReactiveSubject.combineLatest<String>([firstName, lastName])
+    .map((names) => '${names[0]} ${names[1]}');
+
+fullName.stream.listen((name) {
+  print('Full name: $name');
+});
+
+firstName.add('John');
+lastName.add('Doe'); // Outputs: Full name: John Doe
+```
+
+`merge<T>(List<ReactiveSubject<T>> subjects)`
+
+Merges `multiple ReactiveSubjects` into a `single ReactiveSubject`.
+
+```dart
+final userActions = ReactiveSubject<String>();
+final systemEvents = ReactiveSubject<String>();
+
+final allEvents = ReactiveSubject.merge<String>([userActions, systemEvents]);
+
+allEvents.stream.listen((event) {
+  print('Event: $event');
+});
+
+userActions.add('User logged in'); // Outputs: Event: User logged in
+systemEvents.add('System update available'); // Outputs: Event: System update available
+```
+
+`withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`
+
+Combines the source `ReactiveSubject` with the latest item from another `ReactiveSubject` whenever the source emits an item.
+
+```dart
+final userInput = ReactiveSubject<String>();
+final currentSettings = ReactiveSubject<Map<String, dynamic>>(initialValue: {'theme': 'dark'});
+
+final combinedStream = userInput.withLatestFrom(
+  currentSettings,
+  (input, settings) => {'input': input, 'settings': settings},
+);
+
+combinedStream.stream.listen((data) {
+  print('User Input: ${data['input']}, Settings: ${data['settings']}');
+});
+
+userInput.add('Hello'); // Outputs: User Input: Hello, Settings: {theme: dark}
+```
+
+`startWith(T startValue)`
+
+Prepends a given value to the source `ReactiveSubject`.
+
+```dart
+final messages = ReactiveSubject<String>();
+final messagesWithWelcome = messages.startWith('Welcome to the app!');
+
+messagesWithWelcome.stream.listen((message) {
+  print('Message: $message');
+});
+
+// Outputs: Message: Welcome to the app!
+
+messages.add('You have new notifications');
+// Outputs: Message: You have new notifications
+```
+
+`scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`
+
+Applies an accumulator function over the source `ReactiveSubject`, and returns each intermediate result.
+
+```dart
+final numbers = ReactiveSubject<int>();
+final runningTotal = numbers.scan<int>(0, (accumulated, current, index) => accumulated + current);
+
+runningTotal.stream.listen((total) {
+  print('Running Total: $total');
+});
+
+numbers.add(5); // Outputs: Running Total: 5
+numbers.add(10); // Outputs: Running Total: 15
+numbers.add(3); // Outputs: Running Total: 18
+```
+
+8. Error Handling
+
+You can add errors to a `ReactiveSubject` and listen for them:
+
+```dart
+subject.addError(Exception('An error occurred'));
+
+subject.stream.listen(
+  (data) {
+    // Handle data
+  },
+  onError: (error) {
+    print('Error: $error');
+  },
+);
+```
+
+9. Practical Example in BLoC
+
+Here's how you might use `ReactiveSubject` within a `BLoC` to manage state:
+
+```dart
+class SearchBloc extends MainBloc<SearchEvent, SearchState> {
+  final ReactiveSubject<String> _searchQuery = ReactiveSubject<String>();
+  late final ReactiveSubject<List<String>> _searchResults;
+
+  SearchBloc() : super(const SearchState.initial()) {
+    _searchResults = _searchQuery
+        .debounceTime(Duration(milliseconds: 500))
+        .switchMap((query) => _performSearch(query));
+
+    on<SearchEvent>((event, emit) {
+      if (event is UpdateQuery) {
+        _searchQuery.add(event.query);
+      }
+    });
+  }
+
+  Stream<List<String>> _performSearch(String query) async* {
+    // Simulate search operation
+    await Future.delayed(Duration(seconds: 1));
+    yield ['Result 1 for $query', 'Result 2 for $query'];
+  }
+
+  @override
+  Future<void> close() {
+    _searchQuery.dispose();
+    _searchResults.dispose();
+    return super.close();
+  }
+}
+```
+
+10. Notes
+
+Memory Management: Always dispose of your `ReactiveSubjects` when they are no longer needed to free up resources.
+Error Handling: Use addError to add errors to the stream and handle them using the onError callback in your listeners.
+
+`ReactiveSubject` simplifies working with streams in your application, providing a convenient way to manage and react to changing data. It's particularly useful in BLoCs for handling state changes and in widgets for building reactive UIs. By leveraging the built-in transformation methods, you can create powerful reactive data flows with minimal boilerplate.
 
 
 ## Best Practices
@@ -393,16 +646,19 @@ ReactiveSubject simplifies working with streams in your application, providing a
 4. Always dispose of your BLoCs and ReactiveSubjects when they're no longer needed.
 5. Use `blocCatch` for consistent error handling across your app.
 6. Prefer composition to inheritance when creating complex BLoCs.
-7. Utilize Freezed for creating immutable event and state classes.
+7. Utilize `Freezed` for creating immutable event and state classes.
 8. Take advantage of Freezed's union types and pattern matching for more expressive and type-safe event handling.
+9. Use the transformation methods provided by ReactiveSubject to simplify complex stream operations.
+10. Ensure that all your streams are properly disposed of to prevent memory leaks.
 
 ## API Reference
 
 ### MainBloc
 
 - `MainBloc(initialState)`: Constructor for creating a new BLoC.
-- `blocCatch({required Future<void> Function() actions, Function(dynamic)? onError})`: Wrapper for handling errors in
-  async operations.
+- `blocCatch({required Future<void> Function() actions, Function(dynamic)? onError})`: Wrapper for handling errors in async operations.
+- `showLoading({String key = 'global'})`: Shows a loading indicator.
+- `hideLoading({String key = 'global'})`: Hides the loading indicator.
 
 ### MainBlocState
 
@@ -419,15 +675,37 @@ Base class for all events in your BLoCs.
 
 ### ReactiveSubject
 
-`ReactiveSubject` is a wrapper around RxDart's `BehaviorSubject` or `PublishSubject`, providing a simpler API for reactive programming in Dart.
+`ReactiveSubject<T>` is a wrapper around RxDart's `BehaviorSubject` or `PublishSubject`, providing a simpler API for reactive programming in Dart.
 
-- `ReactiveSubject({T? initialValue})`: Create a new ReactiveSubject (wraps BehaviorSubject).
-- `ReactiveSubject.broadcast({T? initialValue})`: Create a new broadcast ReactiveSubject (wraps PublishSubject).
-- `add(T value)`: Add a new value to the subject.
-- `value`: Get the current value.
-- `stream`: Get the stream of values.
-- `dispose()`: Dispose of the subject.
+# Constructors
+- `ReactiveSubject({T? initialValue})`: Creates a new `ReactiveSubject` (wraps `BehaviorSubject`).
+- `ReactiveSubject.broadcast({T? initialValue})`: Creates a new broadcast `ReactiveSubject` (wraps `PublishSubject`).
 
+# Properties
+- `T value`: Gets the current value of the subject.
+- `Stream<T> stream`: Gets the stream of values emitted by the subject.
+- `Sink<T> sink`: Gets the sink for adding values to the subject.
+- `bool isClosed`: Indicates whether the subject is closed.
+
+# Methods
+- `void add(T value)`: Adds a new value to the subject.
+- `void addError(Object error, [StackTrace? stackTrace])`: Adds an error to the subject.
+- `void dispose()`: Disposes of the subject.
+
+# Transformation Methods
+- `ReactiveSubject<R> map<R>(R Function(T event) mapper)`: Transforms each item emitted by applying a function.
+- `ReactiveSubject<T> where(bool Function(T event) test)`: Filters items based on a predicate.
+- `ReactiveSubject<R> switchMap<R>(Stream<R> Function(T event) mapper)`: Switches to a new stream when a new item is emitted.
+- `ReactiveSubject<T> debounceTime(Duration duration)`: Emits items only after a specified duration has passed without another emission.
+- `ReactiveSubject<T> throttleTime(Duration duration)`: Emits the first item in specified intervals.
+- `ReactiveSubject<T> distinct([bool Function(T previous, T next)? equals])`: Emits items that are distinct from their predecessors.
+- `ReactiveSubject<T> startWith(T startValue)`: Prepends a given value to the subject.
+- `ReactiveSubject<R> scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`: Accumulates items using a function.
+- `ReactiveSubject<R> withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`: Combines items with the latest from another subject.
+
+# Static Methods
+- `static ReactiveSubject<List<T>> combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of multiple subjects.
+- `static ReactiveSubject<T> merge<T>(List<ReactiveSubject<T>> subjects)`: Merges multiple subjects into one.
 
 ## Contributing
 
