@@ -2,6 +2,8 @@
 
 Demonstrates how to use the bloc_small plugin.
 
+![Flow](flow.png)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
