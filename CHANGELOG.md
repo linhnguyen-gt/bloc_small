@@ -1,3 +1,6 @@
-## 1.0.0
+## 1.1.0
 
-* TODO: Describe initial release.
+* add sample code 
+* upgrade flutter
+* update readme 
+* update api reactive subject
