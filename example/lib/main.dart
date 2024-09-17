@@ -1,10 +1,19 @@
-import 'package:bloc_small/base_state/base_page_state.dart';
+import 'package:bloc_small_example/reactive_subject/action_with_latest_context.dart';
+import 'package:bloc_small_example/reactive_subject/combined_form_validation.dart';
+import 'package:bloc_small_example/reactive_subject/debounced_search.dart';
+import 'package:bloc_small_example/reactive_subject/default_settings.dart';
+import 'package:bloc_small_example/reactive_subject/distinct_api_calls.dart';
+import 'package:bloc_small_example/reactive_subject/email_filter.dart';
+import 'package:bloc_small_example/reactive_subject/notification_merger.dart';
+import 'package:bloc_small_example/reactive_subject/rate_limited_button.dart';
+import 'package:bloc_small_example/reactive_subject/shopping_cart.dart';
+import 'package:bloc_small_example/reactive_subject/stock_price.dart';
+import 'package:bloc_small_example/reactive_subject/temperature_converter.dart';
+import 'package:bloc_small_example/search_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 
-import 'bloc/count_bloc.dart';
 import 'di/di.dart';
+import 'home.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,87 +39,22 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({required this.title});
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState(getIt);
-}
-
-class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  _MyHomePageState(GetIt getIt) : super(getIt);
-
-  @override
-  Widget buildPage(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return buildLoadingOverlay(
-      child: Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
-        ),
-        body: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'You have pushed the button this many times:',
-              ),
-              BlocBuilder<CountBloc, CountState>(
-                builder: (context, state) {
-                  return Text(
-                    '${state.count}',
-                  );
-                },
-              )
-            ],
-          ),
-        ),
-        floatingActionButton: Wrap(
-          spacing: 5,
-          children: [
-            FloatingActionButton(
-              onPressed: () => bloc.add(Increment()),
-              tooltip: 'Increment',
-              child: Icon(Icons.add),
-            ),
-            FloatingActionButton(
-              onPressed: () => bloc.add(Decrement()),
-              tooltip: 'decrement',
-              child: Icon(Icons.remove),
-            ),
-          ],
-        ), // This trailing comma makes auto-formatting nicer for build methods.
-      ),
+      home: MyHomePage(),
+      routes: {
+        MyHomePage.route: (context) => MyHomePage(),
+        SearchPage.route: (context) => SearchPage(),
+        ActionWithLatestContext.route: (context) => ActionWithLatestContext(),
+        CombinedFormValidation.route: (context) => CombinedFormValidation(),
+        DebouncedSearch.route: (context) => DebouncedSearch(),
+        DefaultSettings.route: (context) => DefaultSettings(),
+        DistinctApiCalls.route: (context) => DistinctApiCalls(),
+        EmailFilter.route: (context) => EmailFilter(),
+        NotificationMerger.route: (context) => NotificationMerger(),
+        RateLimitedButton.route: (context) => RateLimitedButton(),
+        ShoppingCart.route: (context) => ShoppingCart(),
+        StockPrice.route: (context) => StockPrice(),
+        TemperatureConverter.route: (context) => TemperatureConverter(),
+      },
     );
   }
 }

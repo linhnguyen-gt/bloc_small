@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class EmailFilter extends StatefulWidget {
+  static const String route = '/email_filter';
+
   @override
   _EmailFilterState createState() => _EmailFilterState();
 }
@@ -30,23 +34,29 @@ class _EmailFilterState extends State<EmailFilter> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          onChanged: _onEmailChanged,
-          decoration: InputDecoration(labelText: 'Enter your email'),
-        ),
-        StreamBuilder<String>(
-          stream: _validEmailSubject.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Text('Valid email: ${snapshot.data}');
-            } else {
-              return Text('Please enter a valid email');
-            }
-          },
-        ),
-      ],
+    return Scaffold(
+      drawer: const MenuDrawer(EmailFilter.route),
+      appBar: AppBar(
+        title: Text("Email Filter"),
+      ),
+      body: Column(
+        children: [
+          TextField(
+            onChanged: _onEmailChanged,
+            decoration: InputDecoration(labelText: 'Enter your email'),
+          ),
+          StreamBuilder<String>(
+            stream: _validEmailSubject.stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text('Valid email: ${snapshot.data}');
+              } else {
+                return Text('Please enter a valid email');
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

@@ -85,8 +85,8 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   ///   }
   /// }
   /// ```
-  void showLoading({String key = LoadingKeys.global}) {
-    commonBloc.add(SetComponentLoading(key: key, isLoading: true));
+  void showLoading({String? key = LoadingKeys.global}) {
+    commonBloc.add(SetComponentLoading(key: key!, isLoading: true));
   }
 
   /// Hides the loading overlay for a specific key.
@@ -106,8 +106,8 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   ///   }
   /// }
   /// ```
-  void hideLoading({String key = LoadingKeys.global}) {
-    commonBloc.add(SetComponentLoading(key: key, isLoading: false));
+  void hideLoading({String? key = LoadingKeys.global}) {
+    commonBloc.add(SetComponentLoading(key: key!, isLoading: false));
   }
 
   /// Executes a given asynchronous action within a try-catch block, handling loading states.
@@ -142,25 +142,29 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   /// implemented in the concrete Bloc class or a mixin.
   Future<void> blocCatch({
     required Future<void> Function() actions,
-    bool? isLoading = true,
-    Function(dynamic)? onError,
+    bool isLoading = true,
+    String keyLoading = LoadingKeys.global,
+    Future<void> Function(Object error, StackTrace stackTrace)? onError,
+    Future<void> Function()? onFinally,
   }) async {
     try {
-      if (isLoading!) {
-        showLoading();
+      if (isLoading) {
+        showLoading(key: keyLoading);
       }
       await actions.call();
-      if (isLoading) {
-        hideLoading();
-      }
-    } catch (e) {
-      if (isLoading!) {
-        hideLoading();
-      }
+    } catch (e, stackTrace) {
       if (onError != null) {
-        onError(e);
+        await onError(e, stackTrace);
       } else {
-        developer.log('$e', name: 'Error');
+        developer.log('Error occurred: $e',
+            name: 'Error', error: e, stackTrace: stackTrace);
+      }
+    } finally {
+      if (isLoading) {
+        hideLoading(key: keyLoading);
+      }
+      if (onFinally != null) {
+        await onFinally();
       }
     }
   }

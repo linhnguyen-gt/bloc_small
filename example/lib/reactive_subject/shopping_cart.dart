@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class ShoppingCart extends StatefulWidget {
+  static const String route = '/shopping_cart';
+
   @override
   _ShoppingCartState createState() => _ShoppingCartState();
 }
@@ -33,24 +37,30 @@ class _ShoppingCartState extends State<ShoppingCart> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        StreamBuilder<double>(
-          stream: _totalPriceSubject.stream,
-          builder: (context, snapshot) {
-            final total = snapshot.data ?? 0.0;
-            return Text('Total Price: \$${total.toStringAsFixed(2)}');
-          },
-        ),
-        ElevatedButton(
-          onPressed: () => _addItem(29.99),
-          child: Text('Add Item (\$29.99)'),
-        ),
-        ElevatedButton(
-          onPressed: () => _addItem(49.99),
-          child: Text('Add Item (\$49.99)'),
-        ),
-      ],
+    return Scaffold(
+      drawer: const MenuDrawer(ShoppingCart.route),
+      appBar: AppBar(
+        title: Text("Shopping Cart"),
+      ),
+      body: Column(
+        children: [
+          StreamBuilder<double>(
+            stream: _totalPriceSubject.stream,
+            builder: (context, snapshot) {
+              final total = snapshot.data ?? 0.0;
+              return Text('Total Price: \$${total.toStringAsFixed(2)}');
+            },
+          ),
+          ElevatedButton(
+            onPressed: () => _addItem(29.99),
+            child: Text('Add Item (\$29.99)'),
+          ),
+          ElevatedButton(
+            onPressed: () => _addItem(49.99),
+            child: Text('Add Item (\$49.99)'),
+          ),
+        ],
+      ),
     );
   }
 }

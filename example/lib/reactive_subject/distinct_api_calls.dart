@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class DistinctApiCalls extends StatefulWidget {
+  static const String route = '/distinct_api_calls';
+
   @override
   _DistinctApiCallsState createState() => _DistinctApiCallsState();
 }
@@ -34,9 +38,15 @@ class _DistinctApiCallsState extends State<DistinctApiCalls> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      onChanged: _onParamChanged,
-      decoration: InputDecoration(labelText: 'API Parameter'),
+    return Scaffold(
+      drawer: const MenuDrawer(DistinctApiCalls.route),
+      appBar: AppBar(
+        title: Text("Distinct Api Calls"),
+      ),
+      body: TextField(
+        onChanged: _onParamChanged,
+        decoration: InputDecoration(labelText: 'API Parameter'),
+      ),
     );
   }
 }

@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class TemperatureConverter extends StatefulWidget {
+  static const String route = '/temperature_converter';
+
   @override
   _TemperatureConverterState createState() => _TemperatureConverterState();
 }
@@ -33,25 +37,31 @@ class _TemperatureConverterState extends State<TemperatureConverter> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          onChanged: _onCelsiusChanged,
-          decoration: InputDecoration(labelText: 'Temperature in Celsius'),
-          keyboardType: TextInputType.number,
-        ),
-        StreamBuilder<double>(
-          stream: _fahrenheitSubject.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Text(
-                  'Temperature in Fahrenheit: ${snapshot.data!.toStringAsFixed(2)}°F');
-            } else {
-              return Text('Enter a valid temperature');
-            }
-          },
-        ),
-      ],
+    return Scaffold(
+      drawer: const MenuDrawer(TemperatureConverter.route),
+      appBar: AppBar(
+        title: Text("Temperature Converter"),
+      ),
+      body: Column(
+        children: [
+          TextField(
+            onChanged: _onCelsiusChanged,
+            decoration: InputDecoration(labelText: 'Temperature in Celsius'),
+            keyboardType: TextInputType.number,
+          ),
+          StreamBuilder<double>(
+            stream: _fahrenheitSubject.stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(
+                    'Temperature in Fahrenheit: ${snapshot.data!.toStringAsFixed(2)}°F');
+              } else {
+                return Text('Enter a valid temperature');
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

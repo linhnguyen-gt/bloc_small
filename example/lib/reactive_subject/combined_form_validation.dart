@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class CombinedFormValidation extends StatefulWidget {
+  static const String route = '/combined_form_validation';
+
   @override
   _CombinedFormValidationState createState() => _CombinedFormValidationState();
 }
@@ -39,27 +43,33 @@ class _CombinedFormValidationState extends State<CombinedFormValidation> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          onChanged: _nameSubject.add,
-          decoration: InputDecoration(labelText: 'Name'),
-        ),
-        TextField(
-          onChanged: _emailSubject.add,
-          decoration: InputDecoration(labelText: 'Email'),
-        ),
-        StreamBuilder<bool>(
-          stream: _isFormValidSubject.stream,
-          builder: (context, snapshot) {
-            final isValid = snapshot.data ?? false;
-            return ElevatedButton(
-              onPressed: isValid ? _onSubmit : null,
-              child: Text('Submit'),
-            );
-          },
-        ),
-      ],
+    return Scaffold(
+      drawer: const MenuDrawer(CombinedFormValidation.route),
+      appBar: AppBar(
+        title: Text("Combined Form Validation"),
+      ),
+      body: Column(
+        children: [
+          TextField(
+            onChanged: _nameSubject.add,
+            decoration: InputDecoration(labelText: 'Name'),
+          ),
+          TextField(
+            onChanged: _emailSubject.add,
+            decoration: InputDecoration(labelText: 'Email'),
+          ),
+          StreamBuilder<bool>(
+            stream: _isFormValidSubject.stream,
+            builder: (context, snapshot) {
+              final isValid = snapshot.data ?? false;
+              return ElevatedButton(
+                onPressed: isValid ? _onSubmit : null,
+                child: Text('Submit'),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

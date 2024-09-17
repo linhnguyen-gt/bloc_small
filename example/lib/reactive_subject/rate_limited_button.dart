@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class RateLimitedButton extends StatefulWidget {
+  static const String route = '/rate_limited_button';
+
   @override
   _RateLimitedButtonState createState() => _RateLimitedButtonState();
 }
@@ -37,9 +41,15 @@ class _RateLimitedButtonState extends State<RateLimitedButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: _onButtonPressed,
-      child: Text('Press me'),
+    return Scaffold(
+      drawer: const MenuDrawer(RateLimitedButton.route),
+      appBar: AppBar(
+        title: Text("Rate Limited Button"),
+      ),
+      body: ElevatedButton(
+        onPressed: _onButtonPressed,
+        child: Text('Press me'),
+      ),
     );
   }
 }

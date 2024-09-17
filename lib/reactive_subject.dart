@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:rxdart/rxdart.dart';
 
 /// A wrapper class for RxDart subjects that provides a simplified interface for reactive programming.
@@ -112,8 +114,8 @@ class ReactiveSubject<T> {
   }
 
   /// Closes the underlying subject.
-  void dispose() {
-    _subject.close();
+  Future<void> dispose() async {
+    await _subject.close();
   }
 
   /// Transforms the items emitted by the source ReactiveSubject by applying a function to each item.
@@ -127,7 +129,7 @@ class ReactiveSubject<T> {
   /// ```
   ReactiveSubject<R> map<R>(R Function(T event) mapper) {
     final result = ReactiveSubject<R>();
-    stream.map(mapper).listen(result.add);
+    stream.map(mapper).listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -143,7 +145,7 @@ class ReactiveSubject<T> {
   /// ```
   ReactiveSubject<T> where(bool Function(T event) test) {
     final result = ReactiveSubject<T>();
-    stream.where(test).listen(result.add);
+    stream.where(test).listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -156,10 +158,12 @@ class ReactiveSubject<T> {
   /// switched.stream.listen(print);
   /// subject.add(2); // Prints: Value: 2
   /// ```
-  ReactiveSubject<R> switchMap<R>(Stream<R> Function(T event) mapper) {
-    final result = ReactiveSubject<R>();
-    stream.switchMap(mapper).listen(result.add);
-    return result;
+  ReactiveSubject<R> switchMap<R>(ReactiveSubject<R> Function(T event) mapper) {
+    final newSubject = ReactiveSubject<R>();
+    stream
+        .switchMap((event) => mapper(event).stream)
+        .listen(newSubject.add, onError: newSubject.addError);
+    return newSubject;
   }
 
   /// Emits items from the source ReactiveSubject only after a specified duration has passed without the ReactiveSubject emitting any other items.
@@ -175,7 +179,7 @@ class ReactiveSubject<T> {
   /// ```
   ReactiveSubject<T> debounceTime(Duration duration) {
     final result = ReactiveSubject<T>();
-    stream.debounceTime(duration).listen(result.add);
+    stream.debounceTime(duration).listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -192,7 +196,7 @@ class ReactiveSubject<T> {
   /// ```
   ReactiveSubject<T> throttleTime(Duration duration) {
     final result = ReactiveSubject<T>();
-    stream.throttleTime(duration).listen(result.add);
+    stream.throttleTime(duration).listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -209,7 +213,7 @@ class ReactiveSubject<T> {
   /// ```
   ReactiveSubject<T> distinct([bool Function(T previous, T next)? equals]) {
     final result = ReactiveSubject<T>();
-    stream.distinct(equals).listen(result.add);
+    stream.distinct(equals).listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -226,7 +230,8 @@ class ReactiveSubject<T> {
   static ReactiveSubject<List<T>> combineLatest<T>(
       List<ReactiveSubject<T>> subjects) {
     final result = ReactiveSubject<List<T>>();
-    Rx.combineLatestList(subjects.map((s) => s.stream)).listen(result.add);
+    Rx.combineLatestList(subjects.map((s) => s.stream))
+        .listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -242,7 +247,8 @@ class ReactiveSubject<T> {
   /// ```
   static ReactiveSubject<T> merge<T>(List<ReactiveSubject<T>> subjects) {
     final result = ReactiveSubject<T>();
-    Rx.merge(subjects.map((s) => s.stream)).listen(result.add);
+    Rx.merge(subjects.map((s) => s.stream))
+        .listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -259,7 +265,9 @@ class ReactiveSubject<T> {
   ReactiveSubject<R> withLatestFrom<S, R>(ReactiveSubject<S> other,
       R Function(T event, S latestFromOther) combiner) {
     final result = ReactiveSubject<R>();
-    stream.withLatestFrom(other.stream, combiner).listen(result.add);
+    stream
+        .withLatestFrom(other.stream, combiner)
+        .listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -273,8 +281,8 @@ class ReactiveSubject<T> {
   /// subject.add(2); // Prints: 2
   /// ```
   ReactiveSubject<T> startWith(T startValue) {
-    final result = ReactiveSubject<T>();
-    stream.startWith(startValue).listen(result.add);
+    final result = ReactiveSubject<T>(initialValue: startValue);
+    stream.startWith(startValue).listen(result.add, onError: result.addError);
     return result;
   }
 
@@ -291,7 +299,116 @@ class ReactiveSubject<T> {
   ReactiveSubject<R> scan<R>(R initialValue,
       R Function(R accumulated, T current, int index) accumulator) {
     final result = ReactiveSubject<R>();
-    stream.scan(accumulator, initialValue).listen(result.add);
+    stream
+        .scan(accumulator, initialValue)
+        .listen(result.add, onError: result.addError);
     return result;
+  }
+
+  /// Performs a side-effect action for each data event emitted by the source ReactiveSubject.
+  ///
+  /// The [onData] callback receives the emitted item but does not modify it.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>(initialValue: 1);
+  /// final sideEffect = subject.doOnData((value) => print('Value emitted: $value'));
+  /// sideEffect.stream.listen(print); // Prints: Value emitted: 1, then 1
+  /// subject.add(2); // Prints: Value emitted: 2, then 2
+  /// ```
+  ReactiveSubject<T> doOnData(void Function(T event) onData) {
+    final newSubject = ReactiveSubject<T>();
+    stream
+        .doOnData(onData)
+        .listen(newSubject.add, onError: newSubject.addError);
+    return newSubject;
+  }
+
+  /// Performs a side-effect action for each error event emitted by the source ReactiveSubject.
+  ///
+  /// The [onError] callback receives the error and stack trace but does not modify them.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>();
+  /// final sideEffect = subject.doOnError((error, stackTrace) => print('Error: $error'));
+  /// sideEffect.stream.listen(print, onError: (e) => print('Stream error: $e'));
+  /// subject.addError('An error occurred'); // Prints: Error: An error occurred, then Stream error: An error occurred
+  /// ```
+  ReactiveSubject<T> doOnError(
+      void Function(Object error, StackTrace stackTrace) onError) {
+    final newSubject = ReactiveSubject<T>();
+    stream
+        .doOnError(onError)
+        .listen(newSubject.add, onError: newSubject.addError);
+    return newSubject;
+  }
+
+  /// Creates a ReactiveSubject from a Future, with error handling and completion callback.
+  ///
+  /// [future] is the Future to convert into a ReactiveSubject.
+  /// [onError] is an optional callback to handle errors.
+  /// [onFinally] is an optional callback that runs when the Future completes, regardless of success or failure.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final subject = ReactiveSubject.fromFutureWithError(
+  ///   Future.delayed(Duration(seconds: 1), () => 'Result'),
+  ///   onError: (error) => print('Error occurred: $error'),
+  ///   onFinally: () => print('Operation completed'),
+  /// );
+  ///
+  /// subject.stream.listen(
+  ///   (value) => print('Received: $value'),
+  ///   onError: (error) => print('Stream error: $error'),
+  ///   onDone: () => print('Stream closed'),
+  /// );
+  ///
+  /// // Output:
+  /// // Received: Result
+  /// // Operation completed
+  /// // Stream closed
+  /// ```
+  ///
+  /// Error handling example:
+  /// ```dart
+  /// final subject = ReactiveSubject.fromFutureWithError(
+  ///   Future.delayed(Duration(seconds: 1), () => throw Exception('Test error')),
+  ///   onError: (error) => print('Error occurred: $error'),
+  ///   onFinally: () => print('Operation completed'),
+  /// );
+  ///
+  /// subject.stream.listen(
+  ///   (value) => print('Received: $value'),
+  ///   onError: (error) => print('Stream error: $error'),
+  ///   onDone: () => print('Stream closed'),
+  /// );
+  ///
+  /// // Output:
+  /// // Error occurred: Exception: Test error
+  /// // Stream error: Exception: Test error
+  /// // Operation completed
+  /// // Stream closed
+  /// ```
+  static ReactiveSubject<T> fromFutureWithError<T>(
+    Future<T> future, {
+    Function(Object error)? onError,
+    Function()? onFinally,
+  }) {
+    final subject = ReactiveSubject<T>();
+    future.then((value) {
+      subject.add(value);
+    }).catchError((error) {
+      if (onError != null) {
+        onError(error);
+      }
+      subject.addError(error);
+    }).whenComplete(() {
+      if (onFinally != null) {
+        onFinally();
+      }
+      subject.dispose();
+    });
+    return subject;
   }
 }

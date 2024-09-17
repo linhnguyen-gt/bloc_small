@@ -328,7 +328,6 @@ await blocCatch(
 
 
 ### Using ReactiveSubject
-> Note: ReactiveSubject uses RxDart internally.
 
 `ReactiveSubject` provides a powerful and flexible way to work with streams in your application. It wraps RxDart's `BehaviorSubject` or `PublishSubject`, offering a simplified API with additional stream transformation methods. Here's how to use it:
 1. Creating a ReactiveSubject:
@@ -577,6 +576,29 @@ numbers.add(10); // Outputs: Running Total: 15
 numbers.add(3); // Outputs: Running Total: 18
 ```
 
+`doOnData(void Function(T event) onData)`
+
+Performs a side-effect action for each data event emitted by the source `ReactiveSubject`. The `onData` callback receives the emitted item but does not modify it.
+
+```dart
+final subject = ReactiveSubject<int>(initialValue: 1);
+final sideEffect = subject.doOnData((value) => print('Value emitted: $value'));
+sideEffect.stream.listen(print); // Prints: Value emitted: 1, then 1
+
+subject.add(2); // Prints: Value emitted: 2, then 2
+```
+`doOnError(void Function(Object error, StackTrace stackTrace) onError)`
+
+Performs a side-effect action for each error event emitted by the source `ReactiveSubject`. The `onError` callback receives the error and stack trace but does not modify them.
+
+```dart
+final subject = ReactiveSubject<int>();
+final sideEffect = subject.doOnError((error, stackTrace) => print('Error: $error'));
+sideEffect.stream.listen(print, onError: (e) => print('Stream error: $e'));
+
+subject.addError('An error occurred'); // Prints: Error: An error occurred, then Stream error: An error occurred
+```
+
 8. Error Handling
 
 You can add errors to a `ReactiveSubject` and listen for them:
@@ -594,6 +616,8 @@ subject.stream.listen(
 );
 ```
 
+
+
 9. Practical Example in BLoC
 
 Here's how you might use `ReactiveSubject` within a `BLoC` to manage state:
@@ -605,20 +629,53 @@ class SearchBloc extends MainBloc<SearchEvent, SearchState> {
 
   SearchBloc() : super(const SearchState.initial()) {
     _searchResults = _searchQuery
-        .debounceTime(Duration(milliseconds: 500))
-        .switchMap((query) => _performSearch(query));
+        .debounceTime(Duration(milliseconds: 100))
+        .doOnData((query) {
+      showLoading(key: 'search');
+      })
+        .switchMap((query) => _performSearch(query))
+        .doOnData((query) => hideLoading(key: 'search'));
 
-    on<SearchEvent>((event, emit) {
-      if (event is UpdateQuery) {
-        _searchQuery.add(event.query);
-      }
+    _searchResults.stream.listen((results) {
+      add(UpdateResults(results));
     });
+
+    on<UpdateQuery>(_onUpdateQuery);
+    on<UpdateResults>(_onUpdateResults);
+    on<SearchError>(_onSearchError);
   }
 
-  Stream<List<String>> _performSearch(String query) async* {
-    // Simulate search operation
-    await Future.delayed(Duration(seconds: 1));
-    yield ['Result 1 for $query', 'Result 2 for $query'];
+  Future<void> _onUpdateQuery(
+      UpdateQuery event, Emitter<SearchState> emit) async {
+    await blocCatch(
+        keyLoading: 'search',
+        actions: () async {
+          await Future.delayed(Duration(seconds: 2));
+          _searchQuery.add(event.query);
+        });
+  }
+
+  void _onUpdateResults(UpdateResults event, Emitter<SearchState> emit) {
+    emit(SearchState.loaded(event.results));
+  }
+
+  void _onSearchError(SearchError event, Emitter<SearchState> emit) {
+    emit(SearchState.error(event.message));
+  }
+
+  Stream<List<String>> _performSearch(String query) {
+    final resultSubject = ReactiveSubject<List<String>>();
+    Future.delayed(Duration(seconds: 1)).then((_) {
+      if (query.isEmpty) {
+        resultSubject.add([]);
+      } else {
+        resultSubject.add(['Result 1 for "$query"', 'Result 2 for "$query"']);
+      }
+    }).catchError((error) {
+      add(SearchError(error.toString()));
+    });
+
+    return resultSubject.stream;
   }
 
   @override
@@ -632,8 +689,8 @@ class SearchBloc extends MainBloc<SearchEvent, SearchState> {
 
 10. Notes
 
-Memory Management: Always dispose of your `ReactiveSubjects` when they are no longer needed to free up resources.
-Error Handling: Use addError to add errors to the stream and handle them using the onError callback in your listeners.
+- Memory Management: Always dispose of your `ReactiveSubjects` when they are no longer needed to free up resources.
+- Error Handling: Use `addError` to add errors to the stream and handle them using the `onError` callback in your listeners.
 
 `ReactiveSubject` simplifies working with streams in your application, providing a convenient way to manage and react to changing data. It's particularly useful in BLoCs for handling state changes and in widgets for building reactive UIs. By leveraging the built-in transformation methods, you can create powerful reactive data flows with minimal boilerplate.
 
@@ -643,12 +700,12 @@ Error Handling: Use addError to add errors to the stream and handle them using t
 1. Keep your BLoCs focused on a single responsibility.
 2. Use meaningful names for your events and states.
 3. Leverage the `CommonBloc` for app-wide state management.
-4. Always dispose of your BLoCs and ReactiveSubjects when they're no longer needed.
+4. Always dispose of your BLoCs and `ReactiveSubjects` when they're no longer needed.
 5. Use `blocCatch` for consistent error handling across your app.
 6. Prefer composition to inheritance when creating complex BLoCs.
 7. Utilize `Freezed` for creating immutable event and state classes.
 8. Take advantage of Freezed's union types and pattern matching for more expressive and type-safe event handling.
-9. Use the transformation methods provided by ReactiveSubject to simplify complex stream operations.
+9. Use the transformation methods provided by `ReactiveSubject`, including `doOnData` and `doOnError`, to simplify complex stream operations.
 10. Ensure that all your streams are properly disposed of to prevent memory leaks.
 
 ## API Reference
@@ -702,6 +759,8 @@ Base class for all events in your BLoCs.
 - `ReactiveSubject<T> startWith(T startValue)`: Prepends a given value to the subject.
 - `ReactiveSubject<R> scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`: Accumulates items using a function.
 - `ReactiveSubject<R> withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`: Combines items with the latest from another subject.
+- `ReactiveSubject<T> doOnData(void Function(T event) onData)`: Performs a side-effect action for each data event emitted.
+- `ReactiveSubject<T> doOnError(void Function(Object error, StackTrace stackTrace) onError)`: Performs a side-effect action for each error event emitted.
 
 # Static Methods
 - `static ReactiveSubject<List<T>> combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of multiple subjects.

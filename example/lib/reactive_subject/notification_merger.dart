@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class NotificationMerger extends StatefulWidget {
+  static const String route = '/notification_merger';
+
   @override
   _NotificationMergerState createState() => _NotificationMergerState();
 }
@@ -37,29 +41,35 @@ class _NotificationMergerState extends State<NotificationMerger> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: _simulateEmailNotification,
-          child: Text('Simulate Email Notification'),
-        ),
-        ElevatedButton(
-          onPressed: _simulatePushNotification,
-          child: Text('Simulate Push Notification'),
-        ),
-        Expanded(
-          child: StreamBuilder<String>(
-            stream: _allNotifications.stream,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Text('Notification: ${snapshot.data}');
-              } else {
-                return Text('No notifications');
-              }
-            },
+    return Scaffold(
+      drawer: const MenuDrawer(NotificationMerger.route),
+      appBar: AppBar(
+        title: Text("Notification Merger"),
+      ),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: _simulateEmailNotification,
+            child: Text('Simulate Email Notification'),
           ),
-        ),
-      ],
+          ElevatedButton(
+            onPressed: _simulatePushNotification,
+            child: Text('Simulate Push Notification'),
+          ),
+          Expanded(
+            child: StreamBuilder<String>(
+              stream: _allNotifications.stream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text('Notification: ${snapshot.data}');
+                } else {
+                  return Text('No notifications');
+                }
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

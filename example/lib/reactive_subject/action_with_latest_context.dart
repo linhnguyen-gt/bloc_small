@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class ActionWithLatestContext extends StatefulWidget {
+  static const String route = '/action_with_latest_context';
+
   @override
   _ActionWithLatestContextState createState() =>
       _ActionWithLatestContextState();
@@ -47,21 +51,27 @@ class _ActionWithLatestContextState extends State<ActionWithLatestContext> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        DropdownButton<String>(
-          value: _selectedItemSubject.value,
-          onChanged: _onItemSelected,
-          items: [
-            DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
-            DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
-          ],
-        ),
-        ElevatedButton(
-          onPressed: _onActionPressed,
-          child: Text('Perform Action'),
-        ),
-      ],
+    return Scaffold(
+      drawer: const MenuDrawer(ActionWithLatestContext.route),
+      appBar: AppBar(
+        title: Text("Action With Latest"),
+      ),
+      body: Column(
+        children: [
+          DropdownButton<String>(
+            value: _selectedItemSubject.value,
+            onChanged: _onItemSelected,
+            items: [
+              DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
+              DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
+            ],
+          ),
+          ElevatedButton(
+            onPressed: _onActionPressed,
+            child: Text('Perform Action'),
+          ),
+        ],
+      ),
     );
   }
 }

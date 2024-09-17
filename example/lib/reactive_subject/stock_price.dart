@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class StockPrice extends StatefulWidget {
+  static const String route = '/stock_price';
+
   @override
   _StockPriceState createState() => _StockPriceState();
 }
@@ -19,14 +25,18 @@ class _StockPriceState extends State<StockPrice> {
     });
   }
 
-  Stream<double> getStockPriceStream(String symbol) async* {
-    // Mock real-time stock prices
-    while (true) {
-      await Future.delayed(Duration(seconds: 1));
-      yield (100 +
-          (symbol.codeUnitAt(0) * 0.1) +
-          (DateTime.now().second * 0.01));
-    }
+  ReactiveSubject<double> getStockPriceStream(String symbol) {
+    final resultSubject = ReactiveSubject<double>();
+
+    Future.delayed(Duration(seconds: 1)).then((_) {
+      final price =
+          100 + (symbol.codeUnitAt(0) * 0.1) + (DateTime.now().second * 0.01);
+      resultSubject.add(price);
+    }).catchError((error) {
+      resultSubject.addError(error);
+    });
+
+    return resultSubject;
   }
 
   @override
@@ -42,24 +52,30 @@ class _StockPriceState extends State<StockPrice> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          onChanged: _onSymbolChanged,
-          decoration: InputDecoration(labelText: 'Enter Stock Symbol'),
-        ),
-        StreamBuilder<double>(
-          stream: _stockPriceSubject.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Text(
-                  'Current Price: \$${snapshot.data!.toStringAsFixed(2)}');
-            } else {
-              return Text('Enter a stock symbol to see the price');
-            }
-          },
-        ),
-      ],
+    return Scaffold(
+      drawer: const MenuDrawer(StockPrice.route),
+      appBar: AppBar(
+        title: Text("Stock Price"),
+      ),
+      body: Column(
+        children: [
+          TextField(
+            onChanged: _onSymbolChanged,
+            decoration: InputDecoration(labelText: 'Enter Stock Symbol'),
+          ),
+          StreamBuilder<double>(
+            stream: _stockPriceSubject.stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(
+                    'Current Price: \$${snapshot.data!.toStringAsFixed(2)}');
+              } else {
+                return Text('Enter a stock symbol to see the price');
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,7 +1,11 @@
 import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
+import '../drawer/menu_drawer.dart';
+
 class DebouncedSearch extends StatefulWidget {
+  static const String route = '/debounced_search';
+
   @override
   _DebouncedSearchState createState() => _DebouncedSearchState();
 }
@@ -19,11 +23,15 @@ class _DebouncedSearchState extends State<DebouncedSearch> {
         .switchMap((query) => performSearch(query));
   }
 
-  Stream<List<String>> performSearch(String query) async* {
-    // Simulate network delay
-    await Future.delayed(Duration(seconds: 1));
-    // Return mock results
-    yield ['Result 1 for $query', 'Result 2 for $query'];
+  ReactiveSubject<List<String>> performSearch(String query) {
+    return ReactiveSubject.fromFutureWithError(
+      Future.delayed(Duration(seconds: 1)).then((_) {
+        return ['Result 1 for $query', 'Result 2 for $query'];
+      }),
+      onError: (error) {
+        print('Error occurred during search: $error');
+      },
+    );
   }
 
   @override
@@ -39,31 +47,37 @@ class _DebouncedSearchState extends State<DebouncedSearch> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          onChanged: _onSearchChanged,
-          decoration: InputDecoration(labelText: 'Search'),
-        ),
-        Expanded(
-          child: StreamBuilder<List<String>>(
-            stream: _searchResultsSubject.stream,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final results = snapshot.data!;
-                return ListView.builder(
-                  itemCount: results.length,
-                  itemBuilder: (context, index) => ListTile(
-                    title: Text(results[index]),
-                  ),
-                );
-              } else {
-                return Center(child: Text('No results'));
-              }
-            },
+    return Scaffold(
+      drawer: const MenuDrawer(DebouncedSearch.route),
+      appBar: AppBar(
+        title: Text("Debounced Search"),
+      ),
+      body: Column(
+        children: [
+          TextField(
+            onChanged: _onSearchChanged,
+            decoration: InputDecoration(labelText: 'Search'),
           ),
-        ),
-      ],
+          Expanded(
+            child: StreamBuilder<List<String>>(
+              stream: _searchResultsSubject.stream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final results = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: results.length,
+                    itemBuilder: (context, index) => ListTile(
+                      title: Text(results[index]),
+                    ),
+                  );
+                } else {
+                  return Center(child: Text('No results'));
+                }
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
