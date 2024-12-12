@@ -1,21 +1,21 @@
-import 'package:bloc_small/base_state/base_page_state.dart';
+import 'package:bloc_small/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 
 import 'bloc/search/search_bloc.dart';
-import 'di/di.dart';
 import 'drawer/menu_drawer.dart';
 
 class SearchPage extends StatefulWidget {
   static const String route = '/search_page';
 
   @override
-  _SearchPageState createState() => _SearchPageState(getIt);
+  _SearchPageState createState() => _SearchPageState();
 }
 
 class _SearchPageState extends BasePageState<SearchPage, SearchBloc> {
-  _SearchPageState(GetIt getIt) : super(getIt);
+  _SearchPageState() : super();
+
+  @override
+  SearchBloc createBloc() => SearchBloc();
 
   @override
   Widget buildPage(BuildContext context) {

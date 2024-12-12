@@ -1,8 +1,4 @@
-import 'package:bloc/bloc.dart';
-import 'package:bloc_small/core/main_bloc.dart';
-import 'package:bloc_small/core/main_bloc_event.dart';
-import 'package:bloc_small/core/main_bloc_state.dart';
-import 'package:bloc_small/reactive_subject.dart';
+import 'package:bloc_small/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 

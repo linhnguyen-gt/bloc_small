@@ -4,10 +4,9 @@ import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 
-import '../core/main_bloc.dart';
 import '../common/common_bloc.dart';
+import '../core/main_bloc.dart';
 
 /// A base class for all StatefulWidget states in the application that use a Bloc.
 ///
@@ -20,18 +19,48 @@ import '../common/common_bloc.dart';
 ///
 /// Usage:
 /// ```dart
-/// class MyPageState extends BasePageState<MyPage, MyBloc> {
-///   MyPageState(GetIt getIt) : super(getIt);
+/// class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
+///   MyHomePageState() : super();
+///
+///   @override
+///   CountBloc createBloc() => CountBloc();
 ///
 ///   @override
 ///   Widget buildPage(BuildContext context) {
-///     // Implement your page build logic here
+///     return buildLoadingOverlay(
+///       child: Scaffold(
+///         appBar: AppBar(title: Text('My Page')),
+///         body: Center(
+///           child: BlocBuilder<CountBloc, CountState>(
+///             builder: (context, state) {
+///               return Text('${state.count}');
+///             },
+///           ),
+///         ),
+///       ),
+///     );
 ///   }
 /// }
 /// ```
+///
+/// The [buildLoadingOverlay] method can be used to wrap any widget with a loading indicator:
+/// ```dart
+/// buildLoadingOverlay(
+///   child: YourWidget(),
+///   loadingKey: 'customKey', // Optional, defaults to global
+/// )
+/// ```
+///
+/// Access the bloc instance using the [bloc] property:
+/// ```dart
+/// FloatingActionButton(
+///   onPressed: () => bloc.add(YourEvent()),
+///   child: Icon(Icons.add),
+/// )
+/// ```
 abstract class BasePageState<T extends StatefulWidget, B extends MainBloc>
     extends BasePageStateDelegate<T, B> {
-  BasePageState(GetIt getIt) : super(getIt: getIt);
+  BasePageState() : super();
 }
 
 abstract class BasePageStateDelegate<T extends StatefulWidget,
@@ -39,17 +68,17 @@ abstract class BasePageStateDelegate<T extends StatefulWidget,
   late final CommonBloc commonBloc;
   late final B bloc;
 
-  final GetIt getIt;
-
-  BasePageStateDelegate({required this.getIt});
+  BasePageStateDelegate() : super();
 
   @override
   void initState() {
     super.initState();
-    commonBloc = getIt.get<CommonBloc>();
-    bloc = getIt.get<B>();
+    commonBloc = CommonBloc();
+    bloc = createBloc();
     bloc.commonBloc = commonBloc;
   }
+
+  B createBloc();
 
   @override
   Widget build(BuildContext context) {

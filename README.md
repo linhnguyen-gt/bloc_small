@@ -1,10 +1,9 @@
 # bloc_small
 
-A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the `flutter_bloc`
-package. This library is designed to make state management easier and more intuitive, while leveraging the power and
-flexibility of `flutter_bloc`. `bloc_small` aims to simplify the BLoC pattern implementation, maintaining its core
-benefits of separating business logic from presentation code, and providing additional utilities and abstractions for
-common use cases.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-repo)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the `flutter_bloc` package. `bloc_small` simplifies state management, making it more intuitive while maintaining the core benefits of the BLoC pattern.
 
 ## Table of Contents
 
@@ -37,7 +36,6 @@ Add `bloc_small` to your `pubspec.yaml` file:
 ```yaml
 dependencies:
   bloc_small:
-  flutter_bloc:
   injectable:
   freezed:
   get_it:
@@ -50,20 +48,17 @@ dev_dependencies:
 
 Then run:
 
-```
-After adding or modifying any code that uses Freezed or Injectable, run the build runner:
-```
+```bash
 flutter pub run build_runner build --delete-conflicting-outputs
+```
 
 > **Note**: Remember to run the build runner command every time you make changes to files that use Freezed or Injectable annotations. This generates the necessary code for your BLoCs, events, and states.
-
 
 ## Core Concepts
 
 ### MainBloc
 
-The `MainBloc` class is the foundation of your BLoCs. It extends `MainBlocDelegate` and provides a structure for
-handling events and emitting states.
+The `MainBloc` class is the foundation of your BLoCs. It extends `MainBlocDelegate` and provides a structure for handling events and emitting states.
 
 ### MainBlocEvent
 
@@ -71,8 +66,7 @@ All events in your BLoCs should extend `MainBlocEvent`. These events trigger sta
 
 ### MainBlocState
 
-States in your BLoCs should extend `MainBlocState`. These represent the current state of your application or a specific
-feature.
+States in your BLoCs should extend `MainBlocState`. These represent the current state of your application or a specific feature.
 
 ### CommonBloc
 
@@ -80,7 +74,26 @@ The `CommonBloc` is used for managing common functionalities across your app, su
 
 ## Basic Usage
 
-### 1. Define your BLoC
+### 1. Set up Dependency Injection
+
+Use GetIt and Injectable for dependency injection:
+
+```dart
+import 'package:bloc_small/bloc.dart' as bloc_small_di;
+
+void main() {
+  // Call configureInjection() before running your app
+  bloc_small_di.configureInjection();
+  //......
+  runApp(MyApp());
+}
+```
+
+> **Important**: The `RegisterModule` class with the `CommonBloc` singleton is essential. If you don't include this Dependency Injection setup, your app will encounter errors. The `CommonBloc` is used internally by `bloc_small` for managing common functionalities like loading states across your app.
+
+Make sure to call `configureInjectionApp()` before running your app:
+
+### 2. Define your BLoC
 
 Create a class that extends `MainBloc`:
 
@@ -105,10 +118,9 @@ class CountBloc extends MainBloc<CountEvent, CountState> {
 }
 ```
 
-### 2. Define Events and States with Freezed
+### 3. Define Events and States with Freezed
 
 ```dart
-
 abstract class CountEvent extends MainBlocEvent {
   const CountEvent._();
 }
@@ -122,40 +134,14 @@ class Increment extends CountEvent with _$Increment {
 class Decrement extends CountEvent with _$Decrement {
   const factory Decrement() = _Decrement;
 }
-
 ```
 
 ```dart
-
 @freezed
 class CountState extends MainBlocState with $CountState {
   const factory CountState.initial({@Default(0) int count}) = Initial;
 }
 ```
-
-### 3. Set up Dependency Injection
-
-Use GetIt and Injectable for dependency injection:
-
-```dart
-
-final GetIt getIt = GetIt.instance;
-
-@injectableInit
-void configureInjectionApp() => getIt.init();
-
-@module
-abstract class RegisterModule {
-  @injectable
-  CommonBloc get commonBloc => CommonBloc();
-}
-```
-
-> **Important**: The `RegisterModule` class with the `CommonBloc` singleton is essential. If you don't include this
-> Dependency Injection setup, your app will encounter errors. The `CommonBloc` is used internally by `bloc_small` for
-> managing common functionalities like loading states across your app.
-
-Make sure to call `configureInjectionApp()` before running your app:
 
 ### 4. Create a StatefulWidget with BasePageState
 
@@ -166,11 +152,14 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  MyHomePageState createState() => _MyHomePageState(getIt);
+  MyHomePageState createState() => _MyHomePageState();
 }
 
 class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  MyHomePageState(GetIt getIt) : super(getIt);
+  MyHomePageState() : super();
+
+  @override
+  CountBloc createBloc() => CountBloc();
 
   @override
   Widget buildPage(BuildContext context) {
@@ -207,23 +196,11 @@ class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
 }
 ```
 
-### 5. Initialize the App
-
-In your `main.dart` file:
-
-```dart
-void main() {
-  configureInjectionApp();
-  runApp(MyApp());
-}
-```
-
 ## Advanced Usage
 
 ### Handling Loading States
 
-`bloc_small` provides a convenient way to manage loading states and display loading indicators using the `CommonBloc`
-and the `buildLoadingOverlay` method.
+`bloc_small` provides a convenient way to manage loading states and display loading indicators using the `CommonBloc` and the `buildLoadingOverlay` method.
 
 #### Using buildLoadingOverlay
 
@@ -231,8 +208,11 @@ When using `BasePageState`, you can easily add a loading overlay to your entire 
 
 ```dart
 class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  MyHomePageState(GetIt getIt) : super(getIt);
+  MyHomePageState() : super();
 
+  @override
+  CountBloc createBloc() => CountBloc();
+  
   @override
   Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
@@ -274,8 +254,7 @@ class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
 }
 ```
 
-The `buildLoadingOverlay` method wraps your page content and automatically displays a loading indicator when the loading
-state is active.
+The `buildLoadingOverlay` method wraps your page content and automatically displays a loading indicator when the loading state is active.
 
 #### Customizing the Loading Overlay
 
@@ -298,7 +277,7 @@ class YourBloc extends MainBloc<YourEvent, YourState> {
   Future<void> someAsyncOperation() async {
     showLoading(); // or showLoading(key: 'customLoadingKey');
     try {
-// Perform async operation
+      // Perform async operation
     } finally {
       hideLoading(); // or hideLoading(key: 'customLoadingKey');
     }
@@ -306,8 +285,7 @@ class YourBloc extends MainBloc<YourEvent, YourState> {
 }
 ```
 
-This approach provides a clean and consistent way to handle loading states across your application, with the flexibility
-to use global or component-specific loading indicators.
+This approach provides a clean and consistent way to handle loading states across your application, with the flexibility to use global or component-specific loading indicators.
 
 ### Error Handling
 
@@ -326,17 +304,20 @@ await blocCatch(
 );
 ```
 
-
 ### Using ReactiveSubject
 
 `ReactiveSubject` provides a powerful and flexible way to work with streams in your application. It wraps RxDart's `BehaviorSubject` or `PublishSubject`, offering a simplified API with additional stream transformation methods. Here's how to use it:
+
 1. Creating a ReactiveSubject:
 
 - For a single-subscription subject with an initial value
+
 ```dart
 final counter = ReactiveSubject<int>(initialValue: 0);
 ```
+
 - For a broadcast subject (multiple listeners)
+
 ```dart
 final broadcastCounter = ReactiveSubject<int>.broadcast(initialValue: 0);
 ```
@@ -373,11 +354,12 @@ StreamBuilder<int>(
   },
 )
 ```
+
 6. Disposing:
 
 ```dart
 @override
-  void dispose() {
+void dispose() {
   counter.dispose();
   super.dispose();
 }
@@ -387,9 +369,7 @@ StreamBuilder<int>(
 
 `ReactiveSubject` provides several methods to transform streams, making reactive programming more convenient:
 
-`map<R>(R Function(T event) mapper)`
-
-Transforms each item emitted by the source `ReactiveSubject` by applying a function to it.
+- `map<R>(R Function(T event) mapper)`: Transforms each item emitted by the source `ReactiveSubject` by applying a function to it.
 
 ```dart
 final celsiusSubject = ReactiveSubject<double>();
@@ -402,9 +382,7 @@ fahrenheitSubject.stream.listen((fahrenheit) {
 celsiusSubject.add(25); // Outputs: Temperature in Fahrenheit: 77.0°F
 ```
 
-`where(bool Function(T event) test)`
-
-Filters items emitted by the source `ReactiveSubject` by only emitting those that satisfy a specified predicate.
+- `where(bool Function(T event) test)`: Filters items emitted by the source `ReactiveSubject` by only emitting those that satisfy a specified predicate.
 
 ```dart
 final numbers = ReactiveSubject<int>();
@@ -416,12 +394,9 @@ evenNumbers.stream.listen((evenNumber) {
 
 numbers.add(1); // No output
 numbers.add(2); // Outputs: Even number: 2
-
 ```
 
-`debounceTime(Duration duration)`
-
-Emits items from the source `ReactiveSubject` only after a specified duration has passed without the `ReactiveSubject` emitting any other items.
+- `debounceTime(Duration duration)`: Emits items from the source `ReactiveSubject` only after a specified duration has passed without the `ReactiveSubject` emitting any other items.
 
 ```dart
 final searchQuery = ReactiveSubject<String>();
@@ -436,9 +411,7 @@ searchQuery.add('Flut'); // No immediate output
 searchQuery.add('Flutter'); // After 500ms of inactivity, outputs: Search for: Flutter
 ```
 
-`throttleTime(Duration duration)`
-
-Emits the first item emitted by the source `ReactiveSubject` in each time window of a specified duration.
+- `throttleTime(Duration duration)`: Emits the first item emitted by the source `ReactiveSubject` in each time window of a specified duration.
 
 ```dart
 final buttonClicks = ReactiveSubject<void>();
@@ -452,9 +425,7 @@ buttonClicks.add(null); // Outputs: Button clicked
 buttonClicks.add(null); // Ignored (within 1 second)
 ```
 
-`distinct([bool Function(T previous, T next)? equals])`
-
-Emits all items emitted by the source `ReactiveSubject` that are distinct from their immediate predecessors.
+- `distinct([bool Function(T previous, T next)? equals])`: Emits all items emitted by the source `ReactiveSubject` that are distinct from their immediate predecessors.
 
 ```dart
 final textInput = ReactiveSubject<String>();
@@ -469,9 +440,7 @@ textInput.add('Hello'); // Ignored
 textInput.add('World'); // Outputs: User typed: World
 ```
 
-`switchMap<R>(Stream<R> Function(T event) mapper)`
-
-Transforms the items emitted by the source `ReactiveSubject` into streams, then flattens the emissions from those into a single stream, emitting values only from the most recently created stream.
+- `switchMap<R>(Stream<R> Function(T event) mapper)`: Transforms the items emitted by the source `ReactiveSubject` into streams, then flattens the emissions from those into a single stream, emitting values only from the most recently created stream.
 
 ```dart
 final selectedUserId = ReactiveSubject<int>();
@@ -484,9 +453,7 @@ userDetails.stream.listen((details) {
 void Function(int id) selectUser = selectedUserId.add;
 ```
 
-`combineLatest<T>(List<ReactiveSubject<T>> subjects)`
-
-Combines the latest values of `multiple ReactiveSubjects` into a `single ReactiveSubject` that emits a List of those values.
+- `combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of `multiple ReactiveSubjects` into a `single ReactiveSubject` that emits a List of those values.
 
 ```dart
 final firstName = ReactiveSubject<String>();
@@ -503,9 +470,7 @@ firstName.add('John');
 lastName.add('Doe'); // Outputs: Full name: John Doe
 ```
 
-`merge<T>(List<ReactiveSubject<T>> subjects)`
-
-Merges `multiple ReactiveSubjects` into a `single ReactiveSubject`.
+- `merge<T>(List<ReactiveSubject<T>> subjects)`: Merges `multiple ReactiveSubjects` into a `single ReactiveSubject`.
 
 ```dart
 final userActions = ReactiveSubject<String>();
@@ -521,9 +486,7 @@ userActions.add('User logged in'); // Outputs: Event: User logged in
 systemEvents.add('System update available'); // Outputs: Event: System update available
 ```
 
-`withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`
-
-Combines the source `ReactiveSubject` with the latest item from another `ReactiveSubject` whenever the source emits an item.
+- `withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`: Combines the source `ReactiveSubject` with the latest item from another `ReactiveSubject` whenever the source emits an item.
 
 ```dart
 final userInput = ReactiveSubject<String>();
@@ -541,9 +504,7 @@ combinedStream.stream.listen((data) {
 userInput.add('Hello'); // Outputs: User Input: Hello, Settings: {theme: dark}
 ```
 
-`startWith(T startValue)`
-
-Prepends a given value to the source `ReactiveSubject`.
+- `startWith(T startValue)`: Prepends a given value to the source `ReactiveSubject`.
 
 ```dart
 final messages = ReactiveSubject<String>();
@@ -559,9 +520,7 @@ messages.add('You have new notifications');
 // Outputs: Message: You have new notifications
 ```
 
-`scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`
-
-Applies an accumulator function over the source `ReactiveSubject`, and returns each intermediate result.
+- `scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`: Applies an accumulator function over the source `ReactiveSubject`, and returns each intermediate result.
 
 ```dart
 final numbers = ReactiveSubject<int>();
@@ -576,9 +535,7 @@ numbers.add(10); // Outputs: Running Total: 15
 numbers.add(3); // Outputs: Running Total: 18
 ```
 
-`doOnData(void Function(T event) onData)`
-
-Performs a side-effect action for each data event emitted by the source `ReactiveSubject`. The `onData` callback receives the emitted item but does not modify it.
+- `doOnData(void Function(T event) onData)`: Performs a side-effect action for each data event emitted by the source `ReactiveSubject`. The `onData` callback receives the emitted item but does not modify it.
 
 ```dart
 final subject = ReactiveSubject<int>(initialValue: 1);
@@ -587,9 +544,8 @@ sideEffect.stream.listen(print); // Prints: Value emitted: 1, then 1
 
 subject.add(2); // Prints: Value emitted: 2, then 2
 ```
-`doOnError(void Function(Object error, StackTrace stackTrace) onError)`
 
-Performs a side-effect action for each error event emitted by the source `ReactiveSubject`. The `onError` callback receives the error and stack trace but does not modify them.
+- `doOnError(void Function(Object error, StackTrace stackTrace) onError)`: Performs a side-effect action for each error event emitted by the source `ReactiveSubject`. The `onError` callback receives the error and stack trace but does not modify them.
 
 ```dart
 final subject = ReactiveSubject<int>();
@@ -615,8 +571,6 @@ subject.stream.listen(
   },
 );
 ```
-
-
 
 9. Practical Example in BLoC
 
@@ -694,7 +648,6 @@ class SearchBloc extends MainBloc<SearchEvent, SearchState> {
 
 `ReactiveSubject` simplifies working with streams in your application, providing a convenient way to manage and react to changing data. It's particularly useful in BLoCs for handling state changes and in widgets for building reactive UIs. By leveraging the built-in transformation methods, you can create powerful reactive data flows with minimal boilerplate.
 
-
 ## Best Practices
 
 1. Keep your BLoCs focused on a single responsibility.
@@ -735,21 +688,25 @@ Base class for all events in your BLoCs.
 `ReactiveSubject<T>` is a wrapper around RxDart's `BehaviorSubject` or `PublishSubject`, providing a simpler API for reactive programming in Dart.
 
 # Constructors
+
 - `ReactiveSubject({T? initialValue})`: Creates a new `ReactiveSubject` (wraps `BehaviorSubject`).
 - `ReactiveSubject.broadcast({T? initialValue})`: Creates a new broadcast `ReactiveSubject` (wraps `PublishSubject`).
 
 # Properties
+
 - `T value`: Gets the current value of the subject.
 - `Stream<T> stream`: Gets the stream of values emitted by the subject.
 - `Sink<T> sink`: Gets the sink for adding values to the subject.
 - `bool isClosed`: Indicates whether the subject is closed.
 
 # Methods
+
 - `void add(T value)`: Adds a new value to the subject.
 - `void addError(Object error, [StackTrace? stackTrace])`: Adds an error to the subject.
 - `void dispose()`: Disposes of the subject.
 
 # Transformation Methods
+
 - `ReactiveSubject<R> map<R>(R Function(T event) mapper)`: Transforms each item emitted by applying a function.
 - `ReactiveSubject<T> where(bool Function(T event) test)`: Filters items based on a predicate.
 - `ReactiveSubject<R> switchMap<R>(Stream<R> Function(T event) mapper)`: Switches to a new stream when a new item is emitted.
@@ -763,6 +720,7 @@ Base class for all events in your BLoCs.
 - `ReactiveSubject<T> doOnError(void Function(Object error, StackTrace stackTrace) onError)`: Performs a side-effect action for each error event emitted.
 
 # Static Methods
+
 - `static ReactiveSubject<List<T>> combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of multiple subjects.
 - `static ReactiveSubject<T> merge<T>(List<ReactiveSubject<T>> subjects)`: Merges multiple subjects into one.
 

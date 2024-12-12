@@ -1,10 +1,7 @@
-import 'package:bloc_small/base_state/base_page_state.dart';
+import 'package:bloc_small/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 
 import 'bloc/count/count_bloc.dart';
-import 'di/di.dart';
 import 'drawer/menu_drawer.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -13,11 +10,14 @@ class MyHomePage extends StatefulWidget {
   MyHomePage();
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(getIt);
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  _MyHomePageState(GetIt getIt) : super(getIt);
+  _MyHomePageState() : super();
+
+  @override
+  CountBloc createBloc() => CountBloc();
 
   @override
   Widget buildPage(BuildContext context) {
