@@ -87,7 +87,12 @@ class ReactiveSubject<T> {
   late T _value;
 
   /// The current value of the subject.
-  T get value => _value;
+  T get value {
+    if (_value == null) {
+      throw StateError('No value has been added to the subject yet');
+    }
+    return _value!;
+  }
 
   final Subject<T> _subject;
 

@@ -6,7 +6,7 @@ export 'package:get_it/get_it.dart' show GetIt;
 
 final GetIt getIt = GetIt.instance;
 
-@InjectableInit()
-void configureInjection() {
+@InjectableInit(preferRelativeImports: false)
+Future<void> configureInjection() async {
   getIt.registerFactory<CommonBloc>(() => CommonBloc());
 }

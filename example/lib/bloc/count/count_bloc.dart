@@ -8,7 +8,7 @@ part 'count_event.dart';
 part 'count_state.dart';
 
 @injectable
-class CountBloc extends MainBloc<CountEvent, CountState> {
+class CountBloc extends MainBloc<CountEvent, CountState> with BlocErrorHandler {
   CountBloc() : super(const CountState.initial()) {
     on<Increment>(_onIncrementCounter);
     on<Decrement>(_onDecrementCounter);
@@ -16,10 +16,12 @@ class CountBloc extends MainBloc<CountEvent, CountState> {
 
   Future<void> _onIncrementCounter(
       Increment event, Emitter<CountState> emit) async {
-    await blocCatch(actions: () async {
-      await Future.delayed(Duration(seconds: 2));
-      emit(state.copyWith(count: state.count + 1));
-    });
+    await blocCatch(
+        actions: () async {
+          await Future.delayed(Duration(seconds: 2));
+          emit(state.copyWith(count: state.count + 1));
+        },
+        onError: handleError);
   }
 
   void _onDecrementCounter(Decrement event, Emitter<CountState> emit) {

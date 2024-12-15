@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc_small/reactive_subject.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';

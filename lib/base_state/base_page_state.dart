@@ -61,6 +61,11 @@ import '../core/main_bloc.dart';
 abstract class BasePageState<T extends StatefulWidget, B extends MainBloc>
     extends BasePageStateDelegate<T, B> {
   BasePageState() : super();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
 }
 
 abstract class BasePageStateDelegate<T extends StatefulWidget,
