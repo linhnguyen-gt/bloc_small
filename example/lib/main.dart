@@ -1,4 +1,4 @@
-import 'package:bloc_small/bloc.dart' as bloc_small_di;
+import 'package:bloc_small/bloc_small.dart' as bloc_small_di;
 import 'package:bloc_small_example/reactive_subject/action_with_latest_context.dart';
 import 'package:bloc_small_example/reactive_subject/combined_form_validation.dart';
 import 'package:bloc_small_example/reactive_subject/debounced_search.dart';

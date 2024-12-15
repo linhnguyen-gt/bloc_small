@@ -1,4 +1,4 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';

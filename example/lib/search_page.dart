@@ -1,4 +1,5 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/bloc_small.dart';
+import 'package:bloc_small/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'bloc/search/search_bloc.dart';
