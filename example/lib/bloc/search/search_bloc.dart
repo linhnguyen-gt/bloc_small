@@ -1,13 +1,11 @@
 import 'package:bloc_small/bloc_small.dart';
 import 'package:bloc_small/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 
 part 'search_bloc.freezed.dart';
 part 'search_event.dart';
 part 'search_state.dart';
 
-@injectable
 class SearchBloc extends MainBloc<SearchEvent, SearchState>
     with BlocErrorHandler {
   final ReactiveSubject<String> _searchQuery = ReactiveSubject<String>();
