@@ -38,7 +38,6 @@ dependencies:
   bloc_small:
   injectable:
   freezed:
-  get_it:
 
 dev_dependencies:
   injectable_generator:
@@ -79,12 +78,25 @@ The `CommonBloc` is used for managing common functionalities across your app, su
 Use GetIt and Injectable for dependency injection:
 
 ```dart
-import 'package:bloc_small/bloc.dart' as bloc_small_di;
+import 'package:bloc_small/bloc_small.dart';
+import 'package:injectable/injectable.dart';
 
+import 'di.config.dart';
+
+@InjectableInit()
+void configureInjectionApp() {
+  // Step 1: Register core dependencies from package bloc_small
+  getIt.registerCore();
+
+  // Step 2: Register your app dependencies
+  getIt.init();
+}
+```
+
+```dart
 void main() {
-  // Call configureInjection() before running your app
-  bloc_small_di.configureInjection();
-  //......
+  WidgetsFlutterBinding.ensureInitialized();
+  configureInjectionApp(); // Initialize both core and app dependencies
   runApp(MyApp());
 }
 ```

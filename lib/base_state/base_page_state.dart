@@ -7,6 +7,7 @@ import 'package:bloc_small/core/main_bloc_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import '../common/common_bloc.dart';
 import '../core/main_bloc.dart';
@@ -73,20 +74,17 @@ abstract class BasePageState<T extends StatefulWidget, B extends MainBloc>
 
 abstract class BasePageStateDelegate<T extends StatefulWidget,
     B extends MainBloc> extends State<T> {
-  late final CommonBloc commonBloc;
-  late final B bloc;
+  GetIt get di => GetIt.I;
+  late final CommonBloc commonBloc = di<CommonBloc>();
+
+  late final B bloc = di<B>()..commonBloc = commonBloc;
 
   BasePageStateDelegate() : super();
 
   @override
   void initState() {
     super.initState();
-    commonBloc = CommonBloc();
-    bloc = createBloc();
-    bloc.commonBloc = commonBloc;
   }
-
-  B createBloc();
 
   @override
   Widget build(BuildContext context) {

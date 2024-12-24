@@ -1,10 +1,21 @@
 import 'package:bloc_small/common/common_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:injectable/injectable.dart';
 
 export 'package:get_it/get_it.dart' show GetIt;
 
-final GetIt getIt = GetIt.instance;
+final getIt = GetIt.instance;
 
-void configureInjection() {
-  getIt.registerFactory<CommonBloc>(() => CommonBloc());
+@module
+abstract class CoreModule {
+  @singleton
+  CommonBloc get commonBloc => CommonBloc();
+}
+
+extension CoreInjection on GetIt {
+  void registerCore() {
+    if (!isRegistered<CommonBloc>()) {
+      registerFactory<CommonBloc>(() => CommonBloc());
+    }
+  }
 }

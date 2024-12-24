@@ -18,9 +18,6 @@ class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
   _MyHomePageState() : super();
 
   @override
-  CountBloc createBloc() => CountBloc();
-
-  @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.

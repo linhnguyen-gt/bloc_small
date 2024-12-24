@@ -16,9 +16,6 @@ class _SearchPageState extends BasePageState<SearchPage, SearchBloc> {
   _SearchPageState() : super();
 
   @override
-  SearchBloc createBloc() => SearchBloc();
-
-  @override
   Widget buildPage(BuildContext context) {
     return Scaffold(
       drawer: const MenuDrawer(SearchPage.route),

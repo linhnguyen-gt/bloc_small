@@ -1,9 +1,13 @@
-import 'package:bloc_small/get_it.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:injectable/injectable.dart';
 
 import 'di.config.dart';
 
-final GetIt getIt = GetIt.instance;
+@InjectableInit()
+void configureInjectionApp() {
+  // Step 1: Register core dependencies from package bloc_small
+  getIt.registerCore();
 
-@injectableInit
-void configureInjectionApp() => getIt.init();
+  // Step 2: Register your app dependencies
+  getIt.init();
+}
