@@ -6,6 +6,6 @@ export 'core/main_bloc.dart';
 export 'core/main_bloc_event.dart';
 export 'core/main_bloc_state.dart';
 export 'core/reactive_subject.dart';
-export 'di/di.dart';
+export 'core/di/di.dart';
 export 'extensions/bloc_context_extension.dart';
 export 'testing/bloc_test_helper.dart';

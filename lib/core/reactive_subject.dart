@@ -73,23 +73,50 @@ class ReactiveSubject<T> {
   ///
   /// [initialValue] is the initial value of the subject, if provided.
   ReactiveSubject({T? initialValue}) : _subject = BehaviorSubject<T>() {
-    if (initialValue != null) add(initialValue);
+    if (initialValue != null) {
+      _value = initialValue;
+      add(initialValue);
+    }
   }
 
   /// Creates a ReactiveSubject with a PublishSubject.
   ///
+  /// Use this constructor when you need multiple subscribers to receive updates
+  /// independently. Note that late subscribers will only receive values that are
+  /// added after they subscribe.
+  ///
   /// [initialValue] is the initial value of the subject, if provided.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>.broadcast(initialValue: 0);
+  ///
+  /// // First subscriber
+  /// subject.stream.listen((value) => print('Subscriber 1: $value'));
+  ///
+  /// // Second subscriber
+  /// subject.stream.listen((value) => print('Subscriber 2: $value'));
+  ///
+  /// subject.add(1); // Both subscribers will receive this value
+  /// ```
   ReactiveSubject.broadcast({T? initialValue})
       : _subject = PublishSubject<T>() {
-    if (initialValue != null) add(initialValue);
+    if (initialValue != null) {
+      _value = initialValue;
+      add(initialValue);
+    }
   }
 
-  late T _value;
+  late T? _value;
 
   /// The current value of the subject.
+  ///
+  /// Throws a [StateError] if no value has been added and no initial value was provided.
   T get value {
     if (_value == null) {
-      throw StateError('No value has been added to the subject yet');
+      throw StateError(
+          'No value available. Ensure an initial value was provided or a value has been added. '
+          'Consider using ReactiveSubject(initialValue: defaultValue) if a default value is appropriate.');
     }
     return _value!;
   }
@@ -353,7 +380,8 @@ class ReactiveSubject<T> {
   ///
   /// [future] is the Future to convert into a ReactiveSubject.
   /// [onError] is an optional callback to handle errors.
-  /// [onFinally] is an optional callback that runs when the Future completes, regardless of success or failure.
+  /// [onFinally] is an optional callback that runs when the Future completes.
+  /// [timeout] is an optional duration after which the Future will time out.
   ///
   /// Usage:
   /// ```dart
@@ -399,9 +427,20 @@ class ReactiveSubject<T> {
     Future<T> future, {
     Function(Object error)? onError,
     Function()? onFinally,
+    Duration? timeout,
   }) {
     final subject = ReactiveSubject<T>();
-    future.then((value) {
+
+    Future<T> timeoutFuture = future;
+    if (timeout != null) {
+      timeoutFuture = future.timeout(
+        timeout,
+        onTimeout: () => throw TimeoutException(
+            'Operation timed out after ${timeout.inSeconds} seconds'),
+      );
+    }
+
+    timeoutFuture.then((value) {
       subject.add(value);
     }).catchError((error) {
       if (onError != null) {
@@ -414,6 +453,7 @@ class ReactiveSubject<T> {
       }
       subject.dispose();
     });
+
     return subject;
   }
 }

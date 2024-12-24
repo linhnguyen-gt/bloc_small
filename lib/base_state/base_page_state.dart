@@ -1,6 +1,9 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:bloc_small/constant/default_loading.dart';
+import 'package:bloc_small/core/error/error_state.dart';
+import 'package:bloc_small/core/main_bloc_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -128,7 +131,7 @@ abstract class BasePageStateDelegate<T extends StatefulWidget,
   /// are properly managed using the specified loadingKey.
   Widget buildLoadingOverlay(
       {required Widget child,
-      String? loadingKey = LoadingKeys.global,
+      String? loadingKey = LoadingKey.global,
       Widget? loadingWidget}) {
     return BlocBuilder<CommonBloc, CommonState>(
       buildWhen: (previous, current) =>
@@ -152,13 +155,28 @@ abstract class BasePageStateDelegate<T extends StatefulWidget,
 
   Widget buildPage(BuildContext context);
 
-  Widget buildPageListeners({required Widget child}) => child;
+  Widget buildPageListeners({required Widget child}) {
+    return BlocListener<B, MainBlocState>(
+      listener: (context, state) {
+        if (state is ErrorState) {
+          final errorState = state;
+          handleError(errorState.error, errorState.stackTrace);
+        }
+      },
+      child: child,
+    );
+  }
 
   Widget buildPageLoading() => const Center(child: LoadingIndicator());
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void handleError(Object error, StackTrace stackTrace) {
+    developer.log('Error in ${T.toString()}',
+        error: error, stackTrace: stackTrace);
   }
 }
 

@@ -58,13 +58,19 @@ class _ActionWithLatestContextState extends State<ActionWithLatestContext> {
       ),
       body: Column(
         children: [
-          DropdownButton<String>(
-            value: _selectedItemSubject.value,
-            onChanged: _onItemSelected,
-            items: [
-              DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
-              DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
-            ],
+          StreamBuilder<String>(
+            stream: _selectedItemSubject.stream,
+            initialData: _selectedItemSubject.value,
+            builder: (context, snapshot) {
+              return DropdownButton<String>(
+                value: snapshot.data,
+                onChanged: _onItemSelected,
+                items: [
+                  DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
+                  DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
+                ],
+              );
+            },
           ),
           ElevatedButton(
             onPressed: _onActionPressed,

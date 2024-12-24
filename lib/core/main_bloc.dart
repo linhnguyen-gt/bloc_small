@@ -85,7 +85,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   ///   }
   /// }
   /// ```
-  void showLoading({String? key = LoadingKeys.global}) {
+  void showLoading({String? key = LoadingKey.global}) {
     commonBloc.add(SetComponentLoading(key: key!, isLoading: true));
   }
 
@@ -106,7 +106,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   ///   }
   /// }
   /// ```
-  void hideLoading({String? key = LoadingKeys.global}) {
+  void hideLoading({String? key = LoadingKey.global}) {
     commonBloc.add(SetComponentLoading(key: key!, isLoading: false));
   }
 
@@ -143,7 +143,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   Future<void> blocCatch({
     required Future<void> Function() actions,
     bool isLoading = true,
-    String keyLoading = LoadingKeys.global,
+    String keyLoading = LoadingKey.global,
     Future<void> Function(Object error, StackTrace stackTrace)? onError,
     Future<void> Function()? onFinally,
   }) async {
