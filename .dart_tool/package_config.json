@@ -75,15 +75,15 @@
     },
     {
       "name": "build_runner",
-      "rootUri": "file:///C:/Users/linhg/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.4.13",
+      "rootUri": "file:///C:/Users/linhg/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.4.14",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.6"
     },
     {
       "name": "build_runner_core",
-      "rootUri": "file:///C:/Users/linhg/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner_core-7.3.2",
+      "rootUri": "file:///C:/Users/linhg/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner_core-8.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.6"
     },
     {
       "name": "built_collection",
@@ -213,7 +213,7 @@
     },
     {
       "name": "get_it",
-      "rootUri": "file:///C:/Users/linhg/AppData/Local/Pub/Cache/hosted/pub.dev/get_it-7.7.0",
+      "rootUri": "file:///C:/Users/linhg/AppData/Local/Pub/Cache/hosted/pub.dev/get_it-8.0.3",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -542,10 +542,10 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-12-24T11:58:41.119199Z",
+  "generated": "2025-01-01T14:03:01.370172Z",
   "generator": "pub",
   "generatorVersion": "3.6.0",
   "flutterRoot": "file:///C:/Users/linhg/dev/flutter",
-  "flutterVersion": "3.27.0",
+  "flutterVersion": "3.27.1",
   "pubCache": "file:///C:/Users/linhg/AppData/Local/Pub/Cache"
 }
