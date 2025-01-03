@@ -33,7 +33,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
     S extends MainBlocState> extends Bloc<E, S> {
   BaseBlocDelegate(super.initialState);
 
-  late final AppNavigator navigator;
+  AppNavigator? navigator;
 
   late final CommonBloc _commonBloc;
 

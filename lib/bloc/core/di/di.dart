@@ -22,7 +22,9 @@ extension CoreInjection on GetIt {
     }
   }
 
-  void registerAppRouter<T extends BaseAppRouter>(T router) {
+  void registerAppRouter<T extends BaseAppRouter>(T? router) {
+    if (router == null) return;
+
     if (!isRegistered<T>()) {
       registerLazySingleton<BaseAppRouter>(() => get<T>());
       registerLazySingleton<AppNavigator>(() => AppNavigator(get<T>()));
