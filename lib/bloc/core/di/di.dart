@@ -1,4 +1,4 @@
-import 'package:bloc_small/common/common_bloc.dart';
+import 'package:bloc_small/bloc/common/common_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 

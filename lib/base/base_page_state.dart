@@ -2,15 +2,15 @@ import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:bloc_small/constant/default_loading.dart';
-import 'package:bloc_small/core/error/error_state.dart';
-import 'package:bloc_small/core/main_bloc_state.dart';
+import 'package:bloc_small/bloc/core/error/error_state.dart';
+import 'package:bloc_small/bloc/core/main_bloc_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../common/common_bloc.dart';
-import '../core/main_bloc.dart';
+import '../bloc/common/common_bloc.dart';
+import '../bloc/core/main_bloc.dart';
 
 /// A base class for all StatefulWidget states in the application that use a Bloc.
 ///
