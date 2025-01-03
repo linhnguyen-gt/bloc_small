@@ -220,10 +220,8 @@ First, add auto_route to your dependencies:
 
 ```yaml
 dependencies:
-  auto_route: ^7.8.4
-
 dev_dependencies:
-  auto_route_generator: ^7.3.2
+  auto_route_generator:
 ```
 
 #### 2. Create Your Router
