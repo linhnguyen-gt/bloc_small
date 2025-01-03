@@ -2,6 +2,7 @@ import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class EmailFilter extends StatefulWidget {
   static const String route = '/email_filter';
@@ -35,7 +36,7 @@ class _EmailFilterState extends State<EmailFilter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(EmailFilter.route),
+      drawer: const ReactiveSubjectDrawer(EmailFilter.route),
       appBar: AppBar(
         title: Text("Email Filter"),
       ),

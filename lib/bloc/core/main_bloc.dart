@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:bloc_small/constant/default_loading.dart';
+import 'package:bloc_small/navigation/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/common_bloc.dart';
@@ -31,6 +32,8 @@ abstract class MainBloc<E extends MainBlocEvent, S extends MainBlocState>
 abstract class BaseBlocDelegate<E extends MainBlocEvent,
     S extends MainBlocState> extends Bloc<E, S> {
   BaseBlocDelegate(super.initialState);
+
+  late final AppNavigator navigator;
 
   late final CommonBloc _commonBloc;
 

@@ -1,13 +1,21 @@
 import 'package:bloc_small/bloc_small.dart';
 import 'package:injectable/injectable.dart';
 
+import '../navigation/app_router.dart';
 import 'di.config.dart';
+
+// The global instance of GetIt for dependency injection
+final GetIt getIt = GetIt.instance;
 
 @InjectableInit()
 void configureInjectionApp() {
-  // Step 1: Register core dependencies from package bloc_small
+  // Step 1 (Optional): Register your preferred navigation solution
+  // Example with AppRouter:
+  getIt.registerAppRouter<AppRouter>(AppRouter());
+
+  // Step 2: Register other dependencies
   getIt.registerCore();
 
-  // Step 2: Register your app dependencies
+  // Step 3: Initialize injectable
   getIt.init();
 }

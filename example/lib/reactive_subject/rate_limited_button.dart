@@ -2,6 +2,7 @@ import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class RateLimitedButton extends StatefulWidget {
   static const String route = '/rate_limited_button';
@@ -42,7 +43,7 @@ class _RateLimitedButtonState extends State<RateLimitedButton> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(RateLimitedButton.route),
+      drawer: const ReactiveSubjectDrawer(RateLimitedButton.route),
       appBar: AppBar(
         title: Text("Rate Limited Button"),
       ),

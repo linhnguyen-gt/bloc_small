@@ -2,6 +2,7 @@ import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class ActionWithLatestContext extends StatefulWidget {
   static const String route = '/action_with_latest_context';
@@ -52,7 +53,7 @@ class _ActionWithLatestContextState extends State<ActionWithLatestContext> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(ActionWithLatestContext.route),
+      drawer: const ReactiveSubjectDrawer(ActionWithLatestContext.route),
       appBar: AppBar(
         title: Text("Action With Latest"),
       ),

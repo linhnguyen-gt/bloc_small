@@ -1,17 +1,20 @@
+import 'package:bloc_small/auto_route.dart';
 import 'package:flutter/material.dart';
 
 class MenuItemWidget extends StatelessWidget {
   final String caption;
-  final String routeName;
-  final bool isSelected;
-  final Widget? icon;
+  final PageRouteInfo route;
+  final String currentRoute;
+  final Icon? icon;
 
   const MenuItemWidget({
     required this.caption,
-    required this.routeName,
-    required String currentRoute,
+    required this.route,
+    required this.currentRoute,
     this.icon,
-  }) : isSelected = currentRoute == routeName;
+  });
+
+  bool get isSelected => route.routeName == currentRoute;
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +22,10 @@ class MenuItemWidget extends StatelessWidget {
       title: Text(caption),
       leading: icon,
       selected: isSelected,
-      onTap: () {
-        if (isSelected) {
-          // close drawer
-          Navigator.pop(context);
-          return;
-        }
-        Navigator.pushReplacementNamed(context, routeName);
+      onTap: () async {
+        Navigator.of(context).pop();
+        if (isSelected) return;
+        await context.router.replace(route);
       },
     );
   }

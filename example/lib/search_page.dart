@@ -1,13 +1,14 @@
+import 'package:bloc_small/auto_route.dart';
 import 'package:bloc_small/bloc_small.dart';
 import 'package:bloc_small/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'bloc/search/search_bloc.dart';
 import 'drawer/menu_drawer.dart';
+import 'navigation/app_router.gr.dart';
 
+@RoutePage()
 class SearchPage extends StatefulWidget {
-  static const String route = '/search_page';
-
   @override
   _SearchPageState createState() => _SearchPageState();
 }
@@ -18,7 +19,7 @@ class _SearchPageState extends BasePageState<SearchPage, SearchBloc> {
   @override
   Widget buildPage(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(SearchPage.route),
+      drawer: MenuDrawer(SearchRoute.name),
       appBar: AppBar(
         title: Text('Reactive + Bloc Search'),
       ),

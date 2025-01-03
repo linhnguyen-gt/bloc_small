@@ -2,6 +2,7 @@ import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class CombinedFormValidation extends StatefulWidget {
   static const String route = '/combined_form_validation';
@@ -44,7 +45,7 @@ class _CombinedFormValidationState extends State<CombinedFormValidation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(CombinedFormValidation.route),
+      drawer: const ReactiveSubjectDrawer(CombinedFormValidation.route),
       appBar: AppBar(
         title: Text("Combined Form Validation"),
       ),

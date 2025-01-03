@@ -2,6 +2,7 @@ import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class DistinctApiCalls extends StatefulWidget {
   static const String route = '/distinct_api_calls';
@@ -39,7 +40,7 @@ class _DistinctApiCallsState extends State<DistinctApiCalls> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(DistinctApiCalls.route),
+      drawer: const ReactiveSubjectDrawer(DistinctApiCalls.route),
       appBar: AppBar(
         title: Text("Distinct Api Calls"),
       ),

@@ -1,9 +1,10 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
-import 'package:bloc_small/constant/default_loading.dart';
 import 'package:bloc_small/bloc/core/error/error_state.dart';
 import 'package:bloc_small/bloc/core/main_bloc_state.dart';
+import 'package:bloc_small/constant/default_loading.dart';
+import 'package:bloc_small/navigation/app_navigator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,9 +76,12 @@ abstract class BasePageState<T extends StatefulWidget, B extends MainBloc>
 abstract class BasePageStateDelegate<T extends StatefulWidget,
     B extends MainBloc> extends State<T> {
   GetIt get di => GetIt.I;
-  late final CommonBloc commonBloc = di<CommonBloc>();
+  late final AppNavigator navigator = di.get<AppNavigator>();
+  late final CommonBloc commonBloc = di<CommonBloc>()..navigator = navigator;
 
-  late final B bloc = di<B>()..commonBloc = commonBloc;
+  late final B bloc = di<B>()
+    ..commonBloc = commonBloc
+    ..navigator = navigator;
 
   BasePageStateDelegate() : super();
 
