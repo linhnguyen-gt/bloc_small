@@ -1,12 +1,14 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/auto_route.dart';
+import 'package:bloc_small/bloc_small.dart';
+import 'package:bloc_small/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'bloc/count/count_bloc.dart';
 import 'drawer/menu_drawer.dart';
+import 'navigation/app_router.gr.dart';
 
+@RoutePage()
 class MyHomePage extends StatefulWidget {
-  static const String route = '/home_page';
-
   MyHomePage();
 
   @override
@@ -14,11 +16,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  _MyHomePageState() : super();
-
-  @override
-  CountBloc createBloc() => CountBloc();
-
   @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -29,7 +26,7 @@ class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
     // than having to individually change instances of widgets.
     return buildLoadingOverlay(
       child: Scaffold(
-        drawer: const MenuDrawer(MyHomePage.route),
+        drawer: const MenuDrawer(MyHomeRoute.name),
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.

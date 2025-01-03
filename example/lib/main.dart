@@ -1,33 +1,23 @@
-import 'package:bloc_small/bloc.dart' as bloc_small_di;
-import 'package:bloc_small_example/reactive_subject/action_with_latest_context.dart';
-import 'package:bloc_small_example/reactive_subject/combined_form_validation.dart';
-import 'package:bloc_small_example/reactive_subject/debounced_search.dart';
-import 'package:bloc_small_example/reactive_subject/default_settings.dart';
-import 'package:bloc_small_example/reactive_subject/distinct_api_calls.dart';
-import 'package:bloc_small_example/reactive_subject/email_filter.dart';
-import 'package:bloc_small_example/reactive_subject/notification_merger.dart';
-import 'package:bloc_small_example/reactive_subject/rate_limited_button.dart';
-import 'package:bloc_small_example/reactive_subject/shopping_cart.dart';
-import 'package:bloc_small_example/reactive_subject/stock_price.dart';
-import 'package:bloc_small_example/reactive_subject/temperature_converter.dart';
-import 'package:bloc_small_example/search_page.dart';
+import 'package:bloc_small_example/navigation/app_router.dart';
 import 'package:flutter/material.dart';
 
 import 'di/di.dart';
-import 'home.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  bloc_small_di.configureInjection();
-  configureInjectionApp();
+  configureInjectionApp(); // Initialize both core and app dependencies
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  final _router = getIt<AppRouter>();
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: _router.config(),
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -41,22 +31,6 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
-      routes: {
-        MyHomePage.route: (context) => MyHomePage(),
-        SearchPage.route: (context) => SearchPage(),
-        ActionWithLatestContext.route: (context) => ActionWithLatestContext(),
-        CombinedFormValidation.route: (context) => CombinedFormValidation(),
-        DebouncedSearch.route: (context) => DebouncedSearch(),
-        DefaultSettings.route: (context) => DefaultSettings(),
-        DistinctApiCalls.route: (context) => DistinctApiCalls(),
-        EmailFilter.route: (context) => EmailFilter(),
-        NotificationMerger.route: (context) => NotificationMerger(),
-        RateLimitedButton.route: (context) => RateLimitedButton(),
-        ShoppingCart.route: (context) => ShoppingCart(),
-        StockPrice.route: (context) => StockPrice(),
-        TemperatureConverter.route: (context) => TemperatureConverter(),
-      },
     );
   }
 }

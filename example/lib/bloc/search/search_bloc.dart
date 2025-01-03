@@ -1,4 +1,5 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/bloc_small.dart';
+import 'package:bloc_small/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
@@ -7,7 +8,8 @@ part 'search_event.dart';
 part 'search_state.dart';
 
 @injectable
-class SearchBloc extends MainBloc<SearchEvent, SearchState> {
+class SearchBloc extends MainBloc<SearchEvent, SearchState>
+    with BlocErrorHandler {
   final ReactiveSubject<String> _searchQuery = ReactiveSubject<String>();
   late final ReactiveSubject<List<String>> _searchResults;
 
@@ -36,7 +38,8 @@ class SearchBloc extends MainBloc<SearchEvent, SearchState> {
         actions: () async {
           await Future.delayed(Duration(seconds: 2));
           _searchQuery.add(event.query);
-        });
+        },
+        onError: handleError);
   }
 
   void _onUpdateResults(UpdateResults event, Emitter<SearchState> emit) {

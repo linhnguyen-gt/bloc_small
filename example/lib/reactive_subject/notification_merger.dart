@@ -1,7 +1,8 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class NotificationMerger extends StatefulWidget {
   static const String route = '/notification_merger';
@@ -42,7 +43,7 @@ class _NotificationMergerState extends State<NotificationMerger> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(NotificationMerger.route),
+      drawer: const ReactiveSubjectDrawer(NotificationMerger.route),
       appBar: AppBar(
         title: Text("Notification Merger"),
       ),

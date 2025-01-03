@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:bloc_small/constant/default_loading.dart';
+import 'package:bloc_small/navigation/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/common_bloc.dart';
@@ -31,6 +32,8 @@ abstract class MainBloc<E extends MainBlocEvent, S extends MainBlocState>
 abstract class BaseBlocDelegate<E extends MainBlocEvent,
     S extends MainBlocState> extends Bloc<E, S> {
   BaseBlocDelegate(super.initialState);
+
+  AppNavigator? navigator;
 
   late final CommonBloc _commonBloc;
 
@@ -85,7 +88,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   ///   }
   /// }
   /// ```
-  void showLoading({String? key = LoadingKeys.global}) {
+  void showLoading({String? key = LoadingKey.global}) {
     commonBloc.add(SetComponentLoading(key: key!, isLoading: true));
   }
 
@@ -106,7 +109,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   ///   }
   /// }
   /// ```
-  void hideLoading({String? key = LoadingKeys.global}) {
+  void hideLoading({String? key = LoadingKey.global}) {
     commonBloc.add(SetComponentLoading(key: key!, isLoading: false));
   }
 
@@ -143,7 +146,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   Future<void> blocCatch({
     required Future<void> Function() actions,
     bool isLoading = true,
-    String keyLoading = LoadingKeys.global,
+    String keyLoading = LoadingKey.global,
     Future<void> Function(Object error, StackTrace stackTrace)? onError,
     Future<void> Function()? onFinally,
   }) async {

@@ -1,7 +1,8 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class DefaultSettings extends StatefulWidget {
   static const String route = '/default_settings';
@@ -51,7 +52,7 @@ class _DefaultSettingsState extends State<DefaultSettings> {
         final textColor = isDarkTheme ? Colors.white : Colors.black;
 
         return Scaffold(
-          drawer: const MenuDrawer(DefaultSettings.route),
+          drawer: const ReactiveSubjectDrawer(DefaultSettings.route),
           appBar: AppBar(
             title: Text("Default Settings", style: TextStyle(color: textColor)),
             backgroundColor: backgroundColor, // Optional: Change AppBar color

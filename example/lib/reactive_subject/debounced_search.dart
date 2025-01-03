@@ -1,7 +1,8 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class DebouncedSearch extends StatefulWidget {
   static const String route = '/debounced_search';
@@ -48,7 +49,7 @@ class _DebouncedSearchState extends State<DebouncedSearch> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(DebouncedSearch.route),
+      drawer: const ReactiveSubjectDrawer(DebouncedSearch.route),
       appBar: AppBar(
         title: Text("Debounced Search"),
       ),

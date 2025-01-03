@@ -1,7 +1,7 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
-import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class TemperatureConverter extends StatefulWidget {
   static const String route = '/temperature_converter';
@@ -38,7 +38,7 @@ class _TemperatureConverterState extends State<TemperatureConverter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(TemperatureConverter.route),
+      drawer: const ReactiveSubjectDrawer(TemperatureConverter.route),
       appBar: AppBar(
         title: Text("Temperature Converter"),
       ),

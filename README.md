@@ -11,11 +11,12 @@ A lightweight and simplified BLoC (Business Logic Component) library for Flutter
 2. [Installation](#installation)
 3. [Core Concepts](#core-concepts)
 4. [Basic Usage](#basic-usage)
-5. [Advanced Usage](#advanced-usage)
-6. [Best Practices](#best-practices)
-7. [API Reference](#api-reference)
-8. [Contributing](#contributing)
-9. [License](#license)
+5. [Auto Route Integration](#if-you-want-to-use-auto-route-integration)
+6. [Advanced Usage](#advanced-usage)
+7. [Best Practices](#best-practices)
+8. [API Reference](#api-reference)
+9. [Contributing](#contributing)
+10. [License](#license)
 
 ## Features
 
@@ -28,6 +29,12 @@ A lightweight and simplified BLoC (Business Logic Component) library for Flutter
 - Built-in support for asynchronous operations
 - Seamless integration with `Freezed` for immutable state and event classes
 - Enhanced `ReactiveSubject` with powerful stream transformation methods
+- Optional integration with `auto_route` for type-safe navigation, including:
+  - Platform-adaptive transitions
+  - Deep linking support
+  - Nested navigation
+  - Compile-time route verification
+  - Clean and consistent navigation API
 
 ## Installation
 
@@ -38,7 +45,6 @@ dependencies:
   bloc_small:
   injectable:
   freezed:
-  get_it:
 
 dev_dependencies:
   injectable_generator:
@@ -79,12 +85,25 @@ The `CommonBloc` is used for managing common functionalities across your app, su
 Use GetIt and Injectable for dependency injection:
 
 ```dart
-import 'package:bloc_small/bloc.dart' as bloc_small_di;
+import 'package:bloc_small/bloc_small.dart';
+import 'package:injectable/injectable.dart';
 
+import 'di.config.dart';
+
+@InjectableInit()
+void configureInjectionApp() {
+  // Step 1: Register core dependencies from package bloc_small
+  getIt.registerCore();
+
+  // Step 2: Register your app dependencies
+  getIt.init();
+}
+```
+
+```dart
 void main() {
-  // Call configureInjection() before running your app
-  bloc_small_di.configureInjection();
-  //......
+  WidgetsFlutterBinding.ensureInitialized();
+  configureInjectionApp(); // Initialize both core and app dependencies
   runApp(MyApp());
 }
 ```
@@ -156,11 +175,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  MyHomePageState() : super();
-
-  @override
-  CountBloc createBloc() => CountBloc();
-
   @override
   Widget buildPage(BuildContext context) {
     return Scaffold(
@@ -196,6 +210,117 @@ class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
 }
 ```
 
+### If You Want To Use Auto Route Integration
+
+This package provides seamless integration with `auto_route` for type-safe navigation. The integration is optional but recommended for the best development experience.
+
+#### 1. Setup Auto Route
+
+First, add auto_route to your dependencies:
+
+```yaml
+dependencies:
+dev_dependencies:
+  auto_route_generator:
+```
+
+#### 2. Create Your Router
+
+Extend `BaseAppRouter` to create your application router:
+
+```dart
+@AutoRouterConfig()
+class AppRouter extends BaseAppRouter {
+  @override
+  List<AutoRoute> get routes => [
+    AutoRoute(page: HomeRoute.page, initial: true),
+    AutoRoute(page: SettingsRoute.page),
+    // Add more routes here
+  ];
+}
+```
+
+#### 3. Register Router in Dependency Injection
+
+Register your router during app initialization:
+
+```dart
+void configureInjectionApp() {
+  // Register AppRouter (Optional but recommended)
+  getIt.registerAppRouter<AppRouter>(AppRouter());
+
+  // Register other dependencies
+  getIt.registerCore();
+  getIt.init();
+}
+```
+
+#### 4. Setup MaterialApp
+
+Configure your MaterialApp to use auto_route:
+
+```dart
+class MyApp extends StatelessWidget {
+  final _router = getIt<AppRouter>();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      routerConfig: _router.config(),
+      // ... other MaterialApp properties
+    );
+  }
+}
+```
+
+#### 5. Navigation
+
+Use the provided `AppNavigator` for consistent navigation across your app:
+
+```dart
+class MyWidget extends StatelessWidget {
+  final navigator = getIt<AppNavigator>();
+
+  void _onNavigate() {
+    navigator.push(const HomeRoute());
+  }
+}
+```
+
+Use the bloc provided `AppNavigator`:
+
+```dart
+class _MyWidgetState extends BasePageState<MyWidget, MyWidgetBloc> {
+  void _onNavigate() {
+    navigator.push(const HomeRoute());
+  }
+}
+```
+
+#### Features
+
+- Type-safe routing
+- Automatic route generation
+- Platform-adaptive transitions
+- Deep linking support
+- Nested navigation
+- Integration with dependency injection
+
+#### Benefits
+
+- Compile-time route verification
+- Clean and consistent navigation API
+- Reduced boilerplate code
+- Better development experience
+- Easy integration with bloc_small package
+
+For more complex navigation scenarios and detailed documentation, refer to the [auto_route documentation](https://pub.dev/packages/auto_route).
+
+Note: While you can use any navigation solution, this package is optimized to work with auto_route.
+The integration between auto_route and this package provides
+
+If you choose a different navigation solution, you'll need to implement your own navigation registration strategy.
+
 ## Advanced Usage
 
 ### Handling Loading States
@@ -208,11 +333,6 @@ When using `BasePageState`, you can easily add a loading overlay to your entire 
 
 ```dart
 class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  MyHomePageState() : super();
-
-  @override
-  CountBloc createBloc() => CountBloc();
-  
   @override
   Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(

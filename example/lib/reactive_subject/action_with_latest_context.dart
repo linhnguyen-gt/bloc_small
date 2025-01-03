@@ -1,7 +1,8 @@
-import 'package:bloc_small/bloc.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import '../drawer/menu_drawer.dart';
+import 'reactive_subject_drawer.dart';
 
 class ActionWithLatestContext extends StatefulWidget {
   static const String route = '/action_with_latest_context';
@@ -52,19 +53,25 @@ class _ActionWithLatestContextState extends State<ActionWithLatestContext> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(ActionWithLatestContext.route),
+      drawer: const ReactiveSubjectDrawer(ActionWithLatestContext.route),
       appBar: AppBar(
         title: Text("Action With Latest"),
       ),
       body: Column(
         children: [
-          DropdownButton<String>(
-            value: _selectedItemSubject.value,
-            onChanged: _onItemSelected,
-            items: [
-              DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
-              DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
-            ],
+          StreamBuilder<String>(
+            stream: _selectedItemSubject.stream,
+            initialData: _selectedItemSubject.value,
+            builder: (context, snapshot) {
+              return DropdownButton<String>(
+                value: snapshot.data,
+                onChanged: _onItemSelected,
+                items: [
+                  DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
+                  DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
+                ],
+              );
+            },
           ),
           ElevatedButton(
             onPressed: _onActionPressed,

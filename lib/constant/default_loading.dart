@@ -1,3 +1,3 @@
-class LoadingKeys {
+class LoadingKey {
   static const String global = 'global';
 }
