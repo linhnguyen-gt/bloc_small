@@ -175,11 +175,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  MyHomePageState() : super();
-
-  @override
-  CountBloc createBloc() => CountBloc();
-
   @override
   Widget buildPage(BuildContext context) {
     return Scaffold(
@@ -340,11 +335,6 @@ When using `BasePageState`, you can easily add a loading overlay to your entire 
 
 ```dart
 class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  MyHomePageState() : super();
-
-  @override
-  CountBloc createBloc() => CountBloc();
-  
   @override
   Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(

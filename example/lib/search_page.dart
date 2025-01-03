@@ -14,8 +14,6 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends BasePageState<SearchPage, SearchBloc> {
-  _SearchPageState() : super();
-
   @override
   Widget buildPage(BuildContext context) {
     return Scaffold(
