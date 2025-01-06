@@ -279,7 +279,7 @@ Use the provided `AppNavigator` for consistent navigation across your app:
 
 ```dart
 class MyWidget extends StatelessWidget {
-  final navigator = getIt<AppNavigator>();
+  final navigator = getIt.getNavigator();
 
   void _onNavigate() {
     navigator.push(const HomeRoute());

@@ -78,6 +78,7 @@ abstract class BasePageStateDelegate<T extends StatefulWidget,
   GetIt get di => GetIt.I;
   late final AppNavigator? navigator =
       di.isRegistered<AppNavigator>() ? di<AppNavigator>() : null;
+
   late final CommonBloc commonBloc = di<CommonBloc>()..navigator = navigator;
 
   late final B bloc = di<B>()
