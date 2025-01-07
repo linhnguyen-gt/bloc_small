@@ -7,7 +7,7 @@
 
 A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the `flutter_bloc` package. `bloc_small` simplifies state management, making it more intuitive while maintaining the core benefits of the BLoC pattern.
 
-[Getting Started](#installation) • [Examples](#basic-usage)
+[Getting Started](#installation) • [Examples](https://github.com/linhnguyen-gt/bloc_small/tree/base_feature/example)
 
 </div>
 
@@ -433,6 +433,109 @@ The integration between auto_route and this package provides
 
 If you choose a different navigation solution, you'll need to implement your own navigation registration strategy.
 
+## Advanced Usage
+
+### Handling Loading States
+
+`bloc_small` provides a convenient way to manage loading states and display loading indicators using the `CommonBloc` and the `buildLoadingOverlay` method.
+
+#### Using buildLoadingOverlay
+
+When using `BasePageState`, you can easily add a loading overlay to your entire page:
+
+```dart
+class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
+  @override
+  Widget buildPage(BuildContext context) {
+    return buildLoadingOverlay(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('You have pushed the button this many times:'),
+              BlocBuilder<CountBloc, CountState>(
+                builder: (context, state) {
+                  return Text('${state.count}');
+                },
+              )
+            ],
+          ),
+        ),
+        floatingActionButton: Wrap(
+          spacing: 5,
+          children: [
+            FloatingActionButton(
+              onPressed: () => bloc.add(Increment()),
+              tooltip: 'Increment',
+              child: Icon(Icons.add),
+            ),
+            FloatingActionButton(
+              onPressed: () => bloc.add(Decrement()),
+              tooltip: 'decrement',
+              child: Icon(Icons.remove),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+The `buildLoadingOverlay` method wraps your page content and automatically displays a loading indicator when the loading state is active.
+
+#### Customizing the Loading Overlay
+
+You can customize the loading overlay by providing a `loadingWidget` and specifying a `loadingKey`:
+
+```dart
+buildLoadingOverlay(
+  child: YourPageContent(),
+  loadingWidget: YourCustomLoadingWidget(),
+  loadingKey:'customLoadingKey'
+)
+```
+
+#### Activating the Loading State
+
+To show or hide the loading overlay, use the `showLoading` and `hideLoading` methods in your BLoC:
+
+```dart
+class YourBloc extends MainBloc<YourEvent, YourState> {
+  Future<void> someAsyncOperation() async {
+    showLoading(); // or showLoading(key: 'customLoadingKey');
+    try {
+      // Perform async operation
+    } finally {
+      hideLoading(); // or hideLoading(key: 'customLoadingKey');
+    }
+  }
+}
+```
+
+This approach provides a clean and consistent way to handle loading states across your application, with the flexibility to use global or component-specific loading indicators.
+
+### Error Handling
+
+Use the `blocCatch` method in your BLoC to handle errors:
+
+```dart
+await blocCatch(
+  actions: () async {
+    // Your async logic here
+    throw Exception('Something went wrong');
+  },
+  onError: (error) {
+    // Handle the error
+    print('Error occurred: $error');
+  }
+);
+```
+
 ## ReactiveSubject
 
 ### Using ReactiveSubject
@@ -663,71 +766,6 @@ final subject = ReactiveSubject.fromFutureWithError(
 6. Document complex transformations
 7. Consider using timeouts for async operations
 
-## Advanced Features
-
-### Loading State Management
-
-#### Using buildLoadingOverlay
-
-```dart
-@override
-Widget buildPage(BuildContext context) {
-  return buildLoadingOverlay(
-    child: Scaffold(
-      // Your scaffold content
-    ),
-    loadingKey: 'customKey', // Optional
-    loadingWidget: CustomLoadingIndicator(), // Optional
-  );
-}
-```
-
-#### Showing/Hiding Loading States
-
-```dart
-// In your BLoC
-await blocCatch(
-  actions: () async {
-    showLoading(key: 'customKey');
-    await someAsyncOperation();
-    hideLoading(key: 'customKey');
-  },
-);
-```
-
-### Error Handling
-
-#### Basic Error Handling
-
-```dart
-await blocCatch(
-  actions: () async {
-    // Your async logic
-  },
-  onError: (error, stackTrace) {
-    // Handle error
-    print('Error occurred: $error');
-  },
-);
-```
-
-#### Custom Error Handling
-
-```dart
-await blocCatch(
-  actions: () async {
-    // Your async logic
-  },
-  onError: (error, stackTrace) async {
-    if (error is NetworkException) {
-      await handleNetworkError(error);
-    } else {
-      await handleGenericError(error);
-    }
-  },
-);
-```
-
 ## Best Practices
 
 ### 1. State Management
@@ -761,6 +799,69 @@ await blocCatch(
 - Keep BLoCs focused and small
 - Use dependency injection
 - Implement proper separation of concerns
+
+## API Reference
+
+### MainBloc
+
+- `MainBloc(initialState)`: Constructor for creating a new BLoC.
+- `blocCatch({required Future<void> Function() actions, Function(dynamic)? onError})`: Wrapper for handling errors in async operations.
+- `showLoading({String key = 'global'})`: Shows a loading indicator.
+- `hideLoading({String key = 'global'})`: Hides the loading indicator.
+
+### MainBlocState
+
+Base class for all states in your BLoCs.
+
+### MainBlocEvent
+
+Base class for all events in your BLoCs.
+
+### CommonBloc
+
+- `add(SetComponentLoading)`: Set loading state for a component.
+- `state.isLoading(String key)`: Check if a component is in loading state.
+
+### ReactiveSubject
+
+`ReactiveSubject<T>` is a wrapper around RxDart's `BehaviorSubject` or `PublishSubject`, providing a simpler API for reactive programming in Dart.
+
+# Constructors
+
+- `ReactiveSubject({T? initialValue})`: Creates a new `ReactiveSubject` (wraps `BehaviorSubject`).
+- `ReactiveSubject.broadcast({T? initialValue})`: Creates a new broadcast `ReactiveSubject` (wraps `PublishSubject`).
+
+# Properties
+
+- `T value`: Gets the current value of the subject.
+- `Stream<T> stream`: Gets the stream of values emitted by the subject.
+- `Sink<T> sink`: Gets the sink for adding values to the subject.
+- `bool isClosed`: Indicates whether the subject is closed.
+
+# Methods
+
+- `void add(T value)`: Adds a new value to the subject.
+- `void addError(Object error, [StackTrace? stackTrace])`: Adds an error to the subject.
+- `void dispose()`: Disposes of the subject.
+
+# Transformation Methods
+
+- `ReactiveSubject<R> map<R>(R Function(T event) mapper)`: Transforms each item emitted by applying a function.
+- `ReactiveSubject<T> where(bool Function(T event) test)`: Filters items based on a predicate.
+- `ReactiveSubject<R> switchMap<R>(Stream<R> Function(T event) mapper)`: Switches to a new stream when a new item is emitted.
+- `ReactiveSubject<T> debounceTime(Duration duration)`: Emits items only after a specified duration has passed without another emission.
+- `ReactiveSubject<T> throttleTime(Duration duration)`: Emits the first item in specified intervals.
+- `ReactiveSubject<T> distinct([bool Function(T previous, T next)? equals])`: Emits items that are distinct from their predecessors.
+- `ReactiveSubject<T> startWith(T startValue)`: Prepends a given value to the subject.
+- `ReactiveSubject<R> scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`: Accumulates items using a function.
+- `ReactiveSubject<R> withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`: Combines items with the latest from another subject.
+- `ReactiveSubject<T> doOnData(void Function(T event) onData)`: Performs a side-effect action for each data event emitted.
+- `ReactiveSubject<T> doOnError(void Function(Object error, StackTrace stackTrace) onError)`: Performs a side-effect action for each error event emitted.
+
+# Static Methods
+
+- `static ReactiveSubject<List<T>> combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of multiple subjects.
+- `static ReactiveSubject<T> merge<T>(List<ReactiveSubject<T>> subjects)`: Merges multiple subjects into one.
 
 ## Contributing
 
