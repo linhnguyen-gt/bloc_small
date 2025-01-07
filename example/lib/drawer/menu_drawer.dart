@@ -20,6 +20,12 @@ class MenuDrawer extends StatelessWidget {
             icon: const Icon(Icons.home),
           ),
           MenuItemWidget(
+            caption: 'Cubit',
+            route: CounterRoute(),
+            currentRoute: currentRoute,
+            icon: const Icon(Icons.numbers),
+          ),
+          MenuItemWidget(
             caption: 'Search Page',
             route: SearchRoute(),
             currentRoute: currentRoute,
@@ -32,6 +38,7 @@ class MenuDrawer extends StatelessWidget {
             currentRoute: currentRoute,
             icon: const Icon(Icons.stream),
           ),
+
           // MenuItemWidget(
           //   caption: 'Action With Latest Context (withLatestFrom)',
           //   routeName: ActionWithLatestContext.route,

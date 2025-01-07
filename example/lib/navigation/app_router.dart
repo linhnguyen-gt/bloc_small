@@ -15,5 +15,6 @@ class AppRouter extends BaseAppRouter {
         AutoRoute(page: MyHomeRoute.page, initial: true),
         AutoRoute(page: SearchRoute.page),
         AutoRoute(page: ReactiveSubjectScreen.page),
+        AutoRoute(page: CounterRoute.page),
       ];
 }

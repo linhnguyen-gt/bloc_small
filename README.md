@@ -210,6 +210,98 @@ class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
 }
 ```
 
+## Using Cubit (Alternative Approach)
+
+If you prefer a simpler approach without events, you can use Cubit instead of BLoC:
+
+### 1. Define your Cubit
+
+```dart
+@injectable
+class CounterCubit extends MainCubit<CounterState> {
+  CounterCubit() : super(const CounterState());
+
+  Future<void> increment() async {
+    await cubitCatch(
+      actions: () async {
+        await Future.delayed(Duration(seconds: 1));
+        emit(state.copyWith(count: state.count + 1));
+      },
+      keyLoading: 'increment',
+    );
+  }
+
+  void decrement() {
+    if (state.count > 0) {
+      emit(state.copyWith(count: state.count - 1));
+    }
+  }
+}
+```
+
+### 2. Define Cubit State with Freezed
+
+```dart
+@freezed
+class CountState extends MainBlocState with _$CountState {
+  const factory CountState.initial({@Default(0) int count}) = _Initial;
+}
+```
+
+### 3. Create a StatefulWidget with BaseCubitPageState
+
+```dart
+class CounterPage extends StatefulWidget {
+  const CounterPage({super.key});
+
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends BaseCubitPageState<CounterPage, CounterCubit> {
+  @override
+  Widget buildPage(BuildContext context) {
+    return buildLoadingOverlay(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Counter Example')),
+        body: Center(
+          child: BlocBuilder<CounterCubit, CounterState>(
+            builder: (context, state) {
+              return Text(
+                '${state.count}',
+                style: const TextStyle(fontSize: 48),
+              );
+            },
+          ),
+        ),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () => bloc.increment(),
+              child: const Icon(Icons.add),
+            ),
+            const SizedBox(height: 16),
+            FloatingActionButton(
+              onPressed: () => bloc.decrement(),
+              child: const Icon(Icons.remove),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+Key differences when using Cubit:
+
+- Extend `MainCubit` instead of `MainBloc`
+- Use `emit` directly instead of handling events
+- Use `BaseCubitPageState` instead of `BasePageState`
+- Methods can be called directly on the cubit instance
+- No need to define events
+
 ### If You Want To Use Auto Route Integration
 
 This package provides seamless integration with `auto_route` for type-safe navigation. The integration is optional but recommended for the best development experience.

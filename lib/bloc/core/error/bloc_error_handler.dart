@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 
-import '../main_bloc.dart';
+import '../bloc/main_bloc.dart';
 import '../main_bloc_event.dart';
 import '../main_bloc_state.dart';
 
