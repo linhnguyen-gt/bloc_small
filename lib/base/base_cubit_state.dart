@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/common/common_bloc.dart';
 import '../bloc/core/cubit/main_cubit.dart';
 import '../constant/default_loading.dart';
+import '../widgets/loading_indicator.dart';
 import 'base_page_delegate.dart';
 import 'base_page_state.dart';
 

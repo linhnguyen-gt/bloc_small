@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/common/common_bloc.dart';
 import '../bloc/core/bloc/main_bloc.dart';
+import '../widgets/loading_indicator.dart';
 import 'base_page_delegate.dart';
 
 /// A base class for all StatefulWidget states in the application that use a Bloc.
@@ -85,22 +86,4 @@ abstract class BasePageState<T extends StatefulWidget, B extends MainBloc>
 
   @override
   Widget buildPageListeners({required Widget child}) => child;
-}
-
-class LoadingIndicator extends StatelessWidget {
-  const LoadingIndicator({super.key, this.backgroundColor = Colors.white12});
-
-  final Color? backgroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: backgroundColor,
-      child: Center(
-        child: Platform.isIOS
-            ? const CupertinoActivityIndicator()
-            : const CircularProgressIndicator(),
-      ),
-    );
-  }
 }

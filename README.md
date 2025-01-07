@@ -1,22 +1,29 @@
 # bloc_small
 
+<div align="center">
+
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-repo)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the `flutter_bloc` package. `bloc_small` simplifies state management, making it more intuitive while maintaining the core benefits of the BLoC pattern.
 
-## Table of Contents
+[Getting Started](#installation) • [Examples](#basic-usage)
+
+</div>
+
+<summary>Table of Contents</summary>
 
 1. [Features](#features)
 2. [Installation](#installation)
 3. [Core Concepts](#core-concepts)
 4. [Basic Usage](#basic-usage)
-5. [Auto Route Integration](#if-you-want-to-use-auto-route-integration)
-6. [Advanced Usage](#advanced-usage)
-7. [Best Practices](#best-practices)
-8. [API Reference](#api-reference)
-9. [Contributing](#contributing)
-10. [License](#license)
+5. [Using Cubit](#using-cubit-alternative-approach)
+6. [Auto Route Integration](#if-you-want-to-use-auto-route-integration)
+7. [Advanced Usage](#advanced-usage)
+8. [Best Practices](#best-practices)
+9. [API Reference](#api-reference)
+10. [Contributing](#contributing)
+11. [License](#license)
 
 ## Features
 
@@ -85,11 +92,6 @@ The `CommonBloc` is used for managing common functionalities across your app, su
 Use GetIt and Injectable for dependency injection:
 
 ```dart
-import 'package:bloc_small/bloc_small.dart';
-import 'package:injectable/injectable.dart';
-
-import 'di.config.dart';
-
 @InjectableInit()
 void configureInjectionApp() {
   // Step 1: Register core dependencies from package bloc_small
@@ -110,11 +112,9 @@ void main() {
 
 > **Important**: The `RegisterModule` class with the `CommonBloc` singleton is essential. If you don't include this Dependency Injection setup, your app will encounter errors. The `CommonBloc` is used internally by `bloc_small` for managing common functionalities like loading states across your app.
 
-Make sure to call `configureInjectionApp()` before running your app:
+Make sure to call `configureInjectionApp()` before running your app
 
 ### 2. Define your BLoC
-
-Create a class that extends `MainBloc`:
 
 ```dart
 @injectable
@@ -243,8 +243,8 @@ class CounterCubit extends MainCubit<CounterState> {
 
 ```dart
 @freezed
-class CountState extends MainBlocState with _$CountState {
-  const factory CountState.initial({@Default(0) int count}) = _Initial;
+class CountState extends MainBlocState with $CountState {
+  const factory CountState.initial({@Default(0) int count}) = Initial;
 }
 ```
 
@@ -258,14 +258,15 @@ class CounterPage extends StatefulWidget {
   State<CounterPage> createState() => _CounterPageState();
 }
 
-class _CounterPageState extends BaseCubitPageState<CounterPage, CounterCubit> {
+class _CounterPageState extends BaseCubitPageState<CounterPage, CountCubit> {
   @override
   Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
+      loadingKey: 'increment',
       child: Scaffold(
         appBar: AppBar(title: const Text('Counter Example')),
         body: Center(
-          child: BlocBuilder<CounterCubit, CounterState>(
+          child: BlocBuilder<CountCubit, CountState>(
             builder: (context, state) {
               return Text(
                 '${state.count}',
@@ -294,31 +295,28 @@ class _CounterPageState extends BaseCubitPageState<CounterPage, CounterCubit> {
 }
 ```
 
-Key differences when using Cubit:
+<summary>Key differences when using Cubit</summary>
 
-- Extend `MainCubit` instead of `MainBloc`
-- Use `emit` directly instead of handling events
-- Use `BaseCubitPageState` instead of `BasePageState`
-- Methods can be called directly on the cubit instance
-- No need to define events
+| Feature | BLoC | Cubit |
+|---------|------|-------|
+| Event Handling | Uses events | Direct method calls |
+| Base Class | `MainBloc` | `MainCubit` |
+| Widget State | `BasePageState` | `BaseCubitPageState` |
+| Complexity | More boilerplate | Simpler implementation |
+| Use Case | Complex state logic | Simple state changes |
 
-### If You Want To Use Auto Route Integration
+## If you want to use Auto Route Integration
 
-This package provides seamless integration with `auto_route` for type-safe navigation. The integration is optional but recommended for the best development experience.
-
-#### 1. Setup Auto Route
-
-First, add auto_route to your dependencies:
+1. Add auto_route to your dependencies:
 
 ```yaml
 dependencies:
+  auto_route:
 dev_dependencies:
   auto_route_generator:
 ```
 
-#### 2. Create Your Router
-
-Extend `BaseAppRouter` to create your application router:
+2. Create your router:
 
 ```dart
 @AutoRouterConfig()
@@ -327,18 +325,17 @@ class AppRouter extends BaseAppRouter {
   List<AutoRoute> get routes => [
     AutoRoute(page: HomeRoute.page, initial: true),
     AutoRoute(page: SettingsRoute.page),
-    // Add more routes here
   ];
 }
 ```
 
-#### 3. Register Router in Dependency Injection
+3. Register Router in Dependency Injection
 
 Register your router during app initialization:
 
 ```dart
 void configureInjectionApp() {
-  // Register AppRouter (Optional but recommended)
+  // Register AppRouter (recommended)
   getIt.registerAppRouter<AppRouter>(AppRouter());
 
   // Register other dependencies
@@ -347,7 +344,7 @@ void configureInjectionApp() {
 }
 ```
 
-#### 4. Setup MaterialApp
+4. Setup MaterialApp
 
 Configure your MaterialApp to use auto_route:
 
@@ -365,7 +362,7 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-#### 5. Navigation
+5. Navigation
 
 Use the provided `AppNavigator` for consistent navigation across your app:
 
@@ -374,20 +371,43 @@ class MyWidget extends StatelessWidget {
   final navigator = getIt.getNavigator();
 
   void _onNavigate() {
-    navigator.push(const HomeRoute());
+    navigator?.push(const HomeRoute());
   }
 }
 ```
 
-Use the bloc provided `AppNavigator`:
+Use the bloc and cubit provided `AppNavigator`:
 
 ```dart
 class _MyWidgetState extends BasePageState<MyWidget, MyWidgetBloc> {
   void _onNavigate() {
-    navigator.push(const HomeRoute());
+    navigator?.push(const HomeRoute());
   }
 }
 ```
+
+```dart
+class _MyWidgetState extends BaseCubitPageState<MyWidget, MyWidgetCubit> {
+  void _onNavigate() {
+    navigator?.push(const HomeRoute());
+  }
+}
+```
+
+```dart
+// Basic navigation
+navigator?.push(const HomeRoute());
+
+// Navigation with parameters
+navigator?.push(UserRoute(userId: 123));
+```
+
+#### Best Practices
+
+1. Always register AppRouter in your DI setup
+2. Use the type-safe methods provided by AppNavigator
+3. Handle potential initialization errors
+4. Consider creating a navigation service class for complex apps
 
 #### Features
 
@@ -413,378 +433,137 @@ The integration between auto_route and this package provides
 
 If you choose a different navigation solution, you'll need to implement your own navigation registration strategy.
 
-## Advanced Usage
-
-### Handling Loading States
-
-`bloc_small` provides a convenient way to manage loading states and display loading indicators using the `CommonBloc` and the `buildLoadingOverlay` method.
-
-#### Using buildLoadingOverlay
-
-When using `BasePageState`, you can easily add a loading overlay to your entire page:
-
-```dart
-class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
-  @override
-  Widget buildPage(BuildContext context) {
-    return buildLoadingOverlay(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('You have pushed the button this many times:'),
-              BlocBuilder<CountBloc, CountState>(
-                builder: (context, state) {
-                  return Text('${state.count}');
-                },
-              )
-            ],
-          ),
-        ),
-        floatingActionButton: Wrap(
-          spacing: 5,
-          children: [
-            FloatingActionButton(
-              onPressed: () => bloc.add(Increment()),
-              tooltip: 'Increment',
-              child: Icon(Icons.add),
-            ),
-            FloatingActionButton(
-              onPressed: () => bloc.add(Decrement()),
-              tooltip: 'decrement',
-              child: Icon(Icons.remove),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-```
-
-The `buildLoadingOverlay` method wraps your page content and automatically displays a loading indicator when the loading state is active.
-
-#### Customizing the Loading Overlay
-
-You can customize the loading overlay by providing a `loadingWidget` and specifying a `loadingKey`:
-
-```dart
-buildLoadingOverlay(
-  child: YourPageContent(),
-  loadingWidget: YourCustomLoadingWidget(),
-  loadingKey:'customLoadingKey'
-)
-```
-
-#### Activating the Loading State
-
-To show or hide the loading overlay, use the `showLoading` and `hideLoading` methods in your BLoC:
-
-```dart
-class YourBloc extends MainBloc<YourEvent, YourState> {
-  Future<void> someAsyncOperation() async {
-    showLoading(); // or showLoading(key: 'customLoadingKey');
-    try {
-      // Perform async operation
-    } finally {
-      hideLoading(); // or hideLoading(key: 'customLoadingKey');
-    }
-  }
-}
-```
-
-This approach provides a clean and consistent way to handle loading states across your application, with the flexibility to use global or component-specific loading indicators.
-
-### Error Handling
-
-Use the `blocCatch` method in your BLoC to handle errors:
-
-```dart
-await blocCatch(
-  actions: () async {
-    // Your async logic here
-    throw Exception('Something went wrong');
-  },
-  onError: (error) {
-    // Handle the error
-    print('Error occurred: $error');
-  }
-);
-```
+## ReactiveSubject
 
 ### Using ReactiveSubject
 
-`ReactiveSubject` provides a powerful and flexible way to work with streams in your application. It wraps RxDart's `BehaviorSubject` or `PublishSubject`, offering a simplified API with additional stream transformation methods. Here's how to use it:
+ReactiveSubject is a powerful stream controller that combines the functionality of BehaviorSubject with additional reactive operators.
 
-1. Creating a ReactiveSubject:
+### Core Features
 
-- For a single-subscription subject with an initial value
-
-```dart
-final counter = ReactiveSubject<int>(initialValue: 0);
-```
-
-- For a broadcast subject (multiple listeners)
+1. **Value Management**
 
 ```dart
-final broadcastCounter = ReactiveSubject<int>.broadcast(initialValue: 0);
+// Create with initial value
+final subject = ReactiveSubject<int>(initialValue: 0);
+
+// Create broadcast subject
+final broadcast = ReactiveSubject<int>.broadcast(initialValue: 0);
+
+// Add values
+subject.add(1);
+
+// Get current value
+print(subject.value);
+
+// Check if closed
+print(subject.isClosed);
+
+// Dispose when done
+subject.dispose();
 ```
 
-2. Adding values:
+### Stream Transformations
+
+1. **map** - Transform each value
 
 ```dart
-counter.add(1);
-counter.add(2);
+final celsius = ReactiveSubject<double>();
+final fahrenheit = celsius.map((c) => c * 9/5 + 32);
 ```
 
-3. Getting the current value:
-
-```dart
-print(counter.value); // Prints the latest value
-```
-
-4. Listening to changes:
-
-```dart
-counter.stream.listen((value) {
-  print('Counter changed: $value');
-});
-```
-
-5. Using with Flutter widgets:
-
-```dart
-StreamBuilder<int>(
-  stream: counter.stream,
-  initialData: counter.value,
-  builder: (context, snapshot) {
-    return Text('Count: ${snapshot.data}');
-  },
-)
-```
-
-6. Disposing:
-
-```dart
-@override
-void dispose() {
-  counter.dispose();
-  super.dispose();
-}
-```
-
-7. Stream Transformations
-
-`ReactiveSubject` provides several methods to transform streams, making reactive programming more convenient:
-
-- `map<R>(R Function(T event) mapper)`: Transforms each item emitted by the source `ReactiveSubject` by applying a function to it.
-
-```dart
-final celsiusSubject = ReactiveSubject<double>();
-final fahrenheitSubject = celsiusSubject.map((celsius) => celsius * 9 / 5 + 32);
-
-fahrenheitSubject.stream.listen((fahrenheit) {
-  print('Temperature in Fahrenheit: $fahrenheit°F');
-});
-
-celsiusSubject.add(25); // Outputs: Temperature in Fahrenheit: 77.0°F
-```
-
-- `where(bool Function(T event) test)`: Filters items emitted by the source `ReactiveSubject` by only emitting those that satisfy a specified predicate.
+2. **where** - Filter values
 
 ```dart
 final numbers = ReactiveSubject<int>();
-final evenNumbers = numbers.where((number) => number % 2 == 0);
-
-evenNumbers.stream.listen((evenNumber) {
-  print('Even number: $evenNumber');
-});
-
-numbers.add(1); // No output
-numbers.add(2); // Outputs: Even number: 2
+final evenNumbers = numbers.where((n) => n % 2 == 0);
 ```
 
-- `debounceTime(Duration duration)`: Emits items from the source `ReactiveSubject` only after a specified duration has passed without the `ReactiveSubject` emitting any other items.
+3. **switchMap** - Switch to new stream
 
 ```dart
 final searchQuery = ReactiveSubject<String>();
-final debouncedQuery = searchQuery.debounceTime(Duration(milliseconds: 500));
-
-debouncedQuery.stream.listen((query) {
-  print('Search for: $query');
-});
-
-searchQuery.add('Flu'); // No immediate output
-searchQuery.add('Flut'); // No immediate output
-searchQuery.add('Flutter'); // After 500ms of inactivity, outputs: Search for: Flutter
+final results = searchQuery.switchMap((query) => 
+  performSearch(query)); // Cancels previous search
 ```
 
-- `throttleTime(Duration duration)`: Emits the first item emitted by the source `ReactiveSubject` in each time window of a specified duration.
+4. **debounceTime** - Delay emissions
 
 ```dart
-final buttonClicks = ReactiveSubject<void>();
-final throttledClicks = buttonClicks.throttleTime(Duration(seconds: 1));
-
-throttledClicks.stream.listen((_) {
-  print('Button clicked');
-});
-
-buttonClicks.add(null); // Outputs: Button clicked
-buttonClicks.add(null); // Ignored (within 1 second)
+final input = ReactiveSubject<String>();
+final debouncedInput = input.debounceTime(Duration(milliseconds: 300));
 ```
 
-- `distinct([bool Function(T previous, T next)? equals])`: Emits all items emitted by the source `ReactiveSubject` that are distinct from their immediate predecessors.
+5. **throttleTime** - Rate limit emissions
 
 ```dart
-final textInput = ReactiveSubject<String>();
-final distinctInput = textInput.distinct();
-
-distinctInput.stream.listen((input) {
-  print('User typed: $input');
-});
-
-textInput.add('Hello'); // Outputs: User typed: Hello
-textInput.add('Hello'); // Ignored
-textInput.add('World'); // Outputs: User typed: World
+final clicks = ReactiveSubject<void>();
+final throttledClicks = clicks.throttleTime(Duration(seconds: 1));
 ```
 
-- `switchMap<R>(Stream<R> Function(T event) mapper)`: Transforms the items emitted by the source `ReactiveSubject` into streams, then flattens the emissions from those into a single stream, emitting values only from the most recently created stream.
+6. **distinct** - Emit only when value changes
 
 ```dart
-final selectedUserId = ReactiveSubject<int>();
-final userDetails = selectedUserId.switchMap((id) => getUserDetailsStream(id));
-
-userDetails.stream.listen((details) {
-  print('User Details: $details');
-});
-
-void Function(int id) selectUser = selectedUserId.add;
+final values = ReactiveSubject<String>();
+final distinctValues = values.distinct();
 ```
 
-- `combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of `multiple ReactiveSubjects` into a `single ReactiveSubject` that emits a List of those values.
+### Advanced Operations
+
+1. **withLatestFrom** - Combine with another stream
 
 ```dart
-final firstName = ReactiveSubject<String>();
-final lastName = ReactiveSubject<String>();
-
-final fullName = ReactiveSubject.combineLatest<String>([firstName, lastName])
-    .map((names) => '${names[0]} ${names[1]}');
-
-fullName.stream.listen((name) {
-  print('Full name: $name');
-});
-
-firstName.add('John');
-lastName.add('Doe'); // Outputs: Full name: John Doe
+final main = ReactiveSubject<int>();
+final other = ReactiveSubject<String>();
+final combined = main.withLatestFrom(other, 
+  (int a, String b) => '$a-$b');
 ```
 
-- `merge<T>(List<ReactiveSubject<T>> subjects)`: Merges `multiple ReactiveSubjects` into a `single ReactiveSubject`.
-
-```dart
-final userActions = ReactiveSubject<String>();
-final systemEvents = ReactiveSubject<String>();
-
-final allEvents = ReactiveSubject.merge<String>([userActions, systemEvents]);
-
-allEvents.stream.listen((event) {
-  print('Event: $event');
-});
-
-userActions.add('User logged in'); // Outputs: Event: User logged in
-systemEvents.add('System update available'); // Outputs: Event: System update available
-```
-
-- `withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`: Combines the source `ReactiveSubject` with the latest item from another `ReactiveSubject` whenever the source emits an item.
-
-```dart
-final userInput = ReactiveSubject<String>();
-final currentSettings = ReactiveSubject<Map<String, dynamic>>(initialValue: {'theme': 'dark'});
-
-final combinedStream = userInput.withLatestFrom(
-  currentSettings,
-  (input, settings) => {'input': input, 'settings': settings},
-);
-
-combinedStream.stream.listen((data) {
-  print('User Input: ${data['input']}, Settings: ${data['settings']}');
-});
-
-userInput.add('Hello'); // Outputs: User Input: Hello, Settings: {theme: dark}
-```
-
-- `startWith(T startValue)`: Prepends a given value to the source `ReactiveSubject`.
-
-```dart
-final messages = ReactiveSubject<String>();
-final messagesWithWelcome = messages.startWith('Welcome to the app!');
-
-messagesWithWelcome.stream.listen((message) {
-  print('Message: $message');
-});
-
-// Outputs: Message: Welcome to the app!
-
-messages.add('You have new notifications');
-// Outputs: Message: You have new notifications
-```
-
-- `scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`: Applies an accumulator function over the source `ReactiveSubject`, and returns each intermediate result.
-
-```dart
-final numbers = ReactiveSubject<int>();
-final runningTotal = numbers.scan<int>(0, (accumulated, current, index) => accumulated + current);
-
-runningTotal.stream.listen((total) {
-  print('Running Total: $total');
-});
-
-numbers.add(5); // Outputs: Running Total: 5
-numbers.add(10); // Outputs: Running Total: 15
-numbers.add(3); // Outputs: Running Total: 18
-```
-
-- `doOnData(void Function(T event) onData)`: Performs a side-effect action for each data event emitted by the source `ReactiveSubject`. The `onData` callback receives the emitted item but does not modify it.
-
-```dart
-final subject = ReactiveSubject<int>(initialValue: 1);
-final sideEffect = subject.doOnData((value) => print('Value emitted: $value'));
-sideEffect.stream.listen(print); // Prints: Value emitted: 1, then 1
-
-subject.add(2); // Prints: Value emitted: 2, then 2
-```
-
-- `doOnError(void Function(Object error, StackTrace stackTrace) onError)`: Performs a side-effect action for each error event emitted by the source `ReactiveSubject`. The `onError` callback receives the error and stack trace but does not modify them.
+2. **startWith** - Begin with a value
 
 ```dart
 final subject = ReactiveSubject<int>();
-final sideEffect = subject.doOnError((error, stackTrace) => print('Error: $error'));
-sideEffect.stream.listen(print, onError: (e) => print('Stream error: $e'));
-
-subject.addError('An error occurred'); // Prints: Error: An error occurred, then Stream error: An error occurred
+final withDefault = subject.startWith(0);
 ```
 
-8. Error Handling
-
-You can add errors to a `ReactiveSubject` and listen for them:
+3. **scan** - Accumulate values
 
 ```dart
-subject.addError(Exception('An error occurred'));
-
-subject.stream.listen(
-  (data) {
-    // Handle data
-  },
-  onError: (error) {
-    print('Error: $error');
-  },
+final prices = ReactiveSubject<double>();
+final total = prices.scan<double>(
+  0.0,
+  (sum, price, _) => sum + price,
 );
 ```
 
-9. Practical Example in BLoC
+4. **doOnData/doOnError** - Side effects
+
+```dart
+final subject = ReactiveSubject<int>();
+final withLogging = subject
+  .doOnData((value) => print('Emitted: $value'))
+  .doOnError((error, _) => print('Error: $error'));
+```
+
+### Static Operators
+
+1. **combineLatest** - Combine multiple subjects
+
+```dart
+final subject1 = ReactiveSubject<int>();
+final subject2 = ReactiveSubject<String>();
+final combined = ReactiveSubject.combineLatest([subject1, subject2]);
+```
+
+2. **merge** - Merge multiple subjects
+
+```dart
+final subject1 = ReactiveSubject<int>();
+final subject2 = ReactiveSubject<int>();
+final merged = ReactiveSubject.merge([subject1, subject2]);
+```
+
+### Practical Example in BLoC
 
 Here's how you might use `ReactiveSubject` within a `BLoC` to manage state:
 
@@ -853,98 +632,152 @@ class SearchBloc extends MainBloc<SearchEvent, SearchState> {
 }
 ```
 
-10. Notes
+### Error Handling
 
-- Memory Management: Always dispose of your `ReactiveSubjects` when they are no longer needed to free up resources.
-- Error Handling: Use `addError` to add errors to the stream and handle them using the `onError` callback in your listeners.
+```dart
+// Add error
+subject.addError('Something went wrong');
 
-`ReactiveSubject` simplifies working with streams in your application, providing a convenient way to manage and react to changing data. It's particularly useful in BLoCs for handling state changes and in widgets for building reactive UIs. By leveraging the built-in transformation methods, you can create powerful reactive data flows with minimal boilerplate.
+// Handle errors in stream
+subject.stream.listen(
+  (data) => print('Data: $data'),
+  onError: (error) => print('Error: $error'),
+);
+
+// Using fromFutureWithError
+final subject = ReactiveSubject.fromFutureWithError(
+  Future.delayed(Duration(seconds: 1)),
+  onError: (error) => print('Error: $error'),
+  onFinally: () => print('Completed'),
+  timeout: Duration(seconds: 5),
+);
+```
+
+### Best Practices
+
+1. Always dispose subjects when no longer needed
+2. Use broadcast subjects for multiple listeners
+3. Consider memory implications with large datasets
+4. Handle errors appropriately
+5. Use meaningful variable names
+6. Document complex transformations
+7. Consider using timeouts for async operations
+
+## Advanced Features
+
+### Loading State Management
+
+#### Using buildLoadingOverlay
+
+```dart
+@override
+Widget buildPage(BuildContext context) {
+  return buildLoadingOverlay(
+    child: Scaffold(
+      // Your scaffold content
+    ),
+    loadingKey: 'customKey', // Optional
+    loadingWidget: CustomLoadingIndicator(), // Optional
+  );
+}
+```
+
+#### Showing/Hiding Loading States
+
+```dart
+// In your BLoC
+await blocCatch(
+  actions: () async {
+    showLoading(key: 'customKey');
+    await someAsyncOperation();
+    hideLoading(key: 'customKey');
+  },
+);
+```
+
+### Error Handling
+
+#### Basic Error Handling
+
+```dart
+await blocCatch(
+  actions: () async {
+    // Your async logic
+  },
+  onError: (error, stackTrace) {
+    // Handle error
+    print('Error occurred: $error');
+  },
+);
+```
+
+#### Custom Error Handling
+
+```dart
+await blocCatch(
+  actions: () async {
+    // Your async logic
+  },
+  onError: (error, stackTrace) async {
+    if (error is NetworkException) {
+      await handleNetworkError(error);
+    } else {
+      await handleGenericError(error);
+    }
+  },
+);
+```
 
 ## Best Practices
 
-1. Keep your BLoCs focused on a single responsibility.
-2. Use meaningful names for your events and states.
-3. Leverage the `CommonBloc` for app-wide state management.
-4. Always dispose of your BLoCs and `ReactiveSubjects` when they're no longer needed.
-5. Use `blocCatch` for consistent error handling across your app.
-6. Prefer composition to inheritance when creating complex BLoCs.
-7. Utilize `Freezed` for creating immutable event and state classes.
-8. Take advantage of Freezed's union types and pattern matching for more expressive and type-safe event handling.
-9. Use the transformation methods provided by `ReactiveSubject`, including `doOnData` and `doOnError`, to simplify complex stream operations.
-10. Ensure that all your streams are properly disposed of to prevent memory leaks.
+### 1. State Management
 
-## API Reference
+- Keep states immutable using Freezed
+- Use meaningful state classes
+- Avoid storing complex objects in state
 
-### MainBloc
+### 2. Event Handling
 
-- `MainBloc(initialState)`: Constructor for creating a new BLoC.
-- `blocCatch({required Future<void> Function() actions, Function(dynamic)? onError})`: Wrapper for handling errors in async operations.
-- `showLoading({String key = 'global'})`: Shows a loading indicator.
-- `hideLoading({String key = 'global'})`: Hides the loading indicator.
+- Keep events simple and focused
+- Use meaningful event names
+- Document complex event flows
 
-### MainBlocState
+### 3. Error Handling
 
-Base class for all states in your BLoCs.
+- Always use blocCatch for async operations
+- Implement proper error recovery
+- Log errors appropriately
 
-### MainBlocEvent
+### 4. Testing
 
-Base class for all events in your BLoCs.
+- Test BLoCs in isolation
+- Mock dependencies
+- Test error scenarios
+- Verify state transitions
 
-### CommonBloc
+### 5. Architecture
 
-- `add(SetComponentLoading)`: Set loading state for a component.
-- `state.isLoading(String key)`: Check if a component is in loading state.
-
-### ReactiveSubject
-
-`ReactiveSubject<T>` is a wrapper around RxDart's `BehaviorSubject` or `PublishSubject`, providing a simpler API for reactive programming in Dart.
-
-# Constructors
-
-- `ReactiveSubject({T? initialValue})`: Creates a new `ReactiveSubject` (wraps `BehaviorSubject`).
-- `ReactiveSubject.broadcast({T? initialValue})`: Creates a new broadcast `ReactiveSubject` (wraps `PublishSubject`).
-
-# Properties
-
-- `T value`: Gets the current value of the subject.
-- `Stream<T> stream`: Gets the stream of values emitted by the subject.
-- `Sink<T> sink`: Gets the sink for adding values to the subject.
-- `bool isClosed`: Indicates whether the subject is closed.
-
-# Methods
-
-- `void add(T value)`: Adds a new value to the subject.
-- `void addError(Object error, [StackTrace? stackTrace])`: Adds an error to the subject.
-- `void dispose()`: Disposes of the subject.
-
-# Transformation Methods
-
-- `ReactiveSubject<R> map<R>(R Function(T event) mapper)`: Transforms each item emitted by applying a function.
-- `ReactiveSubject<T> where(bool Function(T event) test)`: Filters items based on a predicate.
-- `ReactiveSubject<R> switchMap<R>(Stream<R> Function(T event) mapper)`: Switches to a new stream when a new item is emitted.
-- `ReactiveSubject<T> debounceTime(Duration duration)`: Emits items only after a specified duration has passed without another emission.
-- `ReactiveSubject<T> throttleTime(Duration duration)`: Emits the first item in specified intervals.
-- `ReactiveSubject<T> distinct([bool Function(T previous, T next)? equals])`: Emits items that are distinct from their predecessors.
-- `ReactiveSubject<T> startWith(T startValue)`: Prepends a given value to the subject.
-- `ReactiveSubject<R> scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`: Accumulates items using a function.
-- `ReactiveSubject<R> withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`: Combines items with the latest from another subject.
-- `ReactiveSubject<T> doOnData(void Function(T event) onData)`: Performs a side-effect action for each data event emitted.
-- `ReactiveSubject<T> doOnError(void Function(Object error, StackTrace stackTrace) onError)`: Performs a side-effect action for each error event emitted.
-
-# Static Methods
-
-- `static ReactiveSubject<List<T>> combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of multiple subjects.
-- `static ReactiveSubject<T> merge<T>(List<ReactiveSubject<T>> subjects)`: Merges multiple subjects into one.
+- Follow single responsibility principle
+- Keep BLoCs focused and small
+- Use dependency injection
+- Implement proper separation of concerns
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions! Here's how you can help:
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+Please make sure to:
+
+- Update tests as appropriate
+- Update documentation
+- Follow the existing coding style
+- Add examples for new features
 
 ## License
 
