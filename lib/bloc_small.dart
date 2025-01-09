@@ -1,3 +1,4 @@
+export 'base/base_bloc_page_state.dart';
 export 'base/base_page_state.dart';
 export 'bloc/common/common_bloc.dart';
 export 'bloc/core/bloc/main_bloc.dart';

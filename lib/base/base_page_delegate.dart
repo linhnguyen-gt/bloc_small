@@ -40,7 +40,7 @@ abstract class BasePageDelegate<T extends StatefulWidget,
   /// ```dart
   /// FloatingActionButton(
   ///   onPressed: () {
-  ///     // Using bloc in BasePageState
+  ///     // Using bloc in BaseBlocPageState
   ///     bloc.add(CounterEvent.increment());
   ///
   ///     // Using bloc in BaseCubitPageState

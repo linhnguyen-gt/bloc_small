@@ -69,21 +69,35 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ## Core Concepts
 
-### MainBloc
+| Class | Description | Base Class | Purpose |
+|-------|-------------|------------|----------|
+| `MainBloc` | Foundation for BLoC pattern implementation | `MainBlocDelegate` | Handles events and emits states |
+| `MainCubit` | Simplified state management alternative | `MainCubitDelegate` | Direct state mutations without events |
+| `MainBlocEvent` | Base class for all events | - | Triggers state changes in BLoCs |
+| `MainBlocState` | Base class for all states | - | Represents application state |
+| `CommonBloc` | Global functionality manager | - | Manages loading states and common features |
 
-The `MainBloc` class is the foundation of your BLoCs. It extends `MainBlocDelegate` and provides a structure for handling events and emitting states.
+**BLoC Pattern:**
 
-### MainBlocEvent
+```dart
+@injectable
+class CounterBloc extends MainBloc<CounterEvent, CounterState> {
+  CounterBloc() : super(const CounterState.initial()) {
+    on<Increment>(_onIncrement);
+  }
+}
+```
 
-All events in your BLoCs should extend `MainBlocEvent`. These events trigger state changes in your BLoC.
+**Cubit Pattern:**
 
-### MainBlocState
+```dart
+@injectable
+class CounterCubit extends MainCubit<CounterState> {
+  CounterCubit() : super(const CounterState.initial());
 
-States in your BLoCs should extend `MainBlocState`. These represent the current state of your application or a specific feature.
-
-### CommonBloc
-
-The `CommonBloc` is used for managing common functionalities across your app, such as loading states.
+  void increment() => emit(state.copyWith(count: state.count + 1));
+}
+```
 
 ## Basic Usage
 
@@ -162,7 +176,7 @@ class CountState extends MainBlocState with $CountState {
 }
 ```
 
-### 4. Create a StatefulWidget with BasePageState
+### 4. Create a StatefulWidget with BaseBlocPageState
 
 ```dart
 class MyHomePage extends StatefulWidget {
@@ -174,7 +188,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => _MyHomePageState();
 }
 
-class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
+class MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
   @override
   Widget buildPage(BuildContext context) {
     return Scaffold(
@@ -297,12 +311,12 @@ class _CounterPageState extends BaseCubitPageState<CounterPage, CountCubit> {
 
 <summary>Key differences when using Cubit</summary>
 
-| Feature | BLoC | Cubit |
-|---------|------|-------|
-| Event Handling | Uses events | Direct method calls |
-| Base Class | `MainBloc` | `MainCubit` |
-| Widget State | `BasePageState` | `BaseCubitPageState` |
-| Complexity | More boilerplate | Simpler implementation |
+| Feature | BLoC                | Cubit |
+|---------|---------------------|-------|
+| Event Handling | Uses events         | Direct method calls |
+| Base Class | `MainBloc`          | `MainCubit` |
+| Widget State | `BaseBlocPageState` | `BaseCubitPageState` |
+| Complexity | More boilerplate    | Simpler implementation |
 | Use Case | Complex state logic | Simple state changes |
 
 ## If you want to use Auto Route Integration
@@ -379,7 +393,7 @@ class MyWidget extends StatelessWidget {
 Use the bloc and cubit provided `AppNavigator`:
 
 ```dart
-class _MyWidgetState extends BasePageState<MyWidget, MyWidgetBloc> {
+class _MyWidgetState extends BaseBlocPageState<MyWidget, MyWidgetBloc> {
   void _onNavigate() {
     navigator?.push(const HomeRoute());
   }
@@ -441,10 +455,10 @@ If you choose a different navigation solution, you'll need to implement your own
 
 #### Using buildLoadingOverlay
 
-When using `BasePageState`, you can easily add a loading overlay to your entire page:
+When using `BaseBlocPageState`, you can easily add a loading overlay to your entire page:
 
 ```dart
-class MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
+class MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
   @override
   Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
