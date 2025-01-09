@@ -334,6 +334,7 @@ dev_dependencies:
 
 ```dart
 @AutoRouterConfig()
+@LazySingleton()
 class AppRouter extends BaseAppRouter {
   @override
   List<AutoRoute> get routes => [
@@ -350,7 +351,7 @@ Register your router during app initialization:
 ```dart
 void configureInjectionApp() {
   // Register AppRouter (recommended)
-  getIt.registerAppRouter<AppRouter>(AppRouter());
+  getIt.registerAppRouter<AppRouter>(AppRouter(), enableNavigationLogs: true);
 
   // Register other dependencies
   getIt.registerCore();
