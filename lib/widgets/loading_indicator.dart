@@ -27,7 +27,7 @@ class LoadingIndicator extends StatelessWidget {
       color: backgroundColor,
       child: Center(
         child: Platform.isIOS
-            ? const CupertinoActivityIndicator()
+            ? const CupertinoActivityIndicator(color: Colors.black)
             : const CircularProgressIndicator(),
       ),
     );

@@ -16,6 +16,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
+  final navigator = getIt.getNavigator();
   @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done

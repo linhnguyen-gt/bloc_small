@@ -11,7 +11,7 @@ final GetIt getIt = GetIt.instance;
 void configureInjectionApp() {
   // Step 1 (Optional): Register your preferred navigation solution
   // Example with AppRouter:
-  getIt.registerAppRouter<AppRouter>(AppRouter());
+  getIt.registerAppRouter<AppRouter>(AppRouter(), enableNavigationLogs: true);
 
   // Step 2: Register other dependencies
   getIt.registerCore();

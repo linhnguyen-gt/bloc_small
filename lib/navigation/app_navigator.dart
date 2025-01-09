@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
 
@@ -7,10 +9,13 @@ import 'i_navigator.dart';
 /// Handles navigation operations using auto_route
 class AppNavigator implements INavigator {
   /// Creates an [AppNavigator] instance with the provided [BaseAppRouter]
-  const AppNavigator(this._appRouter);
+  const AppNavigator(this._appRouter, {this.enableNavigationLogs = true});
 
   /// The router instance used for navigation
   final BaseAppRouter? _appRouter;
+
+  /// Controls whether navigation logs are printed
+  final bool enableNavigationLogs;
 
   void _throwError() {
     throw FlutterError('AppNavigator not found in DI container.\n'
@@ -24,6 +29,9 @@ class AppNavigator implements INavigator {
   /// Returns a Future that completes with the result value when the pushed route is popped
   @override
   Future<T?>? push<T extends Object?>(PageRouteInfo route) {
+    if (enableNavigationLogs) {
+      developer.log('push route: ${route.routeName}');
+    }
     if (_appRouter == null) _throwError();
     return _appRouter?.push<T>(route);
   }
@@ -33,6 +41,9 @@ class AppNavigator implements INavigator {
   /// Returns a Future that completes with the result value when the new route is popped
   @override
   Future<T?>? replace<T extends Object?>(PageRouteInfo route) {
+    if (enableNavigationLogs) {
+      developer.log('replace route: ${route.routeName}');
+    }
     if (_appRouter == null) _throwError();
     return _appRouter?.replace<T>(route);
   }
@@ -43,6 +54,9 @@ class AppNavigator implements INavigator {
   /// Returns a Future<bool> indicating whether the pop was successful
   @override
   Future<bool>? pop<T extends Object?>([T? result]) {
+    if (enableNavigationLogs) {
+      developer.log('pop route: ${result.runtimeType}');
+    }
     if (_appRouter == null) _throwError();
     return _appRouter!.maybePop<T>(result);
   }
@@ -52,13 +66,20 @@ class AppNavigator implements INavigator {
   /// The specified route will be pushed onto the stack
   @override
   Future<void>? popUntil(PageRouteInfo route) {
+    if (enableNavigationLogs) {
+      developer.log('popUntil route: ${route.routeName}');
+    }
     if (_appRouter == null) _throwError();
     return _appRouter?.pushAndPopUntil(route, predicate: (_) => false);
   }
 
   @override
   Future<bool>? popTop<T extends Object?>([T? result]) {
+    if (enableNavigationLogs) {
+      developer.log('popTop route: ${result.runtimeType}');
+    }
     if (_appRouter == null) _throwError();
+
     return _appRouter?.maybePopTop();
   }
 
@@ -67,6 +88,9 @@ class AppNavigator implements INavigator {
   /// This effectively resets the navigation stack with only the specified route
   @override
   Future<void>? replaceAllWith(PageRouteInfo route) {
+    if (enableNavigationLogs) {
+      developer.log('replaceAllWith route: ${route.routeName}');
+    }
     if (_appRouter == null) _throwError();
     return _appRouter?.replaceAll([route]);
   }
@@ -76,6 +100,10 @@ class AppNavigator implements INavigator {
   /// This is equivalent to [replaceAllWith] in the current implementation
   @override
   Future<void>? clearAndPush(PageRouteInfo route) {
+    if (enableNavigationLogs) {
+      developer.log('clearAndPush route: ${route.routeName}');
+    }
+
     if (_appRouter == null) _throwError();
     _appRouter?.replaceAll([route]);
     return _appRouter?.push(route);
