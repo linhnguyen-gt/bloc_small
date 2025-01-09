@@ -15,7 +15,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends BasePageState<MyHomePage, CountBloc> {
+class _MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
   @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done

@@ -38,4 +38,6 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-
+# SonarQube
+sonar-scanner.properties
+.scannerwork/

@@ -1,5 +1,4 @@
 import 'package:bloc_small/constant/default_loading.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,7 +18,7 @@ import 'base_page_delegate.dart';
 ///
 /// Usage:
 /// ```dart
-/// class MyHomePageState extends BasePageState<MyHomePage, MyBloc> {
+/// class MyHomePageState extends BaseBlocPageState<MyHomePage, MyBloc> {
 ///   @override
 ///   Widget buildPage(BuildContext context) {
 ///     return buildLoadingOverlay(
@@ -51,11 +50,7 @@ import 'base_page_delegate.dart';
 ///   child: Icon(Icons.add),
 /// )
 /// ```
-@Deprecated('This class is deprecated and will be removed in a future version. '
-    'Use BaseBlocPageState instead. '
-    'BasePageState has been renamed to BaseBlocPageState for better clarity. '
-    'See https://github.com/linhnguyen-gt/bloc_small/tree/base_feature/example/lib/pages for examples.')
-abstract class BasePageState<T extends StatefulWidget, B extends MainBloc>
+abstract class BaseBlocPageState<T extends StatefulWidget, B extends MainBloc>
     extends BasePageDelegate<T, B> {
   @override
   Widget buildLoadingOverlay({

@@ -2,39 +2,55 @@ import 'dart:developer' as developer;
 
 import 'package:bloc_small/constant/default_loading.dart';
 import 'package:bloc_small/navigation/app_navigator.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/common_bloc.dart';
-import 'main_bloc_event.dart';
 import 'main_bloc_state.dart';
 
-/// A base class for all Blocs in the application.
+/// Base delegate containing shared functionality between Bloc and Cubit.
 ///
-/// This class extends [BaseBlocDelegate] and provides a foundation for creating Blocs
-/// with specific event and state types.
+/// This mixin provides common functionality for state management, loading indicators,
+/// and error handling that can be used by both Bloc and Cubit implementations.
+///
+/// Features:
+/// - Loading state management via [showLoading] and [hideLoading]
+/// - Navigation support via [navigator]
+/// - Common bloc integration via [commonBloc]
+/// - Error handling with [catchError]
 ///
 /// Type Parameters:
-/// - [E]: The type of events this Bloc will handle. Must extend [MainBlocEvent].
-/// - [S]: The type of states this Bloc will emit. Must extend [MainBlocState].
+/// - [S]: The type of states. Must extend [MainBlocState].
 ///
-/// Usage:
+/// Usage with Bloc:
 /// ```dart
-/// class MyBloc extends MainBloc<MyEvent, MyState> {
-///   MyBloc() : super(MyInitialState());
-///
+/// class MyBloc extends Bloc<MyEvent, MyState> with BaseDelegate<MyState> {
+///   Future<void> handleAsyncOperation() async {
+///     await catchError(
+///       actions: () async {
+///         showLoading(key: 'myOperation');
+///         await someAsyncWork();
+///         hideLoading(key: 'myOperation');
+///       },
+///     );
+///   }
 /// }
 /// ```
-abstract class MainBloc<E extends MainBlocEvent, S extends MainBlocState>
-    extends BaseBlocDelegate<E, S> {
-  MainBloc(super.initialState);
-}
-
-abstract class BaseBlocDelegate<E extends MainBlocEvent,
-    S extends MainBlocState> extends Bloc<E, S> {
-  BaseBlocDelegate(super.initialState);
-
+///
+/// Usage with Cubit:
+/// ```dart
+/// class MyCubit extends Cubit<MyState> with BaseDelegate<MyState> {
+///   Future<void> handleAsyncOperation() async {
+///     await catchError(
+///       actions: () async {
+///         showLoading();
+///         await someAsyncWork();
+///         hideLoading();
+///       },
+///     );
+///   }
+/// }
+/// ```
+mixin BaseDelegate<S extends MainBlocState> {
   AppNavigator? navigator;
-
   late final CommonBloc _commonBloc;
 
   set commonBloc(CommonBloc commonBloc) {
@@ -43,33 +59,6 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
 
   CommonBloc get commonBloc =>
       this is CommonBloc ? this as CommonBloc : _commonBloc;
-
-  @override
-  void add(E event) {
-    if (!isClosed) {
-      super.add(event);
-    }
-  }
-
-  /// Resets the bloc to its initial state.
-  ///
-  /// [initialState] is the state to reset the bloc to.
-  ///
-  /// This method directly emits the initial state, bypassing the normal event-driven state changes.
-  /// It's useful for resetting the bloc to a known state, typically when cleaning up or reinitializing.
-  ///
-  /// Note: This method uses a protected API and should be used cautiously.
-  ///
-  /// Usage:
-  /// ```dart
-  /// void cleanUpBloc() {
-  ///   reset(MyInitialState());
-  /// }
-  /// ```
-  void reset(S initialState) {
-    // ignore: invalid_use_of_visible_for_testing_member
-    super.emit(initialState);
-  }
 
   /// Shows the loading overlay for a specific key.
   ///
@@ -143,7 +132,7 @@ abstract class BaseBlocDelegate<E extends MainBlocEvent,
   ///
   /// Note: This method uses [showLoading] and [hideLoading] internally, which should be
   /// implemented in the concrete Bloc class or a mixin.
-  Future<void> blocCatch({
+  Future<void> catchError({
     required Future<void> Function() actions,
     bool isLoading = true,
     String keyLoading = LoadingKey.global,
