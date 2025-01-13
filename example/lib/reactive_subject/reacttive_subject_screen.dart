@@ -1,4 +1,4 @@
-import 'package:bloc_small/auto_route.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 import 'action_with_latest_context.dart';
