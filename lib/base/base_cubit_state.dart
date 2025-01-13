@@ -44,14 +44,15 @@ abstract class BaseCubitPageState<T extends StatefulWidget, C extends MainCubit>
   }) {
     return BlocBuilder<CommonBloc, CommonState>(
       buildWhen: (previous, current) =>
-          previous.isLoading(loadingKey!) != current.isLoading(loadingKey),
+          previous.isLoading(key: loadingKey) !=
+          current.isLoading(key: loadingKey),
       builder: (context, state) {
         return Stack(
           children: [
             child,
-            if (state.isLoading(loadingKey!))
+            if (state.isLoading(key: loadingKey))
               AnimatedOpacity(
-                opacity: state.isLoading(loadingKey) ? 1.0 : 0.0,
+                opacity: state.isLoading(key: loadingKey) ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 child: loadingWidget ?? buildPageLoading(),

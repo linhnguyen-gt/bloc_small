@@ -1,4 +1,4 @@
-import 'package:bloc_small/auto_route.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
 class MenuItemWidget extends StatelessWidget {
@@ -18,6 +18,7 @@ class MenuItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final navigator = getIt.getNavigator();
     return ListTile(
       title: Text(caption),
       leading: icon,
@@ -25,7 +26,7 @@ class MenuItemWidget extends StatelessWidget {
       onTap: () async {
         Navigator.of(context).pop();
         if (isSelected) return;
-        await context.router.replace(route);
+        await navigator.replace(route);
       },
     );
   }

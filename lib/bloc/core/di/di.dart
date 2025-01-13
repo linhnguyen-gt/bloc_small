@@ -37,6 +37,9 @@ extension CoreInjection on GetIt {
   ///
   /// Parameters:
   /// - [router]: The router instance that extends [BaseAppRouter]
+  /// - [enableNavigationLogs]: Controls whether navigation logs are printed to console
+  ///   - true: Navigation logs will be printed (default)
+  ///   - false: Navigation logs will be disabled
   ///
   /// This method:
   /// 1. Registers the router as a singleton
@@ -45,19 +48,24 @@ extension CoreInjection on GetIt {
   /// Example:
   /// ```dart
   /// void configureInjectionApp() {
-  ///   final appRouter = AppRouter();
-  ///   getIt.registerAppRouter<AppRouter>(appRouter);
+  ///   // With navigation logs enabled (default)
+  ///   getIt.registerAppRouter<AppRouter>(AppRouter());
+  ///
+  ///   // With navigation logs disabled
+  ///   getIt.registerAppRouter<AppRouter>(AppRouter(), enableNavigationLogs: false);
   /// }
   /// ```
   ///
   /// Note: The router registration is skipped if it's already registered
   /// or if the provided router is null.
-  void registerAppRouter<T extends BaseAppRouter>(T? router) {
+  void registerAppRouter<T extends BaseAppRouter>(T? router,
+      {bool enableNavigationLogs = true}) {
     if (router == null) return;
 
     if (!isRegistered<T>()) {
       registerLazySingleton<BaseAppRouter>(() => get<T>());
-      registerLazySingleton<AppNavigator>(() => AppNavigator(get<T>()));
+      registerLazySingleton<AppNavigator>(() =>
+          AppNavigator(get<T>(), enableNavigationLogs: enableNavigationLogs));
     }
   }
 }

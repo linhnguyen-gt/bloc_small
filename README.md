@@ -5,7 +5,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-repo)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the `flutter_bloc` package. `bloc_small` simplifies state management, making it more intuitive while maintaining the core benefits of the BLoC pattern.
+A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the [flutter_bloc](https://pub.dev/packages/flutter_bloc) package. `bloc_small` simplifies state management, making it more intuitive while maintaining the core benefits of the BLoC pattern.
 
 [Getting Started](#installation) • [Examples](https://github.com/linhnguyen-gt/bloc_small/tree/base_feature/example)
 
@@ -27,16 +27,16 @@ A lightweight and simplified BLoC (Business Logic Component) library for Flutter
 
 ## Features
 
-- Simplified BLoC pattern implementation using `flutter_bloc`
+- Simplified BLoC pattern implementation using [flutter_bloc](https://pub.dev/packages/flutter_bloc)
 - Easy-to-use reactive programming with Dart streams
 - Automatic resource management and disposal
-- Integration with `GetIt` for dependency injection
+- Integration with [GetIt](https://pub.dev/packages/get_it) for dependency injection
 - Support for loading states and error handling
 - Streamlined state updates and event handling
 - Built-in support for asynchronous operations
-- Seamless integration with `Freezed` for immutable state and event classes
-- Enhanced `ReactiveSubject` with powerful stream transformation methods
-- Optional integration with `auto_route` for type-safe navigation, including:
+- Seamless integration with [freezed](https://pub.dev/packages/freezed) for immutable state and event classes
+- Enhanced `ReactiveSubject` with powerful stream transformation methods [rxdart](https://pub.dev/packages/rxdart)
+- Optional integration with [auto_route](https://pub.dev/packages/auto_route) for type-safe navigation, including:
   - Platform-adaptive transitions
   - Deep linking support
   - Nested navigation
@@ -334,6 +334,7 @@ dev_dependencies:
 
 ```dart
 @AutoRouterConfig()
+@LazySingleton()
 class AppRouter extends BaseAppRouter {
   @override
   List<AutoRoute> get routes => [
@@ -350,7 +351,7 @@ Register your router during app initialization:
 ```dart
 void configureInjectionApp() {
   // Register AppRouter (recommended)
-  getIt.registerAppRouter<AppRouter>(AppRouter());
+  getIt.registerAppRouter<AppRouter>(AppRouter(), enableNavigationLogs: true);
 
   // Register other dependencies
   getIt.registerCore();

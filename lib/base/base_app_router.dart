@@ -28,8 +28,9 @@ import 'package:auto_route/auto_route.dart';
 /// For best results, use with the following setup:
 /// 1. Extend this class
 /// 2. Add @AutoRouterConfig() annotation
-/// 3. Override the routes getter
-/// 4. Register your router in dependency injection
+/// 3. Add @LazySingleton() annotation to dependency injection
+/// 4. Override the routes getter
+/// 5. Register your router in dependency injection
 abstract class BaseAppRouter extends RootStackRouter {
   BaseAppRouter() : super();
 

@@ -1,6 +1,4 @@
-import 'package:bloc_small/auto_route.dart';
 import 'package:bloc_small/bloc_small.dart';
-import 'package:bloc_small/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'bloc/count/count_bloc.dart';
@@ -16,6 +14,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
+  final navigator = getIt.getNavigator();
   @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done

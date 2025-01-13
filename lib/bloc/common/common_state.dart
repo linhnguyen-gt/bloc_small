@@ -5,7 +5,8 @@ class CommonState extends MainBlocState {
 
   const CommonState({this.loadingStates = const {}});
 
-  bool isLoading(String key) => loadingStates[key] ?? false;
+  bool isLoading({String? key = LoadingKey.global}) =>
+      loadingStates[key] ?? false;
 
   CommonState copyWith({Map<String, bool>? loadingStates}) {
     return CommonState(

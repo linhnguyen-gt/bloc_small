@@ -33,7 +33,7 @@
     },
     {
       "name": "auto_route",
-      "rootUri": "file:///Users/linh/.pub-cache/hosted/pub.dev/auto_route-9.2.2",
+      "rootUri": "file:///Users/linh/.pub-cache/hosted/pub.dev/auto_route-9.3.0+1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -446,7 +446,7 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2025-01-09T02:31:51.098580Z",
+  "generated": "2025-01-13T07:56:10.420388Z",
   "generator": "pub",
   "generatorVersion": "3.6.0",
   "flutterRoot": "file:///Users/linh/development/flutter",
