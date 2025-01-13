@@ -1,3 +1,9 @@
+# Changelog
+
+## 2.1.2
+
+* Hotfix `BlocContext` extension for BlocProvider and BlocListener
+
 ## 2.1.1
 
 * Reorganized and consolidated exports into a single file
