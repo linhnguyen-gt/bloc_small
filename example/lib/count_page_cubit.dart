@@ -6,14 +6,7 @@ import 'cubit/cubit/count_cubit.dart';
 import 'navigation/app_router.gr.dart';
 
 @RoutePage()
-class CounterPage extends StatefulWidget {
-  const CounterPage();
-
-  @override
-  State<CounterPage> createState() => _CounterPageState();
-}
-
-class _CounterPageState extends BaseCubitPageState<CounterPage, CountCubit> {
+class CounterPage extends BaseCubitPage<CountCubit> {
   @override
   Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(

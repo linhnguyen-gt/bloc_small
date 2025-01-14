@@ -319,6 +319,93 @@ class _CounterPageState extends BaseCubitPageState<CounterPage, CountCubit> {
 | Complexity | More boilerplate    | Simpler implementation |
 | Use Case | Complex state logic | Simple state changes |
 
+## Using StatelessWidget
+
+bloc_small also supports StatelessWidget with similar functionality to StatefulWidget implementations.
+
+### 1. Using BLoC with StatelessWidget
+
+```dart
+class MyHomePage extends BaseBlocPage<CountBloc> {
+  const MyHomePage({super.key});
+
+  @override
+  Widget buildPage(BuildContext context, CountBloc bloc) {
+    return buildLoadingOverlay(
+      context,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Counter Example')),
+        body: Center(
+          child: BlocBuilder<CountBloc, CountState>(
+            builder: (context, state) {
+              return Text(
+                '${state.count}',
+                style: const TextStyle(fontSize: 48),
+              );
+            },
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => bloc.add(const Increment()),
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+}
+```
+
+### 2. Using Cubit with StatelessWidget
+
+```dart
+class CounterPage extends BaseCubitPage<CountCubit> {
+  const CounterPage({super.key});
+
+  @override
+  Widget buildPage(BuildContext context, CountCubit cubit) {
+    return buildLoadingOverlay(
+      context,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Counter Example')),
+        body: Center(
+          child: BlocBuilder<CountCubit, CountState>(
+            builder: (context, state) {
+              return Text(
+                '${state.count}',
+                style: const TextStyle(fontSize: 48),
+              );
+            },
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => cubit.increment(),
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Key Features of StatelessWidget Implementation
+
+| Feature | Description |
+|---------|-------------|
+| Base Classes | `BaseBlocPage` and `BaseCubitPage` |
+| DI Support | Automatic dependency injection |
+| Loading Management | Built-in loading overlay support |
+| Navigation | Integrated navigation capabilities |
+| State Management | Full BLoC/Cubit pattern support |
+
+### When to Use StatelessWidget vs StatefulWidget
+
+| Use Case | Widget Type |
+|----------|------------|
+| Simple UI without local state | StatelessWidget |
+| Complex UI with local state | StatefulWidget |
+| Performance-critical screens | StatelessWidget |
+| Screens with lifecycle needs | StatefulWidget |
+
 ## If you want to use Auto Route Integration
 
 1. Add auto_route to your dependencies:

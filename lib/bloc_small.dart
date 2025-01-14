@@ -8,6 +8,8 @@ export 'base/base_app_router.dart';
 export 'base/base_bloc_page_state.dart';
 export 'base/base_cubit_state.dart';
 export 'base/base_page_delegate.dart';
+export 'base/base_bloc_page.dart';
+export 'base/base_cubit_page.dart';
 // Common bloc
 export 'bloc/common/common_bloc.dart';
 // Bloc core
