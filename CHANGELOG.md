@@ -1,3 +1,27 @@
+# Changelog
+
+## 2.2.0
+
+### Features
+
+* Added StatelessWidget support with `BaseBlocPage` and `BaseCubitPage`
+* Added `BasePageStatelessDelegate` for common StatelessWidget functionality
+* Maintained feature parity with StatefulWidget implementations including:
+  * Dependency injection
+  * Loading overlay management
+  * Navigation support
+  * BLoC/Cubit pattern integration
+
+### Documentation
+
+* Updated README with StatelessWidget usage examples
+* Added comparison between StatelessWidget and StatefulWidget approaches
+* Added code examples for both BLoC and Cubit with StatelessWidget
+
+## 2.1.2
+
+* Hotfix `BlocContext` extension for BlocProvider and BlocListener
+
 ## 2.1.1
 
 * Reorganized and consolidated exports into a single file
