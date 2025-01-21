@@ -1,7 +1,6 @@
 import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
 
-import '../drawer/menu_drawer.dart';
 import 'reactive_subject_drawer.dart';
 
 class DefaultSettings extends StatefulWidget {
