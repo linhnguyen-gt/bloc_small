@@ -330,7 +330,7 @@ class MyHomePage extends BaseBlocPage<CountBloc> {
   const MyHomePage({super.key});
 
   @override
-  Widget buildPage(BuildContext context, CountBloc bloc) {
+  Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
       context,
       child: Scaffold(
@@ -362,7 +362,7 @@ class CounterPage extends BaseCubitPage<CountCubit> {
   const CounterPage({super.key});
 
   @override
-  Widget buildPage(BuildContext context, CountCubit cubit) {
+  Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
       context,
       child: Scaffold(
