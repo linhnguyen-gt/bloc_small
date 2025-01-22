@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.2.1
+
+### Features
+
+* Added `BlocErrorHandlerMixin` for standardized error handling
+* Improved error logging and management
+* Added support for common exception types (NetworkException, ValidationException, TimeoutException)
+
+### Bug Fixes
+
+* Fixed CommonBloc registration to use `registerFactory` instead of `registerLazySingleton`
+* Fixed loading state management between screens
+* Fixed error handling in blocCatch
+
+### Documentation
+
+* Added error handling section in README
+* Added examples for BlocErrorHandlerMixin usage
+* Updated error handling best practices
+
 ## 2.2.0
 
 ### Features

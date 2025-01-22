@@ -233,7 +233,7 @@ If you prefer a simpler approach without events, you can use Cubit instead of BL
 ```dart
 @injectable
 class CounterCubit extends MainCubit<CounterState> {
-  CounterCubit() : super(const CounterState());
+  CounterCubit() : super(const CounterState.initial());
 
   Future<void> increment() async {
     await cubitCatch(
@@ -636,6 +636,60 @@ await blocCatch(
     print('Error occurred: $error');
   }
 );
+```
+
+### Error Handling with BlocErrorHandlerMixin
+
+`bloc_small` provides a mixin for standardized error handling and logging:
+
+```dart
+@injectable
+class CountBloc extends MainBloc<CountEvent, CountState> with BlocErrorHandlerMixin {
+  CountBloc() : super(const CountState.initial()) {
+    on<Increment>(_onIncrement);
+  }
+
+  Future<void> _onIncrement(Increment event, Emitter<CountState> emit) async {
+    await blocCatch(
+      actions: () async {
+        // Your async logic that might throw
+        if (state.count > 5) {
+          throw ValidationException('Count cannot exceed 5');
+        }
+        emit(state.copyWith(count: state.count + 1));
+      },
+      onError: handleError, // Uses the mixin's error handler
+    );
+  }
+}
+```
+
+The mixin provides:
+
+- Automatic error logging with stack traces
+- Built-in support for common exceptions (NetworkException, ValidationException, TimeoutException)
+- Automatic loading state cleanup
+- Helper method for error messages
+
+You can get error messages without state emission:
+
+```dart
+String message = getErrorMessage(error); // Returns user-friendly error message
+```
+
+For custom error handling, override the handleError method:
+
+```dart
+@override
+Future<void> handleError(Object error, StackTrace stackTrace) async {
+  // Always call super to maintain logging
+  super.handleError(error, stackTrace);
+  
+  // Add your custom error handling here
+  if (error is CustomException) {
+    // Handle custom exception
+  }
+}
 ```
 
 ## ReactiveSubject

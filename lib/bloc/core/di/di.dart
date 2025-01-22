@@ -27,7 +27,10 @@ extension CoreInjection on GetIt {
   ///   getIt.registerCore();
   /// }
   /// ```
-  void registerCore() {
+  void registerCore({bool force = false}) {
+    if (force) {
+      unregister<CommonBloc>();
+    }
     if (!isRegistered<CommonBloc>()) {
       registerFactory<CommonBloc>(() => CommonBloc());
     }

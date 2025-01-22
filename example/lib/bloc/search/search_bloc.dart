@@ -8,7 +8,7 @@ part 'search_state.dart';
 
 @injectable
 class SearchBloc extends MainBloc<SearchEvent, SearchState>
-    with BlocErrorHandler {
+    with BlocErrorHandlerMixin {
   final ReactiveSubject<String> _searchQuery = ReactiveSubject<String>();
   late final ReactiveSubject<List<String>> _searchResults;
 
