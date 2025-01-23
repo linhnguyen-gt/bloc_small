@@ -42,6 +42,9 @@ import '../main_bloc_state.dart';
 /// ```
 abstract class MainCubit<S extends MainBlocState> extends BaseCubitDelegate<S> {
   MainCubit(super.initialState);
+
+  void onDependenciesChanged() {}
+  void onDeactivate() {}
 }
 
 abstract class BaseCubitDelegate<S extends MainBlocState> extends Cubit<S>

@@ -692,6 +692,74 @@ Future<void> handleError(Object error, StackTrace stackTrace) async {
 }
 ```
 
+### Lifecycle Management
+
+bloc_small provides lifecycle hooks to manage state and resources based on widget lifecycle events.
+
+#### Using Lifecycle Hooks in BLoC
+
+```dart
+@injectable
+class CounterBloc extends MainBloc<CounterEvent, CounterState> {
+  Timer? _timer;
+
+  CounterBloc() : super(const CounterState.initial()) {
+    on<StartTimer>(_onStartTimer);
+  }
+
+  @override
+  void onDependenciesChanged() {
+    // Called when dependencies change (e.g., Theme, Locale)
+    add(const CounterEvent.checkDependencies());
+  }
+
+  @override
+  void onDeactivate() {
+    // Called when widget is temporarily removed
+    _timer?.cancel();
+  }
+
+  Future<void> _onStartTimer(StartTimer event, Emitter<CounterState> emit) async {
+    _timer = Timer.periodic(Duration(seconds: 1), (_) {
+      add(const CounterEvent.increment());
+    });
+  }
+}
+```
+
+#### Implementation in Widget
+
+```dart
+class CounterPage extends StatefulWidget {
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends BaseBlocPageState<CounterPage, CounterBloc> {
+  @override
+  Widget buildPage(BuildContext context) {
+    return buildLoadingOverlay(
+      child: Scaffold(
+        body: BlocBuilder<CounterBloc, CounterState>(
+          builder: (context, state) => Text('Count: ${state.count}'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => bloc.add(const StartTimer()),
+          child: Icon(Icons.play_arrow),
+        ),
+      ),
+    );
+  }
+}
+```
+
+The lifecycle hooks are automatically managed by the base classes and provide:
+
+- Automatic resource cleanup
+- State synchronization with system changes
+- Proper handling of widget lifecycle events
+- Memory leak prevention
+
 ## ReactiveSubject
 
 ### Using ReactiveSubject

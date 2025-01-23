@@ -11,17 +11,31 @@ abstract class BaseCubitPage<C extends MainCubit>
     extends BasePageStatelessDelegate<C> {
   BaseCubitPage({super.key});
 
+  void hideLoading({String? key = LoadingKey.global}) {
+    commonBloc.add(
+        SetComponentLoading(key: key ?? LoadingKey.global, isLoading: false));
+  }
+
   @override
   Widget buildLoadingOverlay({
     required Widget child,
     String? loadingKey = LoadingKey.global,
     Widget? loadingWidget,
+    Duration timeout = const Duration(seconds: 30),
   }) {
     return BlocBuilder<CommonBloc, CommonState>(
       buildWhen: (previous, current) =>
           previous.isLoading(key: loadingKey) !=
           current.isLoading(key: loadingKey),
       builder: (context, state) {
+        if (state.isLoading(key: loadingKey)) {
+          Future.delayed(timeout, () {
+            final currentContext = context;
+            if (currentContext.mounted && state.isLoading(key: loadingKey)) {
+              hideLoading(key: loadingKey);
+            }
+          });
+        }
         return Stack(
           children: [
             child,

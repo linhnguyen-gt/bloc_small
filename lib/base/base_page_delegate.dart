@@ -59,15 +59,8 @@ abstract class BasePageDelegate<T extends StatefulWidget,
     ..commonBloc = commonBloc
     ..navigator = navigator;
 
-  final Map<String, Widget> _widgetCache = {};
-
-  Widget getCachedWidget(String key, Widget Function() builder) {
-    return _widgetCache.putIfAbsent(key, builder);
-  }
-
   @override
   void dispose() {
-    _widgetCache.clear();
     super.dispose();
   }
 

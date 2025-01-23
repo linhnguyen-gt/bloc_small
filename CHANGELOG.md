@@ -10,7 +10,6 @@
 
 ### Bug Fixes
 
-* Fixed CommonBloc registration to use `registerFactory` instead of `registerLazySingleton`
 * Fixed loading state management between screens
 * Fixed error handling in blocCatch
 

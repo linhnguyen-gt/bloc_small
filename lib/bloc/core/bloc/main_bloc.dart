@@ -47,6 +47,9 @@ import '../main_bloc_state.dart';
 abstract class MainBloc<E extends MainBlocEvent, S extends MainBlocState>
     extends BaseBlocDelegate<E, S> {
   MainBloc(super.initialState);
+
+  void onDependenciesChanged() {}
+  void onDeactivate() {}
 }
 
 abstract class BaseBlocDelegate<E extends MainBlocEvent,

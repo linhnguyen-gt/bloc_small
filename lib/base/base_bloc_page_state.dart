@@ -58,6 +58,18 @@ abstract class BaseBlocPageState<T extends StatefulWidget, B extends MainBloc>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    (bloc as MainBloc).onDependenciesChanged();
+  }
+
+  @override
+  void deactivate() {
+    (bloc as MainBloc).onDeactivate();
+    super.deactivate();
+  }
+
+  @override
   Widget buildLoadingOverlay({
     required Widget child,
     String? loadingKey = LoadingKey.global,
