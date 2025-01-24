@@ -446,10 +446,10 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2025-01-22T09:24:02.512127Z",
+  "generated": "2025-01-24T10:53:23.550251Z",
   "generator": "pub",
-  "generatorVersion": "3.6.0",
+  "generatorVersion": "3.6.1",
   "flutterRoot": "file:///Users/linh/development/flutter",
-  "flutterVersion": "3.27.1",
+  "flutterVersion": "3.27.3",
   "pubCache": "file:///Users/linh/.pub-cache"
 }
