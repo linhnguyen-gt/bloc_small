@@ -1,8 +1,7 @@
 import 'dart:developer' as developer;
 
-import 'package:bloc_small/constant/default_loading.dart';
-import 'package:bloc_small/navigation/app_navigator.dart';
-
+import '../../constant/default_loading.dart';
+import '../../navigation/app_navigator.dart';
 import '../common/common_bloc.dart';
 import 'main_bloc_state.dart';
 

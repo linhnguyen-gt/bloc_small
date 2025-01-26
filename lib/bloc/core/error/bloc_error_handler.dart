@@ -94,7 +94,9 @@ mixin BlocErrorHandlerMixin<Event extends MainBlocEvent,
         return;
       } catch (e) {
         attempts++;
-        if (attempts == maxAttempts) rethrow;
+        if (attempts == maxAttempts) {
+          rethrow;
+        }
         await Future.delayed(delay);
       }
     }
@@ -143,7 +145,9 @@ mixin CubitErrorHandlerMixin<State extends MainBlocState> on MainCubit<State>
         return;
       } catch (e) {
         attempts++;
-        if (attempts == maxAttempts) rethrow;
+        if (attempts == maxAttempts) {
+          rethrow;
+        }
         await Future.delayed(delay);
       }
     }

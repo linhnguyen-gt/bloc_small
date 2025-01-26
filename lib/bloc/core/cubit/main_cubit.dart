@@ -1,6 +1,6 @@
-import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../constant/default_loading.dart';
 import '../base_delegate.dart';
 import '../main_bloc_state.dart';
 

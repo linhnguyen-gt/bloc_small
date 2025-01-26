@@ -1,9 +1,9 @@
-import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/common/common_bloc.dart';
 import '../bloc/core/bloc/main_bloc.dart';
+import '../constant/default_loading.dart';
 import '../widgets/loading_indicator.dart';
 import 'base_page_delegate.dart';
 
@@ -83,8 +83,9 @@ abstract class BaseBlocPageState<T extends StatefulWidget, B extends MainBloc>
       builder: (context, state) {
         if (state.isLoading(key: loadingKey)) {
           Future.delayed(timeout, () {
-            if (mounted && state.isLoading(key: loadingKey))
+            if (mounted && state.isLoading(key: loadingKey)) {
               hideLoading(key: loadingKey);
+            }
           });
         }
         return Stack(

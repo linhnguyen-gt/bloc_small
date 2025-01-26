@@ -67,8 +67,9 @@ abstract class BaseCubitPageState<T extends StatefulWidget, C extends MainCubit>
       builder: (context, state) {
         if (state.isLoading(key: loadingKey)) {
           Future.delayed(timeout, () {
-            if (mounted && state.isLoading(key: loadingKey))
+            if (mounted && state.isLoading(key: loadingKey)) {
               hideLoading(key: loadingKey);
+            }
           });
         }
         return Stack(

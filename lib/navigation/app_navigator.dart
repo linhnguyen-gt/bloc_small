@@ -32,7 +32,9 @@ class AppNavigator implements INavigator {
     if (enableNavigationLogs) {
       developer.log('push route: ${route.routeName}');
     }
-    if (_appRouter == null) _throwError();
+    if (_appRouter == null) {
+      _throwError();
+    }
     return _appRouter?.push<T>(route);
   }
 
@@ -44,7 +46,9 @@ class AppNavigator implements INavigator {
     if (enableNavigationLogs) {
       developer.log('replace route: ${route.routeName}');
     }
-    if (_appRouter == null) _throwError();
+    if (_appRouter == null) {
+      _throwError();
+    }
     return _appRouter?.replace<T>(route);
   }
 
@@ -57,7 +61,9 @@ class AppNavigator implements INavigator {
     if (enableNavigationLogs) {
       developer.log('pop route: ${result.runtimeType}');
     }
-    if (_appRouter == null) _throwError();
+    if (_appRouter == null) {
+      _throwError();
+    }
     return _appRouter!.maybePop<T>(result);
   }
 
@@ -69,7 +75,9 @@ class AppNavigator implements INavigator {
     if (enableNavigationLogs) {
       developer.log('popUntil route: ${route.routeName}');
     }
-    if (_appRouter == null) _throwError();
+    if (_appRouter == null) {
+      _throwError();
+    }
     return _appRouter?.pushAndPopUntil(route, predicate: (_) => false);
   }
 
@@ -78,7 +86,9 @@ class AppNavigator implements INavigator {
     if (enableNavigationLogs) {
       developer.log('popTop route: ${result.runtimeType}');
     }
-    if (_appRouter == null) _throwError();
+    if (_appRouter == null) {
+      _throwError();
+    }
 
     return _appRouter?.maybePopTop();
   }
@@ -91,7 +101,9 @@ class AppNavigator implements INavigator {
     if (enableNavigationLogs) {
       developer.log('replaceAllWith route: ${route.routeName}');
     }
-    if (_appRouter == null) _throwError();
+    if (_appRouter == null) {
+      _throwError();
+    }
     return _appRouter?.replaceAll([route]);
   }
 
@@ -104,7 +116,9 @@ class AppNavigator implements INavigator {
       developer.log('clearAndPush route: ${route.routeName}');
     }
 
-    if (_appRouter == null) _throwError();
+    if (_appRouter == null) {
+      _throwError();
+    }
     _appRouter?.replaceAll([route]);
     return _appRouter?.push(route);
   }

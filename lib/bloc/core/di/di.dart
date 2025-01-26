@@ -1,9 +1,9 @@
-import 'package:bloc_small/bloc/common/common_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../base/base_app_router.dart';
 import '../../../navigation/app_navigator.dart';
+import '../../common/common_bloc.dart';
 
 export 'package:get_it/get_it.dart' show GetIt;
 
@@ -63,7 +63,9 @@ extension CoreInjection on GetIt {
   /// or if the provided router is null.
   void registerAppRouter<T extends BaseAppRouter>(T? router,
       {bool enableNavigationLogs = true}) {
-    if (router == null) return;
+    if (router == null) {
+      return;
+    }
 
     if (!isRegistered<T>()) {
       registerLazySingleton<BaseAppRouter>(() => get<T>());
