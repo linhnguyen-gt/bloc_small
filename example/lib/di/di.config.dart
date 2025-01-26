@@ -26,9 +26,9 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
+    gh.factory<_i543.CountCubit>(() => _i543.CountCubit());
     gh.factory<_i310.CountBloc>(() => _i310.CountBloc());
     gh.factory<_i127.SearchBloc>(() => _i127.SearchBloc());
-    gh.factory<_i543.CountCubit>(() => _i543.CountCubit());
     gh.lazySingleton<_i943.AppRouter>(() => _i943.AppRouter());
     return this;
   }

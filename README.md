@@ -233,7 +233,7 @@ If you prefer a simpler approach without events, you can use Cubit instead of BL
 ```dart
 @injectable
 class CounterCubit extends MainCubit<CounterState> {
-  CounterCubit() : super(const CounterState());
+  CounterCubit() : super(const CounterState.initial());
 
   Future<void> increment() async {
     await cubitCatch(
@@ -330,7 +330,7 @@ class MyHomePage extends BaseBlocPage<CountBloc> {
   const MyHomePage({super.key});
 
   @override
-  Widget buildPage(BuildContext context, CountBloc bloc) {
+  Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
       context,
       child: Scaffold(
@@ -362,7 +362,7 @@ class CounterPage extends BaseCubitPage<CountCubit> {
   const CounterPage({super.key});
 
   @override
-  Widget buildPage(BuildContext context, CountCubit cubit) {
+  Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
       context,
       child: Scaffold(
@@ -637,6 +637,128 @@ await blocCatch(
   }
 );
 ```
+
+### Error Handling with BlocErrorHandlerMixin
+
+`bloc_small` provides a mixin for standardized error handling and logging:
+
+```dart
+@injectable
+class CountBloc extends MainBloc<CountEvent, CountState> with BlocErrorHandlerMixin {
+  CountBloc() : super(const CountState.initial()) {
+    on<Increment>(_onIncrement);
+  }
+
+  Future<void> _onIncrement(Increment event, Emitter<CountState> emit) async {
+    await blocCatch(
+      actions: () async {
+        // Your async logic that might throw
+        if (state.count > 5) {
+          throw ValidationException('Count cannot exceed 5');
+        }
+        emit(state.copyWith(count: state.count + 1));
+      },
+      onError: handleError, // Uses the mixin's error handler
+    );
+  }
+}
+```
+
+The mixin provides:
+
+- Automatic error logging with stack traces
+- Built-in support for common exceptions (NetworkException, ValidationException, TimeoutException)
+- Automatic loading state cleanup
+- Helper method for error messages
+
+You can get error messages without state emission:
+
+```dart
+String message = getErrorMessage(error); // Returns user-friendly error message
+```
+
+For custom error handling, override the handleError method:
+
+```dart
+@override
+Future<void> handleError(Object error, StackTrace stackTrace) async {
+  // Always call super to maintain logging
+  super.handleError(error, stackTrace);
+  
+  // Add your custom error handling here
+  if (error is CustomException) {
+    // Handle custom exception
+  }
+}
+```
+
+### Lifecycle Management
+
+bloc_small provides lifecycle hooks to manage state and resources based on widget lifecycle events.
+
+#### Using Lifecycle Hooks in BLoC
+
+```dart
+@injectable
+class CounterBloc extends MainBloc<CounterEvent, CounterState> {
+  Timer? _timer;
+
+  CounterBloc() : super(const CounterState.initial()) {
+    on<StartTimer>(_onStartTimer);
+  }
+
+  @override
+  void onDependenciesChanged() {
+    // Called when dependencies change (e.g., Theme, Locale)
+    add(const CounterEvent.checkDependencies());
+  }
+
+  @override
+  void onDeactivate() {
+    // Called when widget is temporarily removed
+    _timer?.cancel();
+  }
+
+  Future<void> _onStartTimer(StartTimer event, Emitter<CounterState> emit) async {
+    _timer = Timer.periodic(Duration(seconds: 1), (_) {
+      add(const CounterEvent.increment());
+    });
+  }
+}
+```
+
+#### Implementation in Widget
+
+```dart
+class CounterPage extends StatefulWidget {
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends BaseBlocPageState<CounterPage, CounterBloc> {
+  @override
+  Widget buildPage(BuildContext context) {
+    return buildLoadingOverlay(
+      child: Scaffold(
+        body: BlocBuilder<CounterBloc, CounterState>(
+          builder: (context, state) => Text('Count: ${state.count}'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => bloc.add(const StartTimer()),
+          child: Icon(Icons.play_arrow),
+        ),
+      ),
+    );
+  }
+}
+```
+
+The lifecycle hooks are automatically managed by the base classes and provide:
+
+- Automatic resource cleanup
+- State synchronization with system changes
+- Proper handling of widget lifecycle events
+- Memory leak prevention
 
 ## ReactiveSubject
 

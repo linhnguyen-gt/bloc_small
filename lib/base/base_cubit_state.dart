@@ -36,17 +36,42 @@ import 'base_page_delegate.dart';
 /// ```
 abstract class BaseCubitPageState<T extends StatefulWidget, C extends MainCubit>
     extends BasePageDelegate<T, C> {
+  void hideLoading({String? key = LoadingKey.global}) {
+    commonBloc.add(
+        SetComponentLoading(key: key ?? LoadingKey.global, isLoading: false));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    (bloc as MainCubit).onDependenciesChanged();
+  }
+
+  @override
+  void deactivate() {
+    (bloc as MainCubit).onDeactivate();
+    super.deactivate();
+  }
+
   @override
   Widget buildLoadingOverlay({
     required Widget child,
     String? loadingKey = LoadingKey.global,
     Widget? loadingWidget,
+    Duration timeout = const Duration(seconds: 30),
   }) {
     return BlocBuilder<CommonBloc, CommonState>(
       buildWhen: (previous, current) =>
           previous.isLoading(key: loadingKey) !=
           current.isLoading(key: loadingKey),
       builder: (context, state) {
+        if (state.isLoading(key: loadingKey)) {
+          Future.delayed(timeout, () {
+            if (mounted && state.isLoading(key: loadingKey)) {
+              hideLoading(key: loadingKey);
+            }
+          });
+        }
         return Stack(
           children: [
             child,

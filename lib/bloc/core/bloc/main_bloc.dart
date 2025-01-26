@@ -1,6 +1,6 @@
-import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../constant/default_loading.dart';
 import '../base_delegate.dart';
 import '../main_bloc_event.dart';
 import '../main_bloc_state.dart';
@@ -47,6 +47,9 @@ import '../main_bloc_state.dart';
 abstract class MainBloc<E extends MainBlocEvent, S extends MainBlocState>
     extends BaseBlocDelegate<E, S> {
   MainBloc(super.initialState);
+
+  void onDependenciesChanged() {}
+  void onDeactivate() {}
 }
 
 abstract class BaseBlocDelegate<E extends MainBlocEvent,

@@ -1,11 +1,14 @@
 // lib/testing/bloc_test_helper.dart
 import 'package:bloc_test/bloc_test.dart';
+import 'package:test/test.dart';
 
 import '../bloc_small.dart';
 
 abstract class BlocTestHelper<B extends MainBloc<E, S>, E extends MainBlocEvent,
     S extends MainBlocState> {
   B createBloc();
+
+  late final B bloc = createBloc();
 
   void runBlocTest(
     String description, {
@@ -25,5 +28,18 @@ abstract class BlocTestHelper<B extends MainBloc<E, S>, E extends MainBlocEvent,
       expect: () => expects,
       verify: verify,
     );
+  }
+
+  B createMockedBloc({
+    CommonBloc? mockCommonBloc,
+    AppNavigator? mockNavigator,
+  });
+
+  void expectStateSequence(List<S> states) {
+    var index = 0;
+    bloc.stream.listen((state) {
+      expect(state, states[index]);
+      index++;
+    });
   }
 }

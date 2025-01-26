@@ -60,6 +60,11 @@ abstract class BasePageDelegate<T extends StatefulWidget,
     ..navigator = navigator;
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [

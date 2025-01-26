@@ -1,8 +1,7 @@
 import 'dart:developer' as developer;
 
-import 'package:bloc_small/constant/default_loading.dart';
-import 'package:bloc_small/navigation/app_navigator.dart';
-
+import '../../constant/default_loading.dart';
+import '../../navigation/app_navigator.dart';
 import '../common/common_bloc.dart';
 import 'main_bloc_state.dart';
 
@@ -51,14 +50,14 @@ import 'main_bloc_state.dart';
 /// ```
 mixin BaseDelegate<S extends MainBlocState> {
   AppNavigator? navigator;
-  late final CommonBloc _commonBloc;
+  late final WeakReference<CommonBloc> _commonBlocRef;
 
-  set commonBloc(CommonBloc commonBloc) {
-    _commonBloc = commonBloc;
+  set commonBloc(CommonBloc bloc) {
+    _commonBlocRef = WeakReference(bloc);
   }
 
   CommonBloc get commonBloc =>
-      this is CommonBloc ? this as CommonBloc : _commonBloc;
+      _commonBlocRef.target ?? (throw StateError('CommonBloc not initialized'));
 
   /// Shows the loading overlay for a specific key.
   ///
@@ -159,5 +158,10 @@ mixin BaseDelegate<S extends MainBlocState> {
         await onFinally();
       }
     }
+  }
+
+  void dispose() {
+    navigator = null;
+    // Cleanup other resources
   }
 }

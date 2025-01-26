@@ -1,6 +1,6 @@
-import 'package:bloc_small/constant/default_loading.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../constant/default_loading.dart';
 import '../base_delegate.dart';
 import '../main_bloc_state.dart';
 
@@ -42,6 +42,9 @@ import '../main_bloc_state.dart';
 /// ```
 abstract class MainCubit<S extends MainBlocState> extends BaseCubitDelegate<S> {
   MainCubit(super.initialState);
+
+  void onDependenciesChanged() {}
+  void onDeactivate() {}
 }
 
 abstract class BaseCubitDelegate<S extends MainBlocState> extends Cubit<S>

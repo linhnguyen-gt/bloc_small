@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:bloc_small/bloc/core/bloc/main_bloc.dart';
-import 'package:bloc_small/bloc/core/main_bloc_event.dart';
-import 'package:bloc_small/bloc/core/main_bloc_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../constant/default_loading.dart';
+import '../core/bloc/main_bloc.dart';
+import '../core/main_bloc_event.dart';
+import '../core/main_bloc_state.dart';
 
 part 'common_event.dart';
 part 'common_state.dart';

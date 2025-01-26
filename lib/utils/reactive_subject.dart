@@ -137,7 +137,9 @@ class ReactiveSubject<T> {
   /// Updates the current value and adds it to the stream if the subject is not closed.
   void add(T value) {
     _value = value;
-    if (!_subject.isClosed) _subject.add(value);
+    if (!_subject.isClosed) {
+      _subject.add(value);
+    }
   }
 
   /// Adds an error to the subject.
