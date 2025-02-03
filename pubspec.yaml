@@ -16,17 +16,17 @@ dependencies:
   rxdart: 0.28.0
   auto_route: 9.3.0+1
   bloc_test: 9.1.7
+  test: 1.25.8
+  flutter_test:
+    sdk: flutter
 
 export:
   flutter_bloc:
     include: ["lib/bloc.dart"]
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   flutter_lints: 5.0.0
-  test: 1.25.8
-  mockito: 5.4.5
+  mockito: ^5.4.5
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
