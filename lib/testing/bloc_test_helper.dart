@@ -1,4 +1,3 @@
-// lib/testing/bloc_test_helper.dart
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
