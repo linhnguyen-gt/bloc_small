@@ -7,14 +7,13 @@ import 'navigation/app_router.gr.dart';
 
 @RoutePage()
 class MyHomePage extends StatefulWidget {
-  MyHomePage();
+  const MyHomePage({super.key});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
-  final navigator = getIt.getNavigator();
   @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -97,11 +96,11 @@ class CustomFloatingActionButton extends StatelessWidget {
   final String tooltip;
 
   const CustomFloatingActionButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.child,
     this.tooltip = '',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,10 +108,10 @@ class CustomFloatingActionButton extends StatelessWidget {
       onPressed: onPressed,
       elevation: 6.0,
       fillColor: Theme.of(context).colorScheme.secondary,
-      child: child,
       padding: EdgeInsets.all(8.0),
       shape: CircleBorder(),
       constraints: BoxConstraints(minWidth: 56.0, minHeight: 56.0),
+      child: child,
     );
   }
 }

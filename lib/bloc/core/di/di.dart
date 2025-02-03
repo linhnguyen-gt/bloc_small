@@ -5,11 +5,6 @@ import '../../../base/base_app_router.dart';
 import '../../../navigation/app_navigator.dart';
 import '../../common/common_bloc.dart';
 
-export 'package:get_it/get_it.dart' show GetIt;
-
-/// Global instance of GetIt for dependency injection
-final getIt = GetIt.instance;
-
 @module
 abstract class CoreModule {
   @singleton
@@ -27,12 +22,13 @@ extension CoreInjection on GetIt {
   ///   getIt.registerCore();
   /// }
   /// ```
-  void registerCore({bool force = false}) {
-    if (force) {
-      unregister<CommonBloc>();
-    }
-    if (!isRegistered<CommonBloc>()) {
-      registerFactory<CommonBloc>(() => CommonBloc());
+  void registerCore() {
+    try {
+      if (!isRegistered<CommonBloc>()) {
+        registerFactory<CommonBloc>(() => CommonBloc());
+      }
+    } catch (e) {
+      throw 'Failed to register core dependencies: $e';
     }
   }
 
@@ -63,14 +59,18 @@ extension CoreInjection on GetIt {
   /// or if the provided router is null.
   void registerAppRouter<T extends BaseAppRouter>(T? router,
       {bool enableNavigationLogs = true}) {
-    if (router == null) {
-      return;
-    }
+    try {
+      if (router == null) {
+        throw ArgumentError('Router cannot be null');
+      }
 
-    if (!isRegistered<T>()) {
-      registerLazySingleton<BaseAppRouter>(() => get<T>());
-      registerLazySingleton<AppNavigator>(() =>
-          AppNavigator(get<T>(), enableNavigationLogs: enableNavigationLogs));
+      if (!isRegistered<T>()) {
+        registerLazySingleton<BaseAppRouter>(() => get<T>());
+        registerLazySingleton<AppNavigator>(() =>
+            AppNavigator(get<T>(), enableNavigationLogs: enableNavigationLogs));
+      }
+    } catch (e) {
+      throw 'Failed to register router: $e';
     }
   }
 }

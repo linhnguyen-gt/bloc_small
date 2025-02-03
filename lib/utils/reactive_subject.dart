@@ -135,21 +135,34 @@ class ReactiveSubject<T> {
   /// Adds a new value to the subject.
   ///
   /// Updates the current value and adds it to the stream if the subject is not closed.
+  bool _isDisposed = false;
+
+  /// Checks if the subject has been disposed
+  bool get isDisposed => _isDisposed;
+
+  /// Adds a new value to the subject with disposal check
   void add(T value) {
+    if (_isDisposed) {
+      throw StateError('Cannot add to a disposed ReactiveSubject');
+    }
     _value = value;
     if (!_subject.isClosed) {
       _subject.add(value);
     }
   }
 
+  /// Disposes the subject and prevents further usage
+  Future<void> dispose() async {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+    await _subject.close();
+  }
+
   /// Adds an error to the subject.
   void addError(Object error, [StackTrace? stackTrace]) {
     _subject.addError(error, stackTrace);
-  }
-
-  /// Closes the underlying subject.
-  Future<void> dispose() async {
-    await _subject.close();
   }
 
   /// Transforms the items emitted by the source ReactiveSubject by applying a function to each item.

@@ -10,7 +10,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  MyApp({super.key});
 
   final _router = getIt<AppRouter>();
 
