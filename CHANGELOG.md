@@ -12,6 +12,7 @@
 
 * Fixed loading state management between screens
 * Fixed error handling in blocCatch
+* Improve DI
 
 ### Documentation
 
