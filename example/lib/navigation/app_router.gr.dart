@@ -48,7 +48,7 @@ class MyHomeRoute extends _i5.PageRouteInfo<void> {
   static _i5.PageInfo page = _i5.PageInfo(
     name,
     builder: (data) {
-      return _i2.MyHomePage();
+      return const _i2.MyHomePage();
     },
   );
 }

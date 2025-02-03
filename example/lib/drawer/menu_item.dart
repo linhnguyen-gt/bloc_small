@@ -1,4 +1,5 @@
 import 'package:bloc_small/bloc_small.dart';
+import 'package:bloc_small_example/di/di.dart';
 import 'package:flutter/material.dart';
 
 class MenuItemWidget extends StatelessWidget {
@@ -8,6 +9,7 @@ class MenuItemWidget extends StatelessWidget {
   final Icon? icon;
 
   const MenuItemWidget({
+    super.key,
     required this.caption,
     required this.route,
     required this.currentRoute,

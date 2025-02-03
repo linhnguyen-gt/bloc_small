@@ -1,3 +1,5 @@
+library bloc_small;
+
 // Core exports
 import 'dart:developer' as developer;
 import 'dart:io';
