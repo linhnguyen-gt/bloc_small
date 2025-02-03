@@ -1,0 +1,10 @@
+# IDE files
+.idea/
+*.iml
+
+# Lock files
+pubspec.lock
+
+# Other generated files
+*.g.dart
+*.freezed.dart

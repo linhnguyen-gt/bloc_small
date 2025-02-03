@@ -1,6 +1,7 @@
-// lib/testing/bloc_test_helper.dart
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../bloc_small.dart';
 
@@ -16,6 +17,8 @@ abstract class BlocTestHelper<B extends MainBloc<E, S>, E extends MainBlocEvent,
     required List<E> acts,
     required List<S> expects,
     void Function(B)? verify,
+    Duration? wait,
+    dynamic Function()? expect,
   }) {
     blocTest<B, S>(
       description,
@@ -23,9 +26,12 @@ abstract class BlocTestHelper<B extends MainBloc<E, S>, E extends MainBlocEvent,
       act: (bloc) async {
         for (final event in acts) {
           bloc.add(event);
+          if (wait != null) {
+            await Future.delayed(wait);
+          }
         }
       },
-      expect: () => expects,
+      expect: expects.isEmpty ? null : () => expects,
       verify: verify,
     );
   }
@@ -35,11 +41,54 @@ abstract class BlocTestHelper<B extends MainBloc<E, S>, E extends MainBlocEvent,
     AppNavigator? mockNavigator,
   });
 
-  void expectStateSequence(List<S> states) {
+  Future<void> expectStateSequence(List<S> states, {Duration? timeout}) {
     var index = 0;
-    bloc.stream.listen((state) {
-      expect(state, states[index]);
-      index++;
-    });
+    final completer = Completer<void>();
+
+    bloc.stream.listen(
+      (state) {
+        try {
+          expect(state, states[index]);
+          index++;
+          if (index == states.length) {
+            completer.complete();
+          }
+        } catch (e) {
+          completer.completeError(e);
+        }
+      },
+      onError: completer.completeError,
+    );
+
+    return completer.future.timeout(
+      timeout ?? const Duration(seconds: 5),
+      onTimeout: () => throw TimeoutException(
+        'State sequence did not complete within timeout',
+      ),
+    );
+  }
+
+  Future<void> expectError(Type errorType, {Duration? timeout}) {
+    final completer = Completer<void>();
+
+    bloc.stream.listen(
+      null,
+      onError: (error) {
+        if (error.runtimeType == errorType) {
+          completer.complete();
+        } else {
+          completer.completeError(
+            'Expected error of type $errorType but got ${error.runtimeType}',
+          );
+        }
+      },
+    );
+
+    return completer.future.timeout(
+      timeout ?? const Duration(seconds: 5),
+      onTimeout: () => throw TimeoutException(
+        'Error was not emitted within timeout',
+      ),
+    );
   }
 }
