@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.2
+
+* Fixed package validation issues
+* Added proper test support
+* Updated dependencies to latest versions
+* Improved documentation
+
 ## 2.2.1
 
 ### Features

@@ -8,3 +8,9 @@ pubspec.lock
 # Other generated files
 *.g.dart
 *.freezed.dart
+
+# Development files
+.dart_tool/
+.packages
+.pub/
+build/

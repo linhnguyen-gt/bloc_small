@@ -1,4 +1,6 @@
 analyzer:
+  exclude:
+    - example/**
   language:
     strict-casts: false
     strict-raw-types: true
