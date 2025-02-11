@@ -39,8 +39,6 @@ export 'extensions/bloc_context_extension.dart';
 // Navigation
 export 'navigation/app_navigator.dart';
 export 'navigation/i_navigator.dart';
-// Testing utilities
-export 'testing/bloc_test_helper.dart';
 // Utils
 export 'utils/reactive_subject.dart';
 
