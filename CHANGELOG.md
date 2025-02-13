@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.3
+
+* Upgrade flutter 
+* Remove test helper
+
 ## 2.2.2
 
 * Fixed package validation issues

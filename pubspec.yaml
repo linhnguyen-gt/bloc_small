@@ -1,6 +1,6 @@
 name: bloc_small
 description: An easy-to-use Flutter package offering a streamlined BLoC pattern implementation for intuitive and efficient state management in Flutter apps.
-version: 2.2.2
+version: 2.2.3
 homepage: https://github.com/linhnguyen-gt/bloc_small
 
 environment:
@@ -16,14 +16,15 @@ dependencies:
   rxdart: ^0.28.0
   auto_route: ^9.3.0
   bloc_test: ^10.0.0
-  flutter_test:
-    sdk: flutter
+
 
 export:
   flutter_bloc:
     include: ["lib/bloc.dart"]
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   flutter_lints: 5.0.0
   mockito: ^5.4.5
 # For information on the generic Dart part of this file, see the

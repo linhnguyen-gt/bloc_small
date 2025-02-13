@@ -1,3 +1,4 @@
+// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 // **************************************************************************
@@ -19,10 +20,7 @@ import 'package:bloc_small_example/search_page.dart' as _i4;
 /// [_i1.CounterPage]
 class CounterRoute extends _i5.PageRouteInfo<void> {
   const CounterRoute({List<_i5.PageRouteInfo>? children})
-      : super(
-          CounterRoute.name,
-          initialChildren: children,
-        );
+    : super(CounterRoute.name, initialChildren: children);
 
   static const String name = 'CounterRoute';
 
@@ -38,10 +36,7 @@ class CounterRoute extends _i5.PageRouteInfo<void> {
 /// [_i2.MyHomePage]
 class MyHomeRoute extends _i5.PageRouteInfo<void> {
   const MyHomeRoute({List<_i5.PageRouteInfo>? children})
-      : super(
-          MyHomeRoute.name,
-          initialChildren: children,
-        );
+    : super(MyHomeRoute.name, initialChildren: children);
 
   static const String name = 'MyHomeRoute';
 
@@ -57,10 +52,7 @@ class MyHomeRoute extends _i5.PageRouteInfo<void> {
 /// [_i3.ReactiveSubjectScreen]
 class ReactiveSubjectScreen extends _i5.PageRouteInfo<void> {
   const ReactiveSubjectScreen({List<_i5.PageRouteInfo>? children})
-      : super(
-          ReactiveSubjectScreen.name,
-          initialChildren: children,
-        );
+    : super(ReactiveSubjectScreen.name, initialChildren: children);
 
   static const String name = 'ReactiveSubjectScreen';
 
@@ -76,10 +68,7 @@ class ReactiveSubjectScreen extends _i5.PageRouteInfo<void> {
 /// [_i4.SearchPage]
 class SearchRoute extends _i5.PageRouteInfo<void> {
   const SearchRoute({List<_i5.PageRouteInfo>? children})
-      : super(
-          SearchRoute.name,
-          initialChildren: children,
-        );
+    : super(SearchRoute.name, initialChildren: children);
 
   static const String name = 'SearchRoute';
 
