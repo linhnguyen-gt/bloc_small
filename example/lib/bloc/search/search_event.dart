@@ -5,16 +5,19 @@ abstract class SearchEvent extends MainBlocEvent {
 }
 
 @freezed
-class UpdateQuery extends SearchEvent with _$UpdateQuery {
+sealed class UpdateQuery extends SearchEvent with _$UpdateQuery {
+  const UpdateQuery._() : super._();
   const factory UpdateQuery(String query) = _UpdateQuery;
 }
 
 @freezed
-class UpdateResults extends SearchEvent with _$UpdateResults {
+sealed class UpdateResults extends SearchEvent with _$UpdateResults {
+  const UpdateResults._() : super._();
   const factory UpdateResults(List<String> results) = _UpdateResults;
 }
 
 @freezed
-class SearchError extends SearchEvent with _$SearchError {
+sealed class SearchError extends SearchEvent with _$SearchError {
+  const SearchError._() : super._();
   const factory SearchError(String message) = _SearchError;
 }

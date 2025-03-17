@@ -5,7 +5,7 @@
 ///
 /// The const constructor allows for efficient instantiation of state objects.
 ///
-/// Usage:
+/// Example with regular class:
 /// ```dart
 /// class MySpecificState extends MainBlocState {
 ///   final String someData;
@@ -17,24 +17,33 @@
 /// emit(MySpecificState('Some data'));
 /// ```
 ///
-/// Or for freezed:
+/// Example with Freezed 3.0.0:
 /// ```dart
 /// import 'package:freezed_annotation/freezed_annotation.dart';
 ///
 /// part 'my_state.freezed.dart';
 ///
 /// @freezed
-/// class MyState with _$MyState implements MainBlocState {
+/// sealed class MyState extends MainBlocState with _$MyState {
 ///   const factory MyState.initial() = _Initial;
 ///   const factory MyState.loading() = _Loading;
 ///   const factory MyState.loaded(String data) = _Loaded;
 /// }
 ///
-/// // Using the state
-/// emit(const MyState.initial());
-/// emit(const MyState.loading());
-/// emit(const MyState.loaded('Some data'));
+/// // Using the state with pattern matching
+/// final state = MyState.loaded('data');
+/// final result = switch (state) {
+///   Initial() => 'Initial State',
+///   Loading() => 'Loading State',
+///   Loaded(:final data) => 'Loaded: $data',
+/// };
 /// ```
+///
+/// Note: When using with Freezed 3.0.0+:
+/// 1. Use `sealed` keyword for pattern matching with fixed number of subtypes
+/// 2. Use `abstract` keyword if the class can be extended/implemented
+/// 3. Extend MainBlocState instead of implementing it
+/// 4. Use Dart's built-in pattern matching instead of .when/.map methods
 abstract class MainBlocState {
   const MainBlocState();
 }

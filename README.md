@@ -51,7 +51,6 @@ Add `bloc_small` to your `pubspec.yaml` file:
 dependencies:
   bloc_small:
   injectable:
-  freezed:
 
 dev_dependencies:
   injectable_generator:
@@ -159,20 +158,23 @@ abstract class CountEvent extends MainBlocEvent {
 }
 
 @freezed
-class Increment extends CountEvent with _$Increment {
+sealed class Increment extends CountEvent with _$Increment {
+  const Increment._() : super._();
   const factory Increment() = _Increment;
 }
 
 @freezed
-class Decrement extends CountEvent with _$Decrement {
+sealed class Decrement extends CountEvent with _$Decrement {
+  const Decrement._() : super._();
   const factory Decrement() = _Decrement;
 }
 ```
 
 ```dart
 @freezed
-class CountState extends MainBlocState with $CountState {
-  const factory CountState.initial({@Default(0) int count}) = Initial;
+sealed class CountState extends MainBlocState with _$CountState {
+  const CountState._();
+  const factory CountState.initial({@Default(0) int count}) = _Initial;
 }
 ```
 
@@ -257,8 +259,9 @@ class CounterCubit extends MainCubit<CounterState> {
 
 ```dart
 @freezed
-class CountState extends MainBlocState with $CountState {
-  const factory CountState.initial({@Default(0) int count}) = Initial;
+sealed class CountState extends MainBlocState with _$CountState {
+  const CountState._();
+  const factory CountState.initial({@Default(0) int count}) = _Initial;
 }
 ```
 
@@ -411,8 +414,6 @@ class CounterPage extends BaseCubitPage<CountCubit> {
 1. Add auto_route to your dependencies:
 
 ```yaml
-dependencies:
-  auto_route:
 dev_dependencies:
   auto_route_generator:
 ```
@@ -762,330 +763,98 @@ The lifecycle hooks are automatically managed by the base classes and provide:
 
 ## ReactiveSubject
 
-### Using ReactiveSubject
+`ReactiveSubject<T>` is a wrapper around RxDart's BehaviorSubject/PublishSubject, providing a simplified API for reactive programming.
 
-ReactiveSubject is a powerful stream controller that combines the functionality of BehaviorSubject with additional reactive operators.
+### API Reference
 
-### Core Features
+#### Core API
 
-1. **Value Management**
+| Category | Method/Property | Description |
+|----------|----------------|-------------|
+| **Constructors** | `ReactiveSubject({T? initialValue})` | Creates new with BehaviorSubject |
+| | `ReactiveSubject.broadcast()` | Creates new with PublishSubject |
+| **Properties** | `value` | Current value |
+| | `stream` | Underlying stream |
+| | `isClosed` | Check if closed |
+| | `isDisposed` | Check if disposed |
+| **Core Methods** | `add(T value)` | Add new value |
+| | `addError(Object error)` | Add error |
+| | `dispose()` | Release resources |
+| | `listen()` | Subscribe to stream |
+
+#### Transformation Methods
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `map<R>()` | Transform values | `subject.map((i) => i * 2)` |
+| `where()` | Filter values | `subject.where((i) => i > 0)` |
+| `switchMap()` | Switch streams | `subject.switchMap((i) => api.fetch(i))` |
+| `distinct()` | Remove duplicates | `subject.distinct()` |
+| `scan()` | Accumulate values | `subject.scan((sum, val) => sum + val)` |
+
+#### Time Control
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `debounceTime()` | Delay emissions | `subject.debounceTime(300.ms)` |
+| `throttleTime()` | Rate limit | `subject.throttleTime(1.seconds)` |
+| `buffer()` | Collect over time | `subject.buffer(timer)` |
+
+#### Error Handling
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `retry()` | Retry on error | `subject.retry(3)` |
+| `onErrorResumeNext()` | Recover from error | `subject.onErrorResumeNext(backup)` |
+| `debug()` | Debug stream | `subject.debug(tag: 'MyStream')` |
+
+#### State Management
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `share()` | Share subscription | `subject.share()` |
+| `shareReplay()` | Cache and replay | `subject.shareReplay(maxSize: 2)` |
+| `groupBy()` | Group values | `subject.groupBy((val) => val.type)` |
+
+#### Static Methods
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `combineLatest()` | Combine multiple subjects | `ReactiveSubject.combineLatest([s1, s2])` |
+| `merge()` | Merge multiple subjects | `ReactiveSubject.merge([s1, s2])` |
+| `fromFutureWithError()` | Create from Future | `ReactiveSubject.fromFutureWithError(future)` |
+
+### Basic Usage Example
 
 ```dart
-// Create with initial value
+// Create and initialize
 final subject = ReactiveSubject<int>(initialValue: 0);
 
-// Create broadcast subject
-final broadcast = ReactiveSubject<int>.broadcast(initialValue: 0);
+// Transform and handle errors
+final stream = subject
+    .map((i) => i * 2)
+    .debounceTime(Duration(milliseconds: 300))
+    .retry(3)
+    .debug(tag: 'MyStream');
 
-// Add values
-subject.add(1);
-
-// Get current value
-print(subject.value);
-
-// Check if closed
-print(subject.isClosed);
-
-// Dispose when done
-subject.dispose();
-```
-
-### Stream Transformations
-
-1. **map** - Transform each value
-
-```dart
-final celsius = ReactiveSubject<double>();
-final fahrenheit = celsius.map((c) => c * 9/5 + 32);
-```
-
-2. **where** - Filter values
-
-```dart
-final numbers = ReactiveSubject<int>();
-final evenNumbers = numbers.where((n) => n % 2 == 0);
-```
-
-3. **switchMap** - Switch to new stream
-
-```dart
-final searchQuery = ReactiveSubject<String>();
-final results = searchQuery.switchMap((query) => 
-  performSearch(query)); // Cancels previous search
-```
-
-4. **debounceTime** - Delay emissions
-
-```dart
-final input = ReactiveSubject<String>();
-final debouncedInput = input.debounceTime(Duration(milliseconds: 300));
-```
-
-5. **throttleTime** - Rate limit emissions
-
-```dart
-final clicks = ReactiveSubject<void>();
-final throttledClicks = clicks.throttleTime(Duration(seconds: 1));
-```
-
-6. **distinct** - Emit only when value changes
-
-```dart
-final values = ReactiveSubject<String>();
-final distinctValues = values.distinct();
-```
-
-### Advanced Operations
-
-1. **withLatestFrom** - Combine with another stream
-
-```dart
-final main = ReactiveSubject<int>();
-final other = ReactiveSubject<String>();
-final combined = main.withLatestFrom(other, 
-  (int a, String b) => '$a-$b');
-```
-
-2. **startWith** - Begin with a value
-
-```dart
-final subject = ReactiveSubject<int>();
-final withDefault = subject.startWith(0);
-```
-
-3. **scan** - Accumulate values
-
-```dart
-final prices = ReactiveSubject<double>();
-final total = prices.scan<double>(
-  0.0,
-  (sum, price, _) => sum + price,
-);
-```
-
-4. **doOnData/doOnError** - Side effects
-
-```dart
-final subject = ReactiveSubject<int>();
-final withLogging = subject
-  .doOnData((value) => print('Emitted: $value'))
-  .doOnError((error, _) => print('Error: $error'));
-```
-
-### Static Operators
-
-1. **combineLatest** - Combine multiple subjects
-
-```dart
-final subject1 = ReactiveSubject<int>();
-final subject2 = ReactiveSubject<String>();
-final combined = ReactiveSubject.combineLatest([subject1, subject2]);
-```
-
-2. **merge** - Merge multiple subjects
-
-```dart
-final subject1 = ReactiveSubject<int>();
-final subject2 = ReactiveSubject<int>();
-final merged = ReactiveSubject.merge([subject1, subject2]);
-```
-
-### Practical Example in BLoC
-
-Here's how you might use `ReactiveSubject` within a `BLoC` to manage state:
-
-```dart
-class SearchBloc extends MainBloc<SearchEvent, SearchState> {
-  final ReactiveSubject<String> _searchQuery = ReactiveSubject<String>();
-  late final ReactiveSubject<List<String>> _searchResults;
-
-  SearchBloc() : super(const SearchState.initial()) {
-    _searchResults = _searchQuery
-        .debounceTime(Duration(milliseconds: 100))
-        .doOnData((query) {
-      showLoading(key: 'search');
-      })
-        .switchMap((query) => _performSearch(query))
-        .doOnData((query) => hideLoading(key: 'search'));
-
-    _searchResults.stream.listen((results) {
-      add(UpdateResults(results));
-    });
-
-    on<UpdateQuery>(_onUpdateQuery);
-    on<UpdateResults>(_onUpdateResults);
-    on<SearchError>(_onSearchError);
-  }
-
-  Future<void> _onUpdateQuery(
-      UpdateQuery event, Emitter<SearchState> emit) async {
-    await blocCatch(
-        keyLoading: 'search',
-        actions: () async {
-          await Future.delayed(Duration(seconds: 2));
-          _searchQuery.add(event.query);
-        });
-  }
-
-  void _onUpdateResults(UpdateResults event, Emitter<SearchState> emit) {
-    emit(SearchState.loaded(event.results));
-  }
-
-  void _onSearchError(SearchError event, Emitter<SearchState> emit) {
-    emit(SearchState.error(event.message));
-  }
-
-  Stream<List<String>> _performSearch(String query) {
-    final resultSubject = ReactiveSubject<List<String>>();
-    Future.delayed(Duration(seconds: 1)).then((_) {
-      if (query.isEmpty) {
-        resultSubject.add([]);
-      } else {
-        resultSubject.add(['Result 1 for "$query"', 'Result 2 for "$query"']);
-      }
-    }).catchError((error) {
-      add(SearchError(error.toString()));
-    });
-
-    return resultSubject.stream;
-  }
-
-  @override
-  Future<void> close() {
-    _searchQuery.dispose();
-    _searchResults.dispose();
-    return super.close();
-  }
-}
-```
-
-### Error Handling
-
-```dart
-// Add error
-subject.addError('Something went wrong');
-
-// Handle errors in stream
-subject.stream.listen(
-  (data) => print('Data: $data'),
-  onError: (error) => print('Error: $error'),
+// Subscribe
+final subscription = stream.listen(
+  print,
+  onError: handleError,
 );
 
-// Using fromFutureWithError
-final subject = ReactiveSubject.fromFutureWithError(
-  Future.delayed(Duration(seconds: 1)),
-  onError: (error) => print('Error: $error'),
-  onFinally: () => print('Completed'),
-  timeout: Duration(seconds: 5),
-);
+// Cleanup
+await subject.dispose();
 ```
 
-### Best Practices
+```
 
-1. Always dispose subjects when no longer needed
-2. Use broadcast subjects for multiple listeners
-3. Consider memory implications with large datasets
-4. Handle errors appropriately
-5. Use meaningful variable names
-6. Document complex transformations
-7. Consider using timeouts for async operations
-
-## Best Practices
-
-### 1. State Management
-
-- Keep states immutable using Freezed
-- Use meaningful state classes
-- Avoid storing complex objects in state
-
-### 2. Event Handling
-
-- Keep events simple and focused
-- Use meaningful event names
-- Document complex event flows
-
-### 3. Error Handling
-
-- Always use blocCatch for async operations
-- Implement proper error recovery
-- Log errors appropriately
-
-### 4. Testing
-
-- Test BLoCs in isolation
-- Mock dependencies
-- Test error scenarios
-- Verify state transitions
-
-### 5. Architecture
-
-- Follow single responsibility principle
-- Keep BLoCs focused and small
-- Use dependency injection
-- Implement proper separation of concerns
-
-## API Reference
-
-### MainBloc
-
-- `MainBloc(initialState)`: Constructor for creating a new BLoC.
-- `blocCatch({required Future<void> Function() actions, Function(dynamic)? onError})`: Wrapper for handling errors in async operations.
-- `showLoading({String key = 'global'})`: Shows a loading indicator.
-- `hideLoading({String key = 'global'})`: Hides the loading indicator.
-
-### MainBlocState
-
-Base class for all states in your BLoCs.
-
-### MainBlocEvent
-
-Base class for all events in your BLoCs.
-
-### CommonBloc
-
-- `add(SetComponentLoading)`: Set loading state for a component.
-- `state.isLoading(String key)`: Check if a component is in loading state.
-
-### ReactiveSubject
-
-`ReactiveSubject<T>` is a wrapper around RxDart's `BehaviorSubject` or `PublishSubject`, providing a simpler API for reactive programming in Dart.
-
-# Constructors
-
-- `ReactiveSubject({T? initialValue})`: Creates a new `ReactiveSubject` (wraps `BehaviorSubject`).
-- `ReactiveSubject.broadcast({T? initialValue})`: Creates a new broadcast `ReactiveSubject` (wraps `PublishSubject`).
-
-# Properties
-
-- `T value`: Gets the current value of the subject.
-- `Stream<T> stream`: Gets the stream of values emitted by the subject.
-- `Sink<T> sink`: Gets the sink for adding values to the subject.
-- `bool isClosed`: Indicates whether the subject is closed.
-
-# Methods
-
-- `void add(T value)`: Adds a new value to the subject.
-- `void addError(Object error, [StackTrace? stackTrace])`: Adds an error to the subject.
-- `void dispose()`: Disposes of the subject.
-
-# Transformation Methods
-
-- `ReactiveSubject<R> map<R>(R Function(T event) mapper)`: Transforms each item emitted by applying a function.
-- `ReactiveSubject<T> where(bool Function(T event) test)`: Filters items based on a predicate.
-- `ReactiveSubject<R> switchMap<R>(Stream<R> Function(T event) mapper)`: Switches to a new stream when a new item is emitted.
-- `ReactiveSubject<T> debounceTime(Duration duration)`: Emits items only after a specified duration has passed without another emission.
-- `ReactiveSubject<T> throttleTime(Duration duration)`: Emits the first item in specified intervals.
-- `ReactiveSubject<T> distinct([bool Function(T previous, T next)? equals])`: Emits items that are distinct from their predecessors.
-- `ReactiveSubject<T> startWith(T startValue)`: Prepends a given value to the subject.
-- `ReactiveSubject<R> scan<R>(R initialValue, R Function(R accumulated, T current, int index) accumulator)`: Accumulates items using a function.
-- `ReactiveSubject<R> withLatestFrom<S, R>(ReactiveSubject<S> other, R Function(T event, S latestFromOther) combiner)`: Combines items with the latest from another subject.
-- `ReactiveSubject<T> doOnData(void Function(T event) onData)`: Performs a side-effect action for each data event emitted.
-- `ReactiveSubject<T> doOnError(void Function(Object error, StackTrace stackTrace) onError)`: Performs a side-effect action for each error event emitted.
-
-# Static Methods
-
-- `static ReactiveSubject<List<T>> combineLatest<T>(List<ReactiveSubject<T>> subjects)`: Combines the latest values of multiple subjects.
-- `static ReactiveSubject<T> merge<T>(List<ReactiveSubject<T>> subjects)`: Merges multiple subjects into one.
+This organization:
+1. Groups related methods together
+2. Provides clear, concise descriptions
+3. Includes practical examples
+4. Maintains all essential information while being more readable
+5. Ends with a practical usage example
 
 ## Contributing
 

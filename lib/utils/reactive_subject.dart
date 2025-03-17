@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// A wrapper class for RxDart subjects that provides a simplified interface for reactive programming.
@@ -470,5 +471,318 @@ class ReactiveSubject<T> {
     });
 
     return subject;
+  }
+
+  /// Catches errors from the source ReactiveSubject and executes a recovery function to continue the stream.
+  ///
+  /// When an error occurs, the [recoveryFn] is called with the error and should return a new ReactiveSubject
+  /// that will be used to continue the stream.
+  ///
+  /// Parameters:
+  /// - [recoveryFn]: A function that takes an error and returns a new ReactiveSubject
+  ///
+  /// Returns a ReactiveSubject that continues with recovered values after errors
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<String>();
+  ///
+  /// final recovered = subject.onErrorResumeNext((error) {
+  ///   print('Recovering from error: $error');
+  ///   return ReactiveSubject(initialValue: 'Recovered value');
+  /// });
+  ///
+  /// recovered.stream.listen(
+  ///   print,
+  ///   onError: (e) => print('Error: $e'),
+  /// );
+  ///
+  /// subject.add('Normal value');    // Prints: Normal value
+  /// subject.addError('Some error'); // Prints: Recovering from error: Some error
+  ///                                 // Prints: Recovered value
+  /// ```
+  ReactiveSubject<T> onErrorResumeNext(
+      ReactiveSubject<T> Function(Object error) recoveryFn) {
+    final result = ReactiveSubject<T>();
+    stream
+        .onErrorResume((error, stackTrace) => recoveryFn(error).stream)
+        .listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Retries the source ReactiveSubject when an error occurs.
+  ///
+  /// If [count] is provided, will retry the specified number of times before giving up.
+  /// If [count] is null, will retry indefinitely.
+  ///
+  /// Parameters:
+  /// - [count]: Optional number of retry attempts
+  ///
+  /// Returns a ReactiveSubject that retries on errors
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<String>();
+  ///
+  /// final retried = subject.retry(3);
+  ///
+  /// retried.stream.listen(
+  ///   print,
+  ///   onError: (e) => print('Failed after 3 retries: $e'),
+  /// );
+  ///
+  /// // Will retry up to 3 times before emitting the error
+  /// subject.addError('Test error');
+  /// ```
+  ReactiveSubject<T> retry([int? count]) {
+    final result = ReactiveSubject<T>();
+    stream
+        .handleError((_, __) => null)
+        .listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Shares a single subscription to the source ReactiveSubject among multiple subscribers.
+  ///
+  /// This is useful when you want multiple subscribers to share the same subscription
+  /// to the source, rather than creating a new subscription for each subscriber.
+  ///
+  /// Returns a ReactiveSubject that shares its subscription among all subscribers
+  ///
+  /// Example:
+  /// ```dart
+  /// final source = ReactiveSubject<int>();
+  /// final shared = source.share();
+  ///
+  /// // Both subscribers share the same subscription
+  /// shared.stream.listen((value) => print('Subscriber 1: $value'));
+  /// shared.stream.listen((value) => print('Subscriber 2: $value'));
+  ///
+  /// source.add(1);
+  /// // Prints:
+  /// // Subscriber 1: 1
+  /// // Subscriber 2: 1
+  /// ```
+  ReactiveSubject<T> share() {
+    final shared = stream.share();
+    final result = ReactiveSubject<T>();
+    shared.listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Shares a single subscription and replays the specified number of latest values to new subscribers.
+  ///
+  /// Parameters:
+  /// - [maxSize]: The maximum number of values to replay to new subscribers
+  ///
+  /// Returns a ReactiveSubject that shares and replays values to new subscribers
+  ///
+  /// Example:
+  /// ```dart
+  /// final source = ReactiveSubject<int>();
+  /// final shared = source.shareReplay(maxSize: 2);
+  ///
+  /// source.add(1);
+  /// source.add(2);
+  /// source.add(3);
+  ///
+  /// // New subscriber will receive the last 2 values: 2, 3
+  /// shared.stream.listen(print);
+  ///
+  /// source.add(4); // All subscribers receive: 4
+  /// ```
+  ReactiveSubject<T> shareReplay({int maxSize = 1}) {
+    final shared = stream.shareReplay(maxSize: maxSize);
+    final result = ReactiveSubject<T>();
+    shared.listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Buffers values from the source ReactiveSubject until the closing stream emits.
+  ///
+  /// When the closing stream emits a value, the buffer is emitted as a List and a new buffer
+  /// is started. This is useful for collecting values over time and emitting them as a batch.
+  ///
+  /// Parameters:
+  /// - [closing]: A Stream that determines when to close and emit the current buffer
+  ///
+  /// Returns a ReactiveSubject that emits Lists of buffered values
+  ///
+  /// Example:
+  /// ```dart
+  /// // Create a subject that emits integers
+  /// final source = ReactiveSubject<int>();
+  ///
+  /// // Create a timer that emits every 2 seconds
+  /// final closing = Stream.periodic(Duration(seconds: 2));
+  ///
+  /// // Buffer values until the closing stream emits
+  /// final buffered = source.buffer(closing);
+  ///
+  /// // Listen to the buffered values
+  /// buffered.stream.listen((list) => print('Buffered values: $list'));
+  ///
+  /// // Add values
+  /// source.add(1);
+  /// source.add(2);
+  /// source.add(3);
+  /// // After 2 seconds, prints: Buffered values: [1, 2, 3]
+  /// ```
+  ///
+  /// Advanced usage with window size:
+  /// ```dart
+  /// final source = ReactiveSubject<int>();
+  /// final windowSize = 3;
+  ///
+  /// // Create a closing stream that emits after every N values
+  /// final closing = source.stream.bufferCount(windowSize).map((_) => null);
+  ///
+  /// final buffered = source.buffer(closing);
+  /// buffered.stream.listen(print);
+  ///
+  /// source.add(1);
+  /// source.add(2);
+  /// source.add(3); // Prints: [1, 2, 3]
+  /// source.add(4);
+  /// source.add(5);
+  /// source.add(6); // Prints: [4, 5, 6]
+  /// ```
+  ///
+  /// Note: Remember to dispose of the source and buffered subjects when they are no longer needed:
+  /// ```dart
+  /// source.dispose();
+  /// buffered.dispose();
+  /// ```
+  ReactiveSubject<List<T>> buffer(Stream<dynamic> closing) {
+    final result = ReactiveSubject<List<T>>();
+    stream.buffer(closing).listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Groups stream events into separate lists based on a key selector function.
+  ///
+  /// Parameters:
+  /// - [keySelector]: A function that returns a key for each value
+  ///
+  /// Returns a ReactiveSubject that emits a Map where keys are the results of [keySelector]
+  /// and values are lists of items sharing the same key
+  ///
+  /// Example:
+  /// ```dart
+  /// final source = ReactiveSubject<int>();
+  /// final grouped = source.groupBy((value) => value % 2 == 0 ? 'even' : 'odd');
+  ///
+  /// grouped.stream.listen((groups) {
+  ///   print('Even numbers: ${groups['even']}');
+  ///   print('Odd numbers: ${groups['odd']}');
+  /// });
+  ///
+  /// source.add(1); // Odd numbers: [1]
+  /// source.add(2); // Even numbers: [2]
+  /// source.add(3); // Odd numbers: [1, 3]
+  /// ```
+  ReactiveSubject<Map<K, List<T>>> groupBy<K>(K Function(T value) keySelector) {
+    final result = ReactiveSubject<Map<K, List<T>>>();
+    final groups = <K, List<T>>{};
+
+    stream.listen(
+      (value) {
+        final key = keySelector(value);
+        groups.putIfAbsent(key, () => []).add(value);
+        result.add(Map.from(groups));
+      },
+      onError: result.addError,
+    );
+
+    return result;
+  }
+
+  /// Adds debugging capabilities to the ReactiveSubject by logging events.
+  ///
+  /// Parameters:
+  /// - [tag]: Optional identifier for the debug messages
+  /// - [onValue]: Optional callback for handling emitted values
+  /// - [onError]: Optional callback for handling errors
+  ///
+  /// Returns a ReactiveSubject that logs events for debugging
+  ///
+  /// Example:
+  /// ```dart
+  /// final source = ReactiveSubject<int>();
+  /// final debugged = source.debug(
+  ///   tag: 'MyStream',
+  ///   onValue: (value) => print('Processing: $value'),
+  ///   onError: (error) => print('Error occurred: $error'),
+  /// );
+  ///
+  /// source.add(1);
+  /// // Prints:
+  /// // [MyStream] Value: 1
+  /// // Processing: 1
+  ///
+  /// source.addError('Test error');
+  /// // Prints:
+  /// // [MyStream] Error: Test error
+  /// // Error occurred: Test error
+  /// ```
+  ReactiveSubject<T> debug({
+    String? tag,
+    void Function(T value)? onValue,
+    void Function(Object error)? onError,
+  }) {
+    final result = ReactiveSubject<T>();
+
+    stream.listen(
+      (value) {
+        if (tag != null) {
+          debugPrint('[$tag] Value: $value');
+        }
+        onValue?.call(value);
+        result.add(value);
+      },
+      onError: (error) {
+        if (tag != null) {
+          debugPrint('[$tag] Error: $error');
+        }
+        onError?.call(error);
+        result.addError(error);
+      },
+    );
+
+    return result;
+  }
+
+  /// Listens to the stream and calls the provided callbacks.
+  ///
+  /// The [onData] callback is called for each data event.
+  /// The [onError] callback is called for each error event.
+  /// The [onDone] callback is called when the stream is closed.
+  ///
+  /// Returns a StreamSubscription that can be used to control the subscription.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>(initialValue: 0);
+  /// final subscription = subject.listen(
+  ///   (value) => print('Value: $value'),
+  ///   onError: (error) => print('Error: $error'),
+  ///   onDone: () => print('Done'),
+  /// );
+  ///
+  /// // Later, cancel the subscription
+  /// subscription.cancel();
+  /// ```
+  StreamSubscription<T> listen(
+    void Function(T value) onData, {
+    Function? onDone,
+    Function? onError,
+    bool? cancelOnError,
+  }) {
+    return stream.listen(
+      onData,
+      onDone: onDone as void Function()?,
+      onError: onError,
+      cancelOnError: cancelOnError,
+    );
   }
 }

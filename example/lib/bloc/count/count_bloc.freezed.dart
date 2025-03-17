@@ -1,3 +1,4 @@
+// dart format width=80
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
@@ -9,239 +10,136 @@ part of 'count_bloc.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
 
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
-
 /// @nodoc
-mixin _$Increment {}
+mixin _$Increment {
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is Increment);
+  }
 
-/// @nodoc
-abstract class $IncrementCopyWith<$Res> {
-  factory $IncrementCopyWith(Increment value, $Res Function(Increment) then) =
-      _$IncrementCopyWithImpl<$Res, Increment>;
-}
-
-/// @nodoc
-class _$IncrementCopyWithImpl<$Res, $Val extends Increment>
-    implements $IncrementCopyWith<$Res> {
-  _$IncrementCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of Increment
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-abstract class _$$IncrementImplCopyWith<$Res> {
-  factory _$$IncrementImplCopyWith(
-          _$IncrementImpl value, $Res Function(_$IncrementImpl) then) =
-      __$$IncrementImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$IncrementImplCopyWithImpl<$Res>
-    extends _$IncrementCopyWithImpl<$Res, _$IncrementImpl>
-    implements _$$IncrementImplCopyWith<$Res> {
-  __$$IncrementImplCopyWithImpl(
-      _$IncrementImpl _value, $Res Function(_$IncrementImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of Increment
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$IncrementImpl implements _Increment {
-  const _$IncrementImpl();
+  @override
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() {
     return 'Increment()';
   }
+}
+
+/// @nodoc
+class $IncrementCopyWith<$Res> {
+  $IncrementCopyWith(Increment _, $Res Function(Increment) __);
+}
+
+/// @nodoc
+
+class _Increment extends Increment {
+  const _Increment() : super._();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$IncrementImpl);
+        (other.runtimeType == runtimeType && other is _Increment);
   }
 
   @override
   int get hashCode => runtimeType.hashCode;
-}
 
-abstract class _Increment implements Increment {
-  const factory _Increment() = _$IncrementImpl;
-}
-
-/// @nodoc
-mixin _$Decrement {}
-
-/// @nodoc
-abstract class $DecrementCopyWith<$Res> {
-  factory $DecrementCopyWith(Decrement value, $Res Function(Decrement) then) =
-      _$DecrementCopyWithImpl<$Res, Decrement>;
+  @override
+  String toString() {
+    return 'Increment()';
+  }
 }
 
 /// @nodoc
-class _$DecrementCopyWithImpl<$Res, $Val extends Decrement>
-    implements $DecrementCopyWith<$Res> {
-  _$DecrementCopyWithImpl(this._value, this._then);
+mixin _$Decrement {
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is Decrement);
+  }
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of Decrement
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-abstract class _$$DecrementImplCopyWith<$Res> {
-  factory _$$DecrementImplCopyWith(
-          _$DecrementImpl value, $Res Function(_$DecrementImpl) then) =
-      __$$DecrementImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$DecrementImplCopyWithImpl<$Res>
-    extends _$DecrementCopyWithImpl<$Res, _$DecrementImpl>
-    implements _$$DecrementImplCopyWith<$Res> {
-  __$$DecrementImplCopyWithImpl(
-      _$DecrementImpl _value, $Res Function(_$DecrementImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of Decrement
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$DecrementImpl implements _Decrement {
-  const _$DecrementImpl();
+  @override
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() {
     return 'Decrement()';
   }
+}
+
+/// @nodoc
+class $DecrementCopyWith<$Res> {
+  $DecrementCopyWith(Decrement _, $Res Function(Decrement) __);
+}
+
+/// @nodoc
+
+class _Decrement extends Decrement {
+  const _Decrement() : super._();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$DecrementImpl);
+        (other.runtimeType == runtimeType && other is _Decrement);
   }
 
   @override
   int get hashCode => runtimeType.hashCode;
-}
 
-abstract class _Decrement implements Decrement {
-  const factory _Decrement() = _$DecrementImpl;
-}
-
-/// @nodoc
-mixin _$CountState {
-  int get count => throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(int count) initial,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(int count)? initial,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(int count)? initial,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-
-  /// Create a copy of CountState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $CountStateCopyWith<CountState> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $CountStateCopyWith<$Res> {
-  factory $CountStateCopyWith(
-          CountState value, $Res Function(CountState) then) =
-      _$CountStateCopyWithImpl<$Res, CountState>;
-  @useResult
-  $Res call({int count});
-}
-
-/// @nodoc
-class _$CountStateCopyWithImpl<$Res, $Val extends CountState>
-    implements $CountStateCopyWith<$Res> {
-  _$CountStateCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of CountState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? count = null,
-  }) {
-    return _then(_value.copyWith(
-      count: null == count
-          ? _value.count
-          : count // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+  String toString() {
+    return 'Decrement()';
   }
 }
 
 /// @nodoc
-abstract class _$$InitialImplCopyWith<$Res>
-    implements $CountStateCopyWith<$Res> {
-  factory _$$InitialImplCopyWith(
-          _$InitialImpl value, $Res Function(_$InitialImpl) then) =
-      __$$InitialImplCopyWithImpl<$Res>;
+mixin _$CountState {
+  int get count;
+
+  /// Create a copy of CountState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CountStateCopyWith<CountState> get copyWith =>
+      _$CountStateCopyWithImpl<CountState>(this as CountState, _$identity);
+
   @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CountState &&
+            (identical(other.count, count) || other.count == count));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, count);
+
+  @override
+  String toString() {
+    return 'CountState(count: $count)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $CountStateCopyWith<$Res> {
+  factory $CountStateCopyWith(
+          CountState value, $Res Function(CountState) _then) =
+      _$CountStateCopyWithImpl;
   @useResult
   $Res call({int count});
 }
 
 /// @nodoc
-class __$$InitialImplCopyWithImpl<$Res>
-    extends _$CountStateCopyWithImpl<$Res, _$InitialImpl>
-    implements _$$InitialImplCopyWith<$Res> {
-  __$$InitialImplCopyWithImpl(
-      _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
-      : super(_value, _then);
+class _$CountStateCopyWithImpl<$Res> implements $CountStateCopyWith<$Res> {
+  _$CountStateCopyWithImpl(this._self, this._then);
+
+  final CountState _self;
+  final $Res Function(CountState) _then;
 
   /// Create a copy of CountState
   /// with the given fields replaced by the non-null parameter values.
@@ -250,9 +148,9 @@ class __$$InitialImplCopyWithImpl<$Res>
   $Res call({
     Object? count = null,
   }) {
-    return _then(_$InitialImpl(
+    return _then(_self.copyWith(
       count: null == count
-          ? _value.count
+          ? _self.count
           : count // ignore: cast_nullable_to_non_nullable
               as int,
     ));
@@ -261,104 +159,69 @@ class __$$InitialImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$InitialImpl implements _Initial {
-  const _$InitialImpl({this.count = 0});
+class _Initial extends CountState {
+  const _Initial({this.count = 0}) : super._();
 
   @override
   @JsonKey()
   final int count;
 
+  /// Create a copy of CountState
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'CountState.initial(count: $count)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$InitialCopyWith<_Initial> get copyWith =>
+      __$InitialCopyWithImpl<_Initial>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$InitialImpl &&
+            other is _Initial &&
             (identical(other.count, count) || other.count == count));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, count);
 
+  @override
+  String toString() {
+    return 'CountState.initial(count: $count)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$InitialCopyWith<$Res>
+    implements $CountStateCopyWith<$Res> {
+  factory _$InitialCopyWith(_Initial value, $Res Function(_Initial) _then) =
+      __$InitialCopyWithImpl;
+  @override
+  @useResult
+  $Res call({int count});
+}
+
+/// @nodoc
+class __$InitialCopyWithImpl<$Res> implements _$InitialCopyWith<$Res> {
+  __$InitialCopyWithImpl(this._self, this._then);
+
+  final _Initial _self;
+  final $Res Function(_Initial) _then;
+
   /// Create a copy of CountState
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$InitialImplCopyWith<_$InitialImpl> get copyWith =>
-      __$$InitialImplCopyWithImpl<_$InitialImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(int count) initial,
+  $Res call({
+    Object? count = null,
   }) {
-    return initial(count);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(int count)? initial,
-  }) {
-    return initial?.call(count);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(int count)? initial,
-    required TResult orElse(),
-  }) {
-    if (initial != null) {
-      return initial(count);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-  }) {
-    return initial(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-  }) {
-    return initial?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    required TResult orElse(),
-  }) {
-    if (initial != null) {
-      return initial(this);
-    }
-    return orElse();
+    return _then(_Initial(
+      count: null == count
+          ? _self.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
   }
 }
 
-abstract class _Initial implements CountState {
-  const factory _Initial({final int count}) = _$InitialImpl;
-
-  @override
-  int get count;
-
-  /// Create a copy of CountState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$InitialImplCopyWith<_$InitialImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on

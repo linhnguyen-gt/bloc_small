@@ -12,6 +12,7 @@ import 'rate_limited_button.dart';
 import 'shopping_cart.dart';
 import 'stock_price.dart';
 import 'temperature_converter.dart';
+import 'api_retry_example.dart';
 
 @RoutePage()
 class ReactiveSubjectScreen extends StatelessWidget {
@@ -46,6 +47,7 @@ class ReactiveSubjectScreen extends StatelessWidget {
         ShoppingCart.route: (context) => ShoppingCart(),
         StockPrice.route: (context) => StockPrice(),
         TemperatureConverter.route: (context) => TemperatureConverter(),
+        ApiRetryExample.route: (context) => ApiRetryExample(),
       },
     );
   }

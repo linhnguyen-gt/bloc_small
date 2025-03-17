@@ -1,6 +1,6 @@
-import 'package:bloc_small/navigation/app_navigator.dart';
-import 'package:bloc_small_example/di/di.dart';
+import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
+import '../di/di.dart';
 
 import '../navigation/app_router.gr.dart';
 import 'action_with_latest_context.dart';
@@ -15,6 +15,7 @@ import 'reactive_subject_menu_item.dart';
 import 'shopping_cart.dart';
 import 'stock_price.dart';
 import 'temperature_converter.dart';
+import 'api_retry_example.dart';
 
 class ReactiveSubjectDrawer extends StatelessWidget {
   final String currentRoute;
@@ -23,7 +24,7 @@ class ReactiveSubjectDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navigator = getIt<AppNavigator>();
+    final navigator = getIt.getNavigator();
 
     return Drawer(
       child: ListView(
@@ -108,6 +109,11 @@ class ReactiveSubjectDrawer extends StatelessWidget {
           ReactiveSubjectMenuItemWidget(
             caption: 'Temperature Converter (map)',
             routeName: TemperatureConverter.route,
+            currentRoute: currentRoute,
+          ),
+          ReactiveSubjectMenuItemWidget(
+            caption: 'API Retry Example (Error Handling)',
+            routeName: ApiRetryExample.route,
             currentRoute: currentRoute,
           ),
         ],

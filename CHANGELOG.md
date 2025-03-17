@@ -1,8 +1,33 @@
 # Changelog
 
+## 3.0.0
+
+### Breaking Changes
+
+* Migrated to Freezed 3.0.0
+  * Required `sealed` keyword for pattern matching classes
+  * Removed `.when()` and `.map()` methods in favor of Dart's built-in pattern matching
+  * Updated all Freezed classes to use new syntax
+* Improved ReactiveSubject implementation
+  * Added explicit type arguments for Stream generics
+  * Enhanced error handling and recovery mechanisms
+  * Added `listen` method for better stream control
+
+### Documentation
+
+* Updated examples to use Dart's pattern matching syntax
+* Added migration guide for Freezed 3.0.0
+* Enhanced ReactiveSubject documentation with new examples
+
+### Migration Guide
+
+* Add `sealed` keyword to all Freezed classes using pattern matching
+* Replace `.when()` and `.map()` with Dart's switch expressions
+* Update ReactiveSubject usage to include explicit type arguments
+
 ## 2.2.3
 
-* Upgrade flutter 
+* Upgrade flutter
 * Remove test helper
 
 ## 2.2.2

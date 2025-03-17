@@ -5,11 +5,13 @@ abstract class CountEvent extends MainBlocEvent {
 }
 
 @freezed
-class Increment extends CountEvent with _$Increment {
+sealed class Increment extends CountEvent with _$Increment {
+  const Increment._() : super._();
   const factory Increment() = _Increment;
 }
 
 @freezed
-class Decrement extends CountEvent with _$Decrement {
+sealed class Decrement extends CountEvent with _$Decrement {
+  const Decrement._() : super._();
   const factory Decrement() = _Decrement;
 }
