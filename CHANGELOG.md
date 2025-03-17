@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.1
+
+* Fix freezed import
+* Fix readme
+
 ## 3.0.0
 
 ### Breaking Changes

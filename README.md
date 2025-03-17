@@ -55,7 +55,7 @@ dependencies:
 dev_dependencies:
   injectable_generator:
   build_runner:
-  freezed_annotation:
+  freezed:
 ```
 
 Then run:
@@ -847,31 +847,13 @@ final subscription = stream.listen(
 await subject.dispose();
 ```
 
-```
+### This organization
 
-This organization:
 1. Groups related methods together
 2. Provides clear, concise descriptions
 3. Includes practical examples
 4. Maintains all essential information while being more readable
 5. Ends with a practical usage example
-
-## Contributing
-
-We welcome contributions! Here's how you can help:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-Please make sure to:
-
-- Update tests as appropriate
-- Update documentation
-- Follow the existing coding style
-- Add examples for new features
 
 ## License
 

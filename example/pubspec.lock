@@ -293,7 +293,7 @@ packages:
     source: sdk
     version: "0.0.0"
   freezed:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: freezed
       sha256: "7ed2ddaa47524976d5f2aa91432a79da36a76969edd84170777ac5bea82d797c"
@@ -301,7 +301,7 @@ packages:
     source: hosted
     version: "3.0.4"
   freezed_annotation:
-    dependency: "direct dev"
+    dependency: transitive
     description:
       name: freezed_annotation
       sha256: c87ff004c8aa6af2d531668b46a4ea379f7191dc6dfa066acd53d506da6e044b
