@@ -2,7 +2,6 @@
 
 ## 3.0.2
 
-* Update Flutter SDK requirement to ^3.6.1
 * Update package dependencies:
   * flutter_bloc to ^9.1.0
   * mockito to ^5.4.6
