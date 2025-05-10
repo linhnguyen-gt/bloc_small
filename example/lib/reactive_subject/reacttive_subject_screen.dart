@@ -16,7 +16,7 @@ import 'api_retry_example.dart';
 
 @RoutePage()
 class ReactiveSubjectScreen extends StatelessWidget {
-  const ReactiveSubjectScreen({Key? key}) : super(key: key);
+  const ReactiveSubjectScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

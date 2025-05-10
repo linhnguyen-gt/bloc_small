@@ -7,6 +7,7 @@ class ReactiveSubjectMenuItemWidget extends StatelessWidget {
   final Widget? icon;
 
   const ReactiveSubjectMenuItemWidget({
+    super.key,
     required this.caption,
     required this.routeName,
     required String currentRoute,

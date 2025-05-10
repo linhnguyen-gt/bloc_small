@@ -1,5 +1,4 @@
 import 'package:bloc_small/bloc_small.dart';
-import 'package:injectable/injectable.dart';
 
 part 'count_bloc.freezed.dart';
 part 'count_event.dart';
@@ -14,16 +13,19 @@ class CountBloc extends MainBloc<CountEvent, CountState>
   }
 
   Future<void> _onIncrementCounter(
-      Increment event, Emitter<CountState> emit) async {
+    Increment event,
+    Emitter<CountState> emit,
+  ) async {
     await blocCatch(
-        actions: () async {
-          await Future.delayed(Duration(seconds: 2));
-          if (state.count > 5) {
-            throw Exception('Count cannot exceed 5');
-          }
-          emit(state.copyWith(count: state.count + 1));
-        },
-        onError: handleError);
+      actions: () async {
+        await Future.delayed(Duration(seconds: 2));
+        if (state.count > 5) {
+          throw Exception('Count cannot exceed 5');
+        }
+        emit(state.copyWith(count: state.count + 1));
+      },
+      onError: handleError,
+    );
   }
 
   void _onDecrementCounter(Decrement event, Emitter<CountState> emit) {

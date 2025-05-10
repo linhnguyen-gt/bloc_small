@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class CombinedFormValidation extends StatefulWidget {
   static const String route = '/combined_form_validation';
 
+  const CombinedFormValidation({super.key});
+
   @override
-  _CombinedFormValidationState createState() => _CombinedFormValidationState();
+  CombinedFormValidationState createState() => CombinedFormValidationState();
 }
 
-class _CombinedFormValidationState extends State<CombinedFormValidation> {
+class CombinedFormValidationState extends State<CombinedFormValidation> {
   final ReactiveSubject<String> _nameSubject = ReactiveSubject<String>();
   final ReactiveSubject<String> _emailSubject = ReactiveSubject<String>();
   late ReactiveSubject<bool> _isFormValidSubject;
@@ -19,9 +21,10 @@ class _CombinedFormValidationState extends State<CombinedFormValidation> {
   void initState() {
     super.initState();
     // Combine latest values and validate
-    _isFormValidSubject = ReactiveSubject.combineLatest<String>(
-      [_nameSubject, _emailSubject],
-    ).map((values) {
+    _isFormValidSubject = ReactiveSubject.combineLatest<String>([
+      _nameSubject,
+      _emailSubject,
+    ]).map((values) {
       final nameValid = values[0].isNotEmpty;
       final emailValid = values[1].contains('@');
       return nameValid && emailValid;
@@ -45,9 +48,7 @@ class _CombinedFormValidationState extends State<CombinedFormValidation> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(CombinedFormValidation.route),
-      appBar: AppBar(
-        title: Text("Combined Form Validation"),
-      ),
+      appBar: AppBar(title: Text("Combined Form Validation")),
       body: Column(
         children: [
           TextField(

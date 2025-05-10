@@ -1,5 +1,4 @@
 import 'package:bloc_small/bloc_small.dart';
-import 'package:injectable/injectable.dart';
 
 part 'count_cubit.freezed.dart';
 part 'count_state.dart';

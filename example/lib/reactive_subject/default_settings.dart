@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class DefaultSettings extends StatefulWidget {
   static const String route = '/default_settings';
 
+  const DefaultSettings({super.key});
+
   @override
-  _DefaultSettingsState createState() => _DefaultSettingsState();
+  DefaultSettingsState createState() => DefaultSettingsState();
 }
 
-class _DefaultSettingsState extends State<DefaultSettings> {
+class DefaultSettingsState extends State<DefaultSettings> {
   final ReactiveSubject<Map<String, dynamic>> _settingsSubject =
       ReactiveSubject<Map<String, dynamic>>();
   late ReactiveSubject<Map<String, dynamic>> _settingsWithDefaults;
@@ -60,10 +62,7 @@ class _DefaultSettingsState extends State<DefaultSettings> {
           body: Column(
             children: [
               SwitchListTile(
-                title: Text(
-                  'Dark Theme',
-                  style: TextStyle(color: textColor),
-                ),
+                title: Text('Dark Theme', style: TextStyle(color: textColor)),
                 value: isDarkTheme,
                 onChanged: (bool value) {
                   _updateSettings('theme', value ? 'dark' : 'light');

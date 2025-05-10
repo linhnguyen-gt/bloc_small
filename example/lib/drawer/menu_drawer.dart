@@ -6,7 +6,7 @@ import 'menu_item.dart';
 class MenuDrawer extends StatelessWidget {
   final String currentRoute;
 
-  const MenuDrawer(this.currentRoute);
+  const MenuDrawer(this.currentRoute, {super.key});
 
   @override
   Widget build(BuildContext context) {

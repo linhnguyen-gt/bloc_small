@@ -1,15 +1,18 @@
 import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
+
 import 'reactive_subject_drawer.dart';
 
 class ApiRetryExample extends StatefulWidget {
   static const String route = '/api_retry_example';
 
+  const ApiRetryExample({super.key});
+
   @override
-  _ApiRetryExampleState createState() => _ApiRetryExampleState();
+  ApiRetryExampleState createState() => ApiRetryExampleState();
 }
 
-class _ApiRetryExampleState extends State<ApiRetryExample> {
+class ApiRetryExampleState extends State<ApiRetryExample> {
   final ReactiveSubject<String> _apiCallSubject = ReactiveSubject<String>();
   late ReactiveSubject<String> _resultSubject;
   late TextEditingController _searchController;
@@ -70,9 +73,7 @@ class _ApiRetryExampleState extends State<ApiRetryExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(ApiRetryExample.route),
-      appBar: AppBar(
-        title: Text("API Retry Example"),
-      ),
+      appBar: AppBar(title: Text("API Retry Example")),
       body: Column(
         children: [
           Padding(
@@ -111,10 +112,7 @@ class _ApiRetryExampleState extends State<ApiRetryExample> {
                 }
 
                 return Center(
-                  child: Text(
-                    snapshot.data!,
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  child: Text(snapshot.data!, style: TextStyle(fontSize: 18)),
                 );
               },
             ),

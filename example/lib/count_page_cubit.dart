@@ -7,6 +7,8 @@ import 'navigation/app_router.gr.dart';
 
 @RoutePage()
 class CounterPage extends BaseCubitPage<CountCubit> {
+  CounterPage({super.key});
+
   @override
   Widget buildPage(BuildContext context) {
     return buildLoadingOverlay(
@@ -20,10 +22,7 @@ class CounterPage extends BaseCubitPage<CountCubit> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Count:',
-                    style: TextStyle(fontSize: 24),
-                  ),
+                  const Text('Count:', style: TextStyle(fontSize: 24)),
                   Text(
                     '${state.count}',
                     style: const TextStyle(

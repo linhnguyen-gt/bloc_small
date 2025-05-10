@@ -1,4 +1,4 @@
-library bloc_small;
+library;
 
 // Core exports
 import 'dart:developer' as developer;
@@ -11,6 +11,7 @@ export 'package:flutter_bloc/flutter_bloc.dart';
 // Freezed
 export 'package:freezed_annotation/freezed_annotation.dart';
 export 'package:get_it/get_it.dart';
+export 'package:injectable/injectable.dart';
 
 // Base classes
 export 'base/base_app_router.dart';
@@ -44,14 +45,15 @@ export 'navigation/i_navigator.dart';
 // Utils
 export 'utils/reactive_subject.dart';
 
-typedef BlocEventHandler<E, S> = Future<void> Function(
-    E event, Emitter<S> emit);
-typedef BlocErrorHandler = Future<void> Function(
-    Object error, StackTrace stack);
+typedef BlocEventHandler<E, S> =
+    Future<void> Function(E event, Emitter<S> emit);
+typedef BlocErrorHandler =
+    Future<void> Function(Object error, StackTrace stack);
 
 void checkCompatibility() {
   if (Platform.version.startsWith('2')) {
     developer.log(
-        'Warning: bloc_small requires Dart 3.0 or higher for best performance');
+      'Warning: bloc_small requires Dart 3.0 or higher for best performance',
+    );
   }
 }

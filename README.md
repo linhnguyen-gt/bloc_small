@@ -847,14 +847,6 @@ final subscription = stream.listen(
 await subject.dispose();
 ```
 
-### This organization
-
-1. Groups related methods together
-2. Provides clear, concise descriptions
-3. Includes practical examples
-4. Maintains all essential information while being more readable
-5. Ends with a practical usage example
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

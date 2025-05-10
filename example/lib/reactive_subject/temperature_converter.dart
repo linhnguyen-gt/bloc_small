@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class TemperatureConverter extends StatefulWidget {
   static const String route = '/temperature_converter';
 
+  const TemperatureConverter({super.key});
+
   @override
-  _TemperatureConverterState createState() => _TemperatureConverterState();
+  TemperatureConverterState createState() => TemperatureConverterState();
 }
 
-class _TemperatureConverterState extends State<TemperatureConverter> {
+class TemperatureConverterState extends State<TemperatureConverter> {
   final ReactiveSubject<double> _celsiusSubject = ReactiveSubject<double>();
   late ReactiveSubject<double> _fahrenheitSubject;
 
@@ -39,9 +41,7 @@ class _TemperatureConverterState extends State<TemperatureConverter> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(TemperatureConverter.route),
-      appBar: AppBar(
-        title: Text("Temperature Converter"),
-      ),
+      appBar: AppBar(title: Text("Temperature Converter")),
       body: Column(
         children: [
           TextField(
@@ -54,7 +54,8 @@ class _TemperatureConverterState extends State<TemperatureConverter> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return Text(
-                    'Temperature in Fahrenheit: ${snapshot.data!.toStringAsFixed(2)}°F');
+                  'Temperature in Fahrenheit: ${snapshot.data!.toStringAsFixed(2)}°F',
+                );
               } else {
                 return Text('Enter a valid temperature');
               }

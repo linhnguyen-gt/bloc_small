@@ -8,11 +8,13 @@ import 'reactive_subject_drawer.dart';
 class StockPrice extends StatefulWidget {
   static const String route = '/stock_price';
 
+  const StockPrice({super.key});
+
   @override
-  _StockPriceState createState() => _StockPriceState();
+  StockPriceState createState() => StockPriceState();
 }
 
-class _StockPriceState extends State<StockPrice> {
+class StockPriceState extends State<StockPrice> {
   final ReactiveSubject<String> _stockSymbolSubject = ReactiveSubject<String>();
   late ReactiveSubject<double> _stockPriceSubject;
 
@@ -28,13 +30,17 @@ class _StockPriceState extends State<StockPrice> {
   ReactiveSubject<double> getStockPriceStream(String symbol) {
     final resultSubject = ReactiveSubject<double>();
 
-    Future.delayed(Duration(seconds: 1)).then((_) {
-      final price =
-          100 + (symbol.codeUnitAt(0) * 0.1) + (DateTime.now().second * 0.01);
-      resultSubject.add(price);
-    }).catchError((error) {
-      resultSubject.addError(error);
-    });
+    Future.delayed(Duration(seconds: 1))
+        .then((_) {
+          final price =
+              100 +
+              (symbol.codeUnitAt(0) * 0.1) +
+              (DateTime.now().second * 0.01);
+          resultSubject.add(price);
+        })
+        .catchError((error) {
+          resultSubject.addError(error);
+        });
 
     return resultSubject;
   }
@@ -54,9 +60,7 @@ class _StockPriceState extends State<StockPrice> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(StockPrice.route),
-      appBar: AppBar(
-        title: Text("Stock Price"),
-      ),
+      appBar: AppBar(title: Text("Stock Price")),
       body: Column(
         children: [
           TextField(
@@ -68,7 +72,8 @@ class _StockPriceState extends State<StockPrice> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return Text(
-                    'Current Price: \$${snapshot.data!.toStringAsFixed(2)}');
+                  'Current Price: \$${snapshot.data!.toStringAsFixed(2)}',
+                );
               } else {
                 return Text('Enter a stock symbol to see the price');
               }

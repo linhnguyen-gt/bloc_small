@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class EmailFilter extends StatefulWidget {
   static const String route = '/email_filter';
 
+  const EmailFilter({super.key});
+
   @override
-  _EmailFilterState createState() => _EmailFilterState();
+  EmailFilterState createState() => EmailFilterState();
 }
 
-class _EmailFilterState extends State<EmailFilter> {
+class EmailFilterState extends State<EmailFilter> {
   final ReactiveSubject<String> _emailSubject = ReactiveSubject<String>();
   late ReactiveSubject<String> _validEmailSubject;
 
@@ -36,9 +38,7 @@ class _EmailFilterState extends State<EmailFilter> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(EmailFilter.route),
-      appBar: AppBar(
-        title: Text("Email Filter"),
-      ),
+      appBar: AppBar(title: Text("Email Filter")),
       body: Column(
         children: [
           TextField(

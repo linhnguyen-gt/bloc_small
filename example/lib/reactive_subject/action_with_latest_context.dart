@@ -6,15 +6,17 @@ import 'reactive_subject_drawer.dart';
 class ActionWithLatestContext extends StatefulWidget {
   static const String route = '/action_with_latest_context';
 
+  const ActionWithLatestContext({super.key});
+
   @override
-  _ActionWithLatestContextState createState() =>
-      _ActionWithLatestContextState();
+  ActionWithLatestContextState createState() => ActionWithLatestContextState();
 }
 
-class _ActionWithLatestContextState extends State<ActionWithLatestContext> {
+class ActionWithLatestContextState extends State<ActionWithLatestContext> {
   final ReactiveSubject<void> _actionSubject = ReactiveSubject<void>();
-  final ReactiveSubject<String> _selectedItemSubject =
-      ReactiveSubject<String>(initialValue: 'Item 1');
+  final ReactiveSubject<String> _selectedItemSubject = ReactiveSubject<String>(
+    initialValue: 'Item 1',
+  );
   late ReactiveSubject<String> _actionWithItemSubject;
 
   @override
@@ -53,9 +55,7 @@ class _ActionWithLatestContextState extends State<ActionWithLatestContext> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(ActionWithLatestContext.route),
-      appBar: AppBar(
-        title: Text("Action With Latest"),
-      ),
+      appBar: AppBar(title: Text("Action With Latest")),
       body: Column(
         children: [
           StreamBuilder<String>(

@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class DebouncedSearch extends StatefulWidget {
   static const String route = '/debounced_search';
 
+  const DebouncedSearch({super.key});
+
   @override
-  _DebouncedSearchState createState() => _DebouncedSearchState();
+  DebouncedSearchState createState() => DebouncedSearchState();
 }
 
-class _DebouncedSearchState extends State<DebouncedSearch> {
+class DebouncedSearchState extends State<DebouncedSearch> {
   final ReactiveSubject<String> _searchQuerySubject = ReactiveSubject<String>();
   late ReactiveSubject<List<String>> _searchResultsSubject;
 
@@ -49,9 +51,7 @@ class _DebouncedSearchState extends State<DebouncedSearch> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(DebouncedSearch.route),
-      appBar: AppBar(
-        title: Text("Debounced Search"),
-      ),
+      appBar: AppBar(title: Text("Debounced Search")),
       body: Column(
         children: [
           TextField(
@@ -66,9 +66,9 @@ class _DebouncedSearchState extends State<DebouncedSearch> {
                   final results = snapshot.data!;
                   return ListView.builder(
                     itemCount: results.length,
-                    itemBuilder: (context, index) => ListTile(
-                      title: Text(results[index]),
-                    ),
+                    itemBuilder:
+                        (context, index) =>
+                            ListTile(title: Text(results[index])),
                   );
                 } else {
                   return Center(child: Text('No results'));

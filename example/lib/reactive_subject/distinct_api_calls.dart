@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class DistinctApiCalls extends StatefulWidget {
   static const String route = '/distinct_api_calls';
 
+  const DistinctApiCalls({super.key});
+
   @override
-  _DistinctApiCallsState createState() => _DistinctApiCallsState();
+  DistinctApiCallsState createState() => DistinctApiCallsState();
 }
 
-class _DistinctApiCallsState extends State<DistinctApiCalls> {
+class DistinctApiCallsState extends State<DistinctApiCalls> {
   final ReactiveSubject<String> _apiParamSubject = ReactiveSubject<String>();
   late ReactiveSubject<String> _distinctParamSubject;
 
@@ -40,9 +42,7 @@ class _DistinctApiCallsState extends State<DistinctApiCalls> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(DistinctApiCalls.route),
-      appBar: AppBar(
-        title: Text("Distinct Api Calls"),
-      ),
+      appBar: AppBar(title: Text("Distinct Api Calls")),
       body: TextField(
         onChanged: _onParamChanged,
         decoration: InputDecoration(labelText: 'API Parameter'),

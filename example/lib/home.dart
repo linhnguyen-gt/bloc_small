@@ -10,10 +10,10 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
+class MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
   @override
   Widget buildPage(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -50,16 +50,12 @@ class _MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
             // horizontal).
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                'You have pushed the button this many times:',
-              ),
+              Text('You have pushed the button this many times:'),
               BlocBuilder<CountBloc, CountState>(
                 builder: (context, state) {
-                  return Text(
-                    '${state.count}',
-                  );
+                  return Text('${state.count}');
                 },
-              )
+              ),
             ],
           ),
         ),
@@ -69,19 +65,13 @@ class _MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
             CustomFloatingActionButton(
               onPressed: () => bloc.add(Increment()),
               tooltip: 'Increment',
-              child: Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
+              child: Icon(Icons.add, color: Colors.white),
             ),
             SizedBox(width: 10),
             CustomFloatingActionButton(
               onPressed: () => bloc.add(Decrement()),
               tooltip: 'Decrement',
-              child: Icon(
-                Icons.remove,
-                color: Colors.white,
-              ),
+              child: Icon(Icons.remove, color: Colors.white),
             ),
           ],
         ), // This trailing comma makes auto-formatting nicer for build methods.

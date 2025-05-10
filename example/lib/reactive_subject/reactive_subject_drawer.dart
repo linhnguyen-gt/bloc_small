@@ -20,7 +20,7 @@ import 'api_retry_example.dart';
 class ReactiveSubjectDrawer extends StatelessWidget {
   final String currentRoute;
 
-  const ReactiveSubjectDrawer(this.currentRoute);
+  const ReactiveSubjectDrawer(this.currentRoute, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,27 +30,18 @@ class ReactiveSubjectDrawer extends StatelessWidget {
       child: ListView(
         children: <Widget>[
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-            ),
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
             child: GestureDetector(
               onTap: () {
                 navigator.replaceAllWith(MyHomeRoute());
               },
               child: Row(
                 children: [
-                  Icon(
-                    Icons.home,
-                    color: Colors.white,
-                    size: 32,
-                  ),
+                  Icon(Icons.home, color: Colors.white, size: 32),
                   SizedBox(width: 16),
                   Text(
                     'Back to Home',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 24),
                   ),
                 ],
               ),

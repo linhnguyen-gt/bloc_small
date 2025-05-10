@@ -7,18 +7,18 @@ import 'navigation/app_router.gr.dart';
 
 @RoutePage()
 class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
+
   @override
-  _SearchPageState createState() => _SearchPageState();
+  SearchPageState createState() => SearchPageState();
 }
 
-class _SearchPageState extends BaseBlocPageState<SearchPage, SearchBloc> {
+class SearchPageState extends BaseBlocPageState<SearchPage, SearchBloc> {
   @override
   Widget buildPage(BuildContext context) {
     return Scaffold(
       drawer: MenuDrawer(SearchRoute.name),
-      appBar: AppBar(
-        title: Text('Reactive + Bloc Search'),
-      ),
+      appBar: AppBar(title: Text('Reactive + Bloc Search')),
       body: Column(
         children: [
           Padding(
@@ -27,7 +27,9 @@ class _SearchPageState extends BaseBlocPageState<SearchPage, SearchBloc> {
           ),
           Expanded(
             child: buildLoadingOverlay(
-                loadingKey: 'search', child: _SearchResults()),
+              loadingKey: 'search',
+              child: _SearchResults(),
+            ),
           ),
         ],
       ),
@@ -38,7 +40,7 @@ class _SearchPageState extends BaseBlocPageState<SearchPage, SearchBloc> {
 class _SearchInput extends StatelessWidget {
   final SearchBloc bloc;
 
-  _SearchInput({required this.bloc});
+  const _SearchInput({required this.bloc});
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +72,7 @@ class _SearchResults extends StatelessWidget {
             shrinkWrap: true,
             itemCount: state.results.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(state.results[index]),
-              );
+              return ListTile(title: Text(state.results[index]));
             },
           );
         } else if (state is Error) {

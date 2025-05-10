@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.2
+
+* Update Flutter SDK requirement to ^3.6.1
+* Update package dependencies:
+  * flutter_bloc to ^9.1.0
+  * mockito to ^5.4.6
+* Improve logging and error handling in AppNavigator
+* Update example project configurations and dependencies
+* Fix generated code compatibility (Freezed and auto_route generated files)\
+* Update "Constructors for public widgets should have a named 'key' parameter.
+Try adding a named parameter to the constructor.dartuse_key_in_widget_constructors"
+
 ## 3.0.1
 
 * Fix freezed import

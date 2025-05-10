@@ -12,132 +12,131 @@ part of 'count_cubit.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
-
 /// @nodoc
 mixin _$CountState {
-  int get count;
 
-  /// Create a copy of CountState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $CountStateCopyWith<CountState> get copyWith =>
-      _$CountStateCopyWithImpl<CountState>(this as CountState, _$identity);
+ int get count;
+/// Create a copy of CountState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CountStateCopyWith<CountState> get copyWith => _$CountStateCopyWithImpl<CountState>(this as CountState, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is CountState &&
-            (identical(other.count, count) || other.count == count));
-  }
 
-  @override
-  int get hashCode => Object.hash(runtimeType, count);
 
-  @override
-  String toString() {
-    return 'CountState(count: $count)';
-  }
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CountState&&(identical(other.count, count) || other.count == count));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,count);
+
+@override
+String toString() {
+  return 'CountState(count: $count)';
+}
+
+
 }
 
 /// @nodoc
-abstract mixin class $CountStateCopyWith<$Res> {
-  factory $CountStateCopyWith(
-          CountState value, $Res Function(CountState) _then) =
-      _$CountStateCopyWithImpl;
-  @useResult
-  $Res call({int count});
-}
+abstract mixin class $CountStateCopyWith<$Res>  {
+  factory $CountStateCopyWith(CountState value, $Res Function(CountState) _then) = _$CountStateCopyWithImpl;
+@useResult
+$Res call({
+ int count
+});
 
+
+
+
+}
 /// @nodoc
-class _$CountStateCopyWithImpl<$Res> implements $CountStateCopyWith<$Res> {
+class _$CountStateCopyWithImpl<$Res>
+    implements $CountStateCopyWith<$Res> {
   _$CountStateCopyWithImpl(this._self, this._then);
 
   final CountState _self;
   final $Res Function(CountState) _then;
 
-  /// Create a copy of CountState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? count = null,
-  }) {
-    return _then(_self.copyWith(
-      count: null == count
-          ? _self.count
-          : count // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
-  }
+/// Create a copy of CountState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? count = null,}) {
+  return _then(_self.copyWith(
+count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
 }
 
+}
+
+
 /// @nodoc
+
 
 class _Initial extends CountState {
-  const _Initial({this.count = 0}) : super._();
+  const _Initial({this.count = 0}): super._();
+  
 
-  @override
-  @JsonKey()
-  final int count;
+@override@JsonKey() final  int count;
 
-  /// Create a copy of CountState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$InitialCopyWith<_Initial> get copyWith =>
-      __$InitialCopyWithImpl<_Initial>(this, _$identity);
+/// Create a copy of CountState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$InitialCopyWith<_Initial> get copyWith => __$InitialCopyWithImpl<_Initial>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _Initial &&
-            (identical(other.count, count) || other.count == count));
-  }
 
-  @override
-  int get hashCode => Object.hash(runtimeType, count);
 
-  @override
-  String toString() {
-    return 'CountState.initial(count: $count)';
-  }
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initial&&(identical(other.count, count) || other.count == count));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,count);
+
+@override
+String toString() {
+  return 'CountState.initial(count: $count)';
+}
+
+
 }
 
 /// @nodoc
-abstract mixin class _$InitialCopyWith<$Res>
-    implements $CountStateCopyWith<$Res> {
-  factory _$InitialCopyWith(_Initial value, $Res Function(_Initial) _then) =
-      __$InitialCopyWithImpl;
-  @override
-  @useResult
-  $Res call({int count});
-}
+abstract mixin class _$InitialCopyWith<$Res> implements $CountStateCopyWith<$Res> {
+  factory _$InitialCopyWith(_Initial value, $Res Function(_Initial) _then) = __$InitialCopyWithImpl;
+@override @useResult
+$Res call({
+ int count
+});
 
+
+
+
+}
 /// @nodoc
-class __$InitialCopyWithImpl<$Res> implements _$InitialCopyWith<$Res> {
+class __$InitialCopyWithImpl<$Res>
+    implements _$InitialCopyWith<$Res> {
   __$InitialCopyWithImpl(this._self, this._then);
 
   final _Initial _self;
   final $Res Function(_Initial) _then;
 
-  /// Create a copy of CountState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? count = null,
-  }) {
-    return _then(_Initial(
-      count: null == count
-          ? _self.count
-          : count // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
-  }
+/// Create a copy of CountState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? count = null,}) {
+  return _then(_Initial(
+count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
 }
 
 // dart format on

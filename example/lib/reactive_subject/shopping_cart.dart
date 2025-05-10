@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class ShoppingCart extends StatefulWidget {
   static const String route = '/shopping_cart';
 
+  const ShoppingCart({super.key});
+
   @override
-  _ShoppingCartState createState() => _ShoppingCartState();
+  ShoppingCartState createState() => ShoppingCartState();
 }
 
-class _ShoppingCartState extends State<ShoppingCart> {
+class ShoppingCartState extends State<ShoppingCart> {
   final ReactiveSubject<double> _itemPriceSubject = ReactiveSubject<double>();
   late ReactiveSubject<double> _totalPriceSubject;
 
@@ -39,9 +41,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(ShoppingCart.route),
-      appBar: AppBar(
-        title: Text("Shopping Cart"),
-      ),
+      appBar: AppBar(title: Text("Shopping Cart")),
       body: Column(
         children: [
           StreamBuilder<double>(

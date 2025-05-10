@@ -6,11 +6,13 @@ import 'reactive_subject_drawer.dart';
 class NotificationMerger extends StatefulWidget {
   static const String route = '/notification_merger';
 
+  const NotificationMerger({super.key});
+
   @override
-  _NotificationMergerState createState() => _NotificationMergerState();
+  NotificationMergerState createState() => NotificationMergerState();
 }
 
-class _NotificationMergerState extends State<NotificationMerger> {
+class NotificationMergerState extends State<NotificationMerger> {
   final ReactiveSubject<String> _emailNotifications = ReactiveSubject<String>();
   final ReactiveSubject<String> _pushNotifications = ReactiveSubject<String>();
   late ReactiveSubject<String> _allNotifications;
@@ -19,8 +21,10 @@ class _NotificationMergerState extends State<NotificationMerger> {
   void initState() {
     super.initState();
     // Merge email and push notifications
-    _allNotifications = ReactiveSubject.merge<String>(
-        [_emailNotifications, _pushNotifications]);
+    _allNotifications = ReactiveSubject.merge<String>([
+      _emailNotifications,
+      _pushNotifications,
+    ]);
   }
 
   @override
@@ -43,9 +47,7 @@ class _NotificationMergerState extends State<NotificationMerger> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReactiveSubjectDrawer(NotificationMerger.route),
-      appBar: AppBar(
-        title: Text("Notification Merger"),
-      ),
+      appBar: AppBar(title: Text("Notification Merger")),
       body: Column(
         children: [
           ElevatedButton(

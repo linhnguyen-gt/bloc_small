@@ -18,10 +18,12 @@ class AppNavigator implements INavigator {
   final bool enableNavigationLogs;
 
   void _throwError() {
-    throw FlutterError('AppNavigator not found in DI container.\n'
-        'Did you forget to register AppRouter?\n\n'
-        'Add this in your configureInjectionApp():\n'
-        '  getIt.registerAppRouter<AppRouter>(AppRouter());');
+    throw FlutterError(
+      'AppNavigator not found in DI container.\n'
+      'Did you forget to register AppRouter?\n\n'
+      'Add this in your configureInjectionApp():\n'
+      '  getIt.registerAppRouter<AppRouter>(AppRouter());',
+    );
   }
 
   /// Pushes a new route onto the navigation stack
@@ -55,7 +57,7 @@ class AppNavigator implements INavigator {
   /// Pops the current route off the navigation stack
   ///
   /// If [result] is provided, it will be passed to the previous route
-  /// Returns a Future<bool> indicating whether the pop was successful
+  /// Returns a Future&lt;bool&gt; indicating whether the pop was successful
   @override
   Future<bool>? pop<T extends Object?>([T? result]) {
     if (enableNavigationLogs) {

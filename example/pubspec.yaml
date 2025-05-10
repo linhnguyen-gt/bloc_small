@@ -5,7 +5,7 @@ description: "Demonstrates how to use the bloc_small plugin."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: ^3.6.1
+  sdk: ^3.7.2
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -28,8 +28,6 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  injectable: ^2.5.0
-  bloc_test: ^10.0.0
 
 dev_dependencies:
   integration_test:
@@ -43,7 +41,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-  injectable_generator: ^2.7.0
+
+  bloc_test: ^10.0.0
   build_runner: ^2.4.15
   auto_route_generator: ^10.0.1
   freezed: ^3.0.4
