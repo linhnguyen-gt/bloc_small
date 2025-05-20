@@ -31,6 +31,7 @@ class DebouncedSearchState extends State<DebouncedSearch> {
         return ['Result 1 for $query', 'Result 2 for $query'];
       }),
       onError: (error) {
+        // ignore: avoid_print
         print('Error occurred during search: $error');
       },
     );

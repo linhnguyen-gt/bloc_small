@@ -30,6 +30,7 @@ class ApiRetryExampleState extends State<ApiRetryExample> {
         .debounceTime(const Duration(milliseconds: 300))
         .switchMap((query) => _makeApiCall(query))
         .onErrorResumeNext((error) {
+          // ignore: avoid_print
           print('Error occurred: $error');
           return ReactiveSubject<String>(
             initialValue: 'Error: ${error.toString()}',
@@ -51,8 +52,14 @@ class ApiRetryExampleState extends State<ApiRetryExample> {
         }
         return 'Result for: $query';
       }),
-      onError: (error) => print('API call failed: $error'),
-      onFinally: () => print('API call completed'),
+      onError: (error) {
+        // ignore: avoid_print
+        print('API call failed: $error');
+      },
+      onFinally: () {
+        // ignore: avoid_print
+        print('API call completed');
+      },
       timeout: Duration(seconds: 5),
     );
   }

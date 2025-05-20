@@ -13,37 +13,42 @@ export 'package:freezed_annotation/freezed_annotation.dart';
 export 'package:get_it/get_it.dart';
 export 'package:injectable/injectable.dart';
 
-// Base classes
-export 'base/base_app_router.dart';
-export 'base/base_bloc_page.dart';
-export 'base/base_bloc_page_state.dart';
-export 'base/base_cubit_page.dart';
-export 'base/base_cubit_state.dart';
-export 'base/base_page_delegate.dart';
-// Common bloc
-export 'bloc/common/common_bloc.dart';
-// Bloc core
-export 'bloc/core/bloc/main_bloc.dart';
-export 'bloc/core/cubit/main_cubit.dart';
-// DI
-export 'bloc/core/di/di.dart';
-// Error handling
-export 'bloc/core/error/bloc_error_handler.dart';
-export 'bloc/core/error/cubit_error_handler.dart';
-export 'bloc/core/error/error_state.dart';
-export 'bloc/core/error/exceptions.dart';
-export 'bloc/core/main_bloc_event.dart';
-export 'bloc/core/main_bloc_state.dart';
 // Constants
-export 'constant/default_loading.dart';
+export 'core/constants/default_loading.dart';
+// Core layer
+// DI
+export 'core/di/di.dart';
+// Error handling
+export 'core/error/bloc_error_handler.dart';
+export 'core/error/cubit_error_handler.dart';
+export 'core/error/error_state.dart';
+export 'core/error/exceptions.dart';
 // Extensions
-export 'extensions/app_navigator_extension.dart';
-export 'extensions/bloc_context_extension.dart';
+export 'core/extensions/app_navigator_extension.dart';
+export 'core/extensions/bloc_context_extension.dart';
+// Utils
+export 'core/utils/reactive_subject.dart';
 // Navigation
 export 'navigation/app_navigator.dart';
 export 'navigation/i_navigator.dart';
-// Utils
-export 'utils/reactive_subject.dart';
+// Presentation layer
+// Base classes
+export 'presentation/base/base_app_router.dart';
+export 'presentation/base/base_bloc_page.dart';
+export 'presentation/base/base_bloc_page_state.dart';
+export 'presentation/base/base_cubit_page.dart';
+export 'presentation/base/base_cubit_state.dart';
+export 'presentation/base/base_page_delegate.dart';
+export 'presentation/base/base_page_stateless_delegate.dart';
+// Bloc
+export 'presentation/bloc/common_bloc.dart';
+export 'presentation/bloc/main_bloc.dart';
+export 'presentation/bloc/main_bloc_event.dart';
+export 'presentation/bloc/main_bloc_state.dart';
+// Cubit
+export 'presentation/cubit/main_cubit.dart';
+// Widgets
+export 'presentation/widgets/loading_indicator.dart';
 
 typedef BlocEventHandler<E, S> =
     Future<void> Function(E event, Emitter<S> emit);

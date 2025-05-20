@@ -50,12 +50,13 @@ Add `bloc_small` to your `pubspec.yaml` file:
 ```yaml
 dependencies:
   bloc_small:
-  injectable:
 
 dev_dependencies:
-  injectable_generator:
+# available in pubspec.yaml
   build_runner:
+  auto_route_generator:
   freezed:
+  injectable_generator:
 ```
 
 Then run:
@@ -296,12 +297,12 @@ class _CounterPageState extends BaseCubitPageState<CounterPage, CountCubit> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             FloatingActionButton(
-              onPressed: () => bloc.increment(),
+              onPressed: () => cubit.increment(),
               child: const Icon(Icons.add),
             ),
             const SizedBox(height: 16),
             FloatingActionButton(
-              onPressed: () => bloc.decrement(),
+              onPressed: () => cubit.decrement(),
               child: const Icon(Icons.remove),
             ),
           ],

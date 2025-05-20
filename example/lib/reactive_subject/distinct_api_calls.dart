@@ -23,6 +23,7 @@ class DistinctApiCallsState extends State<DistinctApiCalls> {
     _distinctParamSubject = _apiParamSubject.distinct();
     _distinctParamSubject.stream.listen((param) {
       // Make API call with param
+      // ignore: avoid_print
       print('Making API call with parameter: $param');
     });
   }

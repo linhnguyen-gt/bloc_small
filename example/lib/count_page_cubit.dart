@@ -39,13 +39,13 @@ class CounterPage extends BaseCubitPage<CountCubit> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             FloatingActionButton(
-              onPressed: () => bloc.increment(),
+              onPressed: () => cubit.increment(),
               heroTag: 'increment',
               child: const Icon(Icons.add),
             ),
             const SizedBox(height: 16),
             FloatingActionButton(
-              onPressed: () => bloc.decrement(),
+              onPressed: () => cubit.decrement(),
               heroTag: 'decrement',
               child: const Icon(Icons.remove),
             ),

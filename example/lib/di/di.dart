@@ -4,9 +4,9 @@ import '../navigation/app_router.dart';
 import 'di.config.dart';
 
 // The global instance of GetIt for dependency injection
-final GetIt getIt = GetIt.instance;
+final getIt = GetIt.instance;
 
-@InjectableInit()
+@injectableInit
 void configureInjectionApp() {
   // Step 1 (Optional): Register your preferred navigation solution
   // Example with AppRouter:

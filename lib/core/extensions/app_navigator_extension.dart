@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../navigation/app_navigator.dart';
+import '../../navigation/app_navigator.dart';
 
 /// Extension on [GetIt] to provide type-safe access to [AppNavigator].
 ///

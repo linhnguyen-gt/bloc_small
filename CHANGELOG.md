@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.1.0
+
+* BasePageDelegate (base_page_delegate.dart):
+  * Renamed bloc property to stateManager for better semantic clarity
+  * Updated documentation to reflect that it can be both a Bloc or Cubit
+  * Updated MultiBlocProvider to use the new variable name
+* BaseBlocPageState (base_bloc_page_state.dart):
+
+  * Added a strongly-typed bloc getter that returns stateManager with the correct Bloc type
+  * Updated method calls to use the typed bloc getter instead of casting
+  * Enhanced documentation with proper usage examples
+* BaseCubitPageState (base_cubit_state.dart):
+  * Added a strongly-typed cubit getter that returns stateManager with the correct Cubit type
+  * Updated method calls to use the typed cubit getter instead of casting
+  * Updated documentation with proper usage examples
+* Clean folder
+
 ## 3.0.2
 
 * Update package dependencies:

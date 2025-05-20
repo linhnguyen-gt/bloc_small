@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../presentation/bloc/main_bloc.dart';
+import '../../presentation/bloc/main_bloc.dart';
 
 extension BlocContextX on BuildContext {
   B getBloc<B extends MainBloc>() => BlocProvider.of<B>(this);

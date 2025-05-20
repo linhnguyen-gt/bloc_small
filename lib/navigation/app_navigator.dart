@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
 
-import '../base/base_app_router.dart';
+import '../presentation/base/base_app_router.dart';
 import 'i_navigator.dart';
 
 /// Handles navigation operations using auto_route

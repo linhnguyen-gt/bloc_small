@@ -29,6 +29,7 @@ class ActionWithLatestContextState extends State<ActionWithLatestContext> {
     );
     _actionWithItemSubject.stream.listen((item) {
       // Perform action with the selected item
+      // ignore: avoid_print
       print('Action performed on $item');
     });
   }

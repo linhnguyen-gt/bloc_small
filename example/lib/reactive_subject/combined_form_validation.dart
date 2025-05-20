@@ -41,6 +41,7 @@ class CombinedFormValidationState extends State<CombinedFormValidation> {
 
   void _onSubmit() {
     // Submit the form
+    // ignore: avoid_print
     print('Form submitted');
   }
 
