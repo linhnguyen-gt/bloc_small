@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1
+
+* Upgrade dependencies
+
 ## 3.1.0
 
 * BasePageDelegate (base_page_delegate.dart):

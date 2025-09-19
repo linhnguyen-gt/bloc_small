@@ -460,11 +460,9 @@ class ReactiveSubject<T> {
     if (timeout != null) {
       timeoutFuture = future.timeout(
         timeout,
-        onTimeout:
-            () =>
-                throw TimeoutException(
-                  'Operation timed out after ${timeout.inSeconds} seconds',
-                ),
+        onTimeout: () => throw TimeoutException(
+          'Operation timed out after ${timeout.inSeconds} seconds',
+        ),
       );
     }
 
@@ -553,7 +551,7 @@ class ReactiveSubject<T> {
   ReactiveSubject<T> retry([int? count]) {
     final result = ReactiveSubject<T>();
     stream
-        .handleError((_, __) => null)
+        .handleError((_, _) => null)
         .listen(result.add, onError: result.addError);
     return result;
   }
