@@ -1,4 +1,5 @@
 import 'package:bloc_small/bloc_small.dart';
+import 'package:bloc_small_example/reactive_subject/reactive_subject_improvements_demo.dart';
 import 'package:flutter/material.dart';
 
 import 'action_with_latest_context.dart';
@@ -48,6 +49,8 @@ class ReactiveSubjectScreen extends StatelessWidget {
         StockPrice.route: (context) => StockPrice(),
         TemperatureConverter.route: (context) => TemperatureConverter(),
         ApiRetryExample.route: (context) => ApiRetryExample(),
+        ReactiveSubjectImprovementsDemo.route:
+            (context) => ReactiveSubjectImprovementsDemo(),
       },
     );
   }

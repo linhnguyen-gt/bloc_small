@@ -1,9 +1,10 @@
 import 'package:bloc_small/bloc_small.dart';
 import 'package:flutter/material.dart';
-import '../di/di.dart';
 
+import '../di/di.dart';
 import '../navigation/app_router.gr.dart';
 import 'action_with_latest_context.dart';
+import 'api_retry_example.dart';
 import 'combined_form_validation.dart';
 import 'debounced_search.dart';
 import 'default_settings.dart';
@@ -11,11 +12,11 @@ import 'distinct_api_calls.dart';
 import 'email_filter.dart';
 import 'notification_merger.dart';
 import 'rate_limited_button.dart';
+import 'reactive_subject_improvements_demo.dart';
 import 'reactive_subject_menu_item.dart';
 import 'shopping_cart.dart';
 import 'stock_price.dart';
 import 'temperature_converter.dart';
-import 'api_retry_example.dart';
 
 class ReactiveSubjectDrawer extends StatelessWidget {
   final String currentRoute;
@@ -105,6 +106,11 @@ class ReactiveSubjectDrawer extends StatelessWidget {
           ReactiveSubjectMenuItemWidget(
             caption: 'API Retry Example (Error Handling)',
             routeName: ApiRetryExample.route,
+            currentRoute: currentRoute,
+          ),
+          ReactiveSubjectMenuItemWidget(
+            caption: 'Reactive Subject Improvements Demo',
+            routeName: ReactiveSubjectImprovementsDemo.route,
             currentRoute: currentRoute,
           ),
         ],

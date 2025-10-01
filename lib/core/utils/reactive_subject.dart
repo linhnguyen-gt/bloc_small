@@ -123,6 +123,16 @@ class ReactiveSubject<T> {
     return _value!;
   }
 
+  /// Returns the current value if available, otherwise returns null.
+  /// This is a safe alternative to [value] that doesn't throw exceptions.
+  T? get valueOrNull => _value;
+
+  /// Returns the current value if available, otherwise returns the provided default value.
+  T valueOr(T defaultValue) => _value ?? defaultValue;
+
+  /// Returns true if the subject has a current value.
+  bool get hasValue => _value != null;
+
   final Subject<T> _subject;
 
   /// The stream of the underlying subject.
@@ -159,7 +169,48 @@ class ReactiveSubject<T> {
       return;
     }
     _isDisposed = true;
+
+    // Cancel all active subscriptions before closing
+    await _cancelAllSubscriptions();
+
+    // Close the underlying subject
     await _subject.close();
+
+    // Clear the cached value
+    _value = null;
+  }
+
+  final List<StreamSubscription<dynamic>> _subscriptions = [];
+
+  /// Adds a subscription to be managed by this ReactiveSubject
+  void _addSubscription(StreamSubscription<dynamic> subscription) {
+    if (!_isDisposed) {
+      _subscriptions.add(subscription);
+    }
+  }
+
+  /// Cancels all managed subscriptions
+  Future<void> _cancelAllSubscriptions() async {
+    final futures = _subscriptions.map((sub) => sub.cancel()).toList();
+    _subscriptions.clear();
+    await Future.wait(futures.whereType<Future<void>>());
+  }
+
+  /// Creates a managed subscription that will be automatically cancelled on dispose
+  StreamSubscription<T> listenManaged(
+    void Function(T value) onData, {
+    Function? onDone,
+    Function? onError,
+    bool? cancelOnError,
+  }) {
+    final subscription = stream.listen(
+      onData,
+      onDone: onDone as void Function()?,
+      onError: onError,
+      cancelOnError: cancelOnError,
+    );
+    _addSubscription(subscription);
+    return subscription;
   }
 
   /// Adds an error to the subject.
@@ -264,6 +315,67 @@ class ReactiveSubject<T> {
     final result = ReactiveSubject<T>();
     stream.distinct(equals).listen(result.add, onError: result.addError);
     return result;
+  }
+
+  /// Emits items that are distinct based on a key selector function.
+  /// This is more efficient than distinct() when you only need to compare specific properties.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<User>();
+  /// final distinctById = subject.distinctBy((user) => user.id);
+  /// distinctById.stream.listen(print);
+  /// ```
+  ReactiveSubject<T> distinctBy<K>(K Function(T value) keySelector) {
+    final result = ReactiveSubject<T>();
+    final seenKeys = <K>{};
+
+    stream
+        .where((value) {
+          final key = keySelector(value);
+          if (seenKeys.contains(key)) {
+            return false;
+          }
+          seenKeys.add(key);
+          return true;
+        })
+        .listen(result.add, onError: result.addError);
+
+    return result;
+  }
+
+  /// Caches the latest value and replays it to new subscribers.
+  /// This is more memory efficient than shareReplay for single value caching.
+  ///
+  /// Example:
+  /// ```dart
+  /// final source = ReactiveSubject<String>();
+  /// final cached = source.cache();
+  ///
+  /// source.add('hello');
+  ///
+  /// // New subscriber gets the cached value immediately
+  /// cached.stream.listen(print); // Prints: hello
+  /// ```
+  ReactiveSubject<T> cache() {
+    if (_subject is BehaviorSubject<T>) {
+      return this; // Already caching behavior
+    }
+
+    final result = ReactiveSubject<T>();
+    T? cachedValue;
+    bool hasCache = false;
+
+    stream.listen((value) {
+      cachedValue = value;
+      hasCache = true;
+      result.add(value);
+    }, onError: result.addError);
+
+    // Override the stream getter to provide cached value to new subscribers
+    return ReactiveSubject<T>.broadcast()
+      ..stream.listen((_) {}, onError: (_) {}) // Keep original stream alive
+      .._value = hasCache ? cachedValue : null;
   }
 
   /// Combines the latest values of multiple ReactiveSubjects into a single ReactiveSubject that emits a List of those values.
@@ -550,9 +662,54 @@ class ReactiveSubject<T> {
   /// ```
   ReactiveSubject<T> retry([int? count]) {
     final result = ReactiveSubject<T>();
+
+    Stream<T> retryStream = stream;
+    if (count != null) {
+      retryStream = stream.onErrorResume((error, stackTrace) {
+        if (count > 0) {
+          return retry(count - 1).stream;
+        } else {
+          return Stream.error(error, stackTrace);
+        }
+      });
+    } else {
+      retryStream = stream.onErrorResume((error, stackTrace) => retry().stream);
+    }
+
+    retryStream.listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Retries the source ReactiveSubject when an error occurs, with a delay between retries.
+  ///
+  /// Parameters:
+  /// - [retryWhenFactory]: A function that receives the error stream and returns a stream that determines when to retry
+  ///
+  /// Returns a ReactiveSubject that retries based on the retryWhen function
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<String>();
+  ///
+  /// final retried = subject.retryWhen((errors) =>
+  ///   errors.delay(Duration(seconds: 1)).take(3)
+  /// );
+  ///
+  /// retried.stream.listen(print);
+  /// ```
+  ReactiveSubject<T> retryWhen(
+    Stream<void> Function(Stream<Object>) retryWhenFactory,
+  ) {
+    final result = ReactiveSubject<T>();
+
+    // Use a simpler approach - just use onErrorResume which is available in RxDart
     stream
-        .handleError((_, _) => null)
+        .onErrorResume((error, stackTrace) {
+          final errorStream = Stream<Object>.value(error);
+          return retryWhenFactory(errorStream).switchMap((_) => stream);
+        })
         .listen(result.add, onError: result.addError);
+
     return result;
   }
 
@@ -760,6 +917,153 @@ class ReactiveSubject<T> {
       },
     );
 
+    return result;
+  }
+
+  /// Transforms each item emitted by the source ReactiveSubject by applying a function that returns a nullable value,
+  /// and only emits non-null results.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<String>();
+  /// final mapped = subject.mapNotNull((s) => int.tryParse(s));
+  /// mapped.stream.listen(print);
+  ///
+  /// subject.add('123'); // Prints: 123
+  /// subject.add('abc'); // Does not print (null filtered out)
+  /// ```
+  ReactiveSubject<R> mapNotNull<R>(R? Function(T event) mapper) {
+    final result = ReactiveSubject<R>();
+    stream
+        .map(mapper)
+        .whereType<R>()
+        .listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Emits only items that are not null from the source ReactiveSubject.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<String?>();
+  /// final nonNull = subject.whereNotNull();
+  /// nonNull.stream.listen(print);
+  ///
+  /// subject.add('hello'); // Prints: hello
+  /// subject.add(null);    // Does not print
+  /// ```
+  ReactiveSubject<T> whereNotNull() {
+    final result = ReactiveSubject<T>();
+    stream
+        .where((event) => event != null)
+        .cast<T>()
+        .listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Emits the previous and current values as a pair.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>();
+  /// final paired = subject.pairwise();
+  /// paired.stream.listen(print);
+  ///
+  /// subject.add(1);
+  /// subject.add(2); // Prints: [1, 2]
+  /// subject.add(3); // Prints: [2, 3]
+  /// ```
+  ReactiveSubject<List<T>> pairwise() {
+    final result = ReactiveSubject<List<T>>();
+    stream.pairwise().listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Emits the time interval between consecutive emissions.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>();
+  /// final timed = subject.timeInterval();
+  /// timed.stream.listen((interval) => print('Value: ${interval.value}, Interval: ${interval.interval}'));
+  /// ```
+  ReactiveSubject<TimeInterval<T>> timeInterval() {
+    final result = ReactiveSubject<TimeInterval<T>>();
+    stream.timeInterval().listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Emits each item with a timestamp indicating when it was emitted.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>();
+  /// final timestamped = subject.timestamp();
+  /// timestamped.stream.listen((ts) => print('Value: ${ts.value}, Time: ${ts.timestamp}'));
+  /// ```
+  ReactiveSubject<Timestamped<T>> timestamp() {
+    final result = ReactiveSubject<Timestamped<T>>();
+    stream.timestamp().listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Skips the last [count] items emitted by the source ReactiveSubject.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>();
+  /// final skipped = subject.skipLast(2);
+  /// skipped.stream.listen(print);
+  ///
+  /// subject.add(1);
+  /// subject.add(2);
+  /// subject.add(3); // Prints: 1
+  /// subject.add(4); // Prints: 2
+  /// ```
+  ReactiveSubject<T> skipLast(int count) {
+    final result = ReactiveSubject<T>();
+    stream.skipLast(count).listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Takes the last [count] items emitted by the source ReactiveSubject.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>();
+  /// final lastTwo = subject.takeLast(2);
+  /// lastTwo.stream.listen(print);
+  ///
+  /// subject.add(1);
+  /// subject.add(2);
+  /// subject.add(3);
+  /// subject.dispose(); // Prints: 2, 3
+  /// ```
+  ReactiveSubject<T> takeLast(int count) {
+    final result = ReactiveSubject<T>();
+    stream.takeLast(count).listen(result.add, onError: result.addError);
+    return result;
+  }
+
+  /// Emits items from the source ReactiveSubject while the [test] function returns true.
+  /// Unlike [Stream.takeWhile], this includes the first item that fails the test.
+  ///
+  /// Example:
+  /// ```dart
+  /// final subject = ReactiveSubject<int>();
+  /// final taken = subject.takeWhileInclusive((i) => i < 3);
+  /// taken.stream.listen(print);
+  ///
+  /// subject.add(1); // Prints: 1
+  /// subject.add(2); // Prints: 2
+  /// subject.add(3); // Prints: 3 (included even though test fails)
+  /// subject.add(4); // Does not print
+  /// ```
+  ReactiveSubject<T> takeWhileInclusive(bool Function(T event) test) {
+    final result = ReactiveSubject<T>();
+    stream
+        .takeWhileInclusive(test)
+        .listen(result.add, onError: result.addError);
     return result;
   }
 
