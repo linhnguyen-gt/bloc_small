@@ -1,6 +1,6 @@
 name: bloc_small
 description: An easy-to-use Flutter package offering a streamlined BLoC pattern implementation for intuitive and efficient state management in Flutter apps.
-version: 3.2.1
+version: 3.2.2
 homepage: https://github.com/linhnguyen-gt/bloc_small
 
 environment:

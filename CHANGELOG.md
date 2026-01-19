@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.2.2
+
+*Released on 2026-01-19*
+
+### Fixes
+
+* **ci**: checkout release tag in publish job to ensure correct version ([dd40a05](https://github.com/linhnguyen-gt/bloc_small/commit/dd40a05385b73aea29ac77f195f5c018de526f18))
+
 ## 3.2.1
 
 *Released on 2026-01-19*
