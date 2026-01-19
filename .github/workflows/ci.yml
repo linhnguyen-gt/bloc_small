@@ -106,8 +106,7 @@ jobs:
         id: changelog
         run: |
           VERSION="${{ steps.bump_version.outputs.new_version }}"
-          awk "/^## $VERSION/,/^## /{if (!/^## / || /^## $VERSION/) print}" CHANGELOG.md > release_notes.md || \
-          awk "/^## $VERSION/,0" CHANGELOG.md > release_notes.md
+          awk "/^## $VERSION/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md > release_notes.md
 
       - name: Create GitHub Release
         if: steps.bump_version.outputs.version_bumped == 'true'
