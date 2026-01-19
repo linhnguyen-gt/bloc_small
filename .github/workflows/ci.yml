@@ -127,6 +127,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.version.outputs.new_version }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
