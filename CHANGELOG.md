@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.2.0
+
+*Released on 2026-01-19*
+
+### Features
+
+* implement automated CI/CD release workflow and refactor codebase ([04a7754](https://github.com/linhnguyen-gt/bloc_small/commit/04a7754ad0430d1021d39faf86f9a3a6527964c0))
+
+### Fixes
+
+* correct version extraction in CI/CD workflow ([d674c28](https://github.com/linhnguyen-gt/bloc_small/commit/d674c2815f0973de2e534dec8ccefd59b4c6b0e4))
+* update test to match new ReactiveSubject disposal behavior ([97dc3c9](https://github.com/linhnguyen-gt/bloc_small/commit/97dc3c99d6874e4ee3d2ad24f2d72f408fc06724))
+* resolve all linting issues for CI/CD ([8358151](https://github.com/linhnguyen-gt/bloc_small/commit/8358151734658567dbc28ec0becb4d6a7d7641fd))
+* resolve injectable_generator dependency conflict ([fb4cdc0](https://github.com/linhnguyen-gt/bloc_small/commit/fb4cdc04ef5e17ffe5844ebd435221b3860b96c5))
+* resolve build_runner dependency conflict in example ([1a3ae45](https://github.com/linhnguyen-gt/bloc_small/commit/1a3ae453ae3e0306ca012321621f4c7a36650552))
+
+### Other
+
+* upgrade Flutter to 3.38.7 and update all packages ([6587aa2](https://github.com/linhnguyen-gt/bloc_small/commit/6587aa23b5f92d8136af9e6eea2fe3918ef777ed))
+* add RxDart 0.28.0 enhancements to ReactiveSubject with comprehensive demo ([fcc4ec0](https://github.com/linhnguyen-gt/bloc_small/commit/fcc4ec069ec32f8b79e38ee193a3bc953356c284))
+
 ## 3.1.1
 
 * Upgrade dependencies
