@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.2.1
+
+*Released on 2026-01-19*
+
+### Fixes
+
+* **ci**: correct changelog extraction logic for release notes ([049a261](https://github.com/linhnguyen-gt/bloc_small/commit/049a2619108ca2908c174868853b1fb278c2fe5d))
+
 ## 3.2.0
 
 *Released on 2026-01-19*
