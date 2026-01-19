@@ -31,3 +31,10 @@ migrate_working_dir/
 .flutter-plugins
 .flutter-plugins-dependencies
 build/
+
+# AIKit - AI Development Kits
+.shared/
+plans/
+.cursor/
+.cursorrules
+CLAUDE.md

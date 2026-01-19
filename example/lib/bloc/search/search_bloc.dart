@@ -37,7 +37,10 @@ class SearchBloc extends MainBloc<SearchEvent, SearchState>
       keyLoading: 'search',
       actions: () async {
         await Future.delayed(Duration(seconds: 2));
-        _searchQuery.add(event.query);
+        // Check if bloc is closed before adding to ReactiveSubject
+        if (!isClosed && !_searchQuery.isDisposed) {
+          _searchQuery.add(event.query);
+        }
       },
       onError: handleError,
     );

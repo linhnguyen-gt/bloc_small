@@ -7,7 +7,17 @@
 
 A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the [flutter_bloc](https://pub.dev/packages/flutter_bloc) package. `bloc_small` simplifies state management, making it more intuitive while maintaining the core benefits of the BLoC pattern.
 
-[Getting Started](#installation) • [Examples](https://github.com/linhnguyen-gt/bloc_small/tree/base_feature/example)
+[Getting Started](#installation) • [Documentation](docs/)
+
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+- **[Project Overview & PDR](docs/project-overview-pdr.md)** - Product vision, features, and requirements
+- **[Codebase Summary](docs/codebase-summary.md)** - Overview of codebase structure and components
+- **[Code Standards](docs/code-standards.md)** - Coding conventions and best practices
+- **[System Architecture](docs/system-architecture.md)** - Architecture diagrams and design patterns
+- **[Example Application](example/README.md)** - Complete example app with all features demonstrated
 
 </div>
 

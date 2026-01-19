@@ -1,4 +1,4 @@
-import 'package:bloc_small/core/utils/reactive_subject.dart';
+import 'package:bloc_small/core/utils/reactive_subject/reactive_subject.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

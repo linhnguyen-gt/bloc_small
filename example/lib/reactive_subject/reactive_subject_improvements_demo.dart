@@ -1,4 +1,4 @@
-import 'package:bloc_small/core/utils/reactive_subject.dart';
+import 'package:bloc_small/core/utils/reactive_subject/reactive_subject.dart';
 import 'package:flutter/material.dart';
 
 class ReactiveSubjectImprovementsDemo extends StatefulWidget {

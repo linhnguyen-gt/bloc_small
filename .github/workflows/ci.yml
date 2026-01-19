@@ -2,17 +2,18 @@ name: CI/CD
 
 on:
   push:
-    branches: [master]
+    branches: [master, main]
   pull_request:
-    branches: [master]
-  release:
-    types: [published]
+    branches: [master, main]
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -31,16 +32,102 @@ jobs:
         run: flutter test --coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: coverage/lcov.info
 
-  publish:
+  version:
     needs: test
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      new_version: ${{ steps.bump_version.outputs.new_version }}
+      version_bumped: ${{ steps.bump_version.outputs.version_bumped }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.35.4"
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          set +e
+          OUTPUT=$(dart scripts/bump_version.dart 2>&1)
+          EXIT_CODE=$?
+          NEW_VERSION=$(echo "$OUTPUT" | tail -1)
+          
+          if [ $EXIT_CODE -eq 0 ] && [ -n "$NEW_VERSION" ]; then
+            echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "version_bumped=true" >> $GITHUB_OUTPUT
+            echo "Version bumped to: $NEW_VERSION"
+          else
+            echo "version_bumped=false" >> $GITHUB_OUTPUT
+            echo "No version bump needed or error occurred"
+            echo "$OUTPUT"
+          fi
+
+      - name: Generate CHANGELOG
+        if: steps.bump_version.outputs.version_bumped == 'true'
+        run: |
+          dart scripts/generate_changelog.dart ${{ steps.bump_version.outputs.new_version }}
+
+      - name: Commit changes
+        if: steps.bump_version.outputs.version_bumped == 'true'
+        run: |
+          git add pubspec.yaml CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: bump version to ${{ steps.bump_version.outputs.new_version }}"
+          git push
+
+      - name: Extract CHANGELOG for release
+        if: steps.bump_version.outputs.version_bumped == 'true'
+        id: changelog
+        run: |
+          VERSION="${{ steps.bump_version.outputs.new_version }}"
+          awk "/^## $VERSION/,/^## /{if (!/^## / || /^## $VERSION/) print}" CHANGELOG.md > release_notes.md || \
+          awk "/^## $VERSION/,0" CHANGELOG.md > release_notes.md
+
+      - name: Create GitHub Release
+        if: steps.bump_version.outputs.version_bumped == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.bump_version.outputs.new_version }}
+          name: Release v${{ steps.bump_version.outputs.new_version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+
+  publish:
+    needs: [test, version]
+    if: |
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') &&
+      needs.version.outputs.version_bumped == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
