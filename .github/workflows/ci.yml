@@ -71,9 +71,10 @@ jobs:
         id: bump_version
         run: |
           set +e
-          OUTPUT=$(dart scripts/bump_version.dart 2>&1)
+          # Capture stdout (version) separately from stderr (log message)
+          # Version is printed to stdout, log message to stderr
+          NEW_VERSION=$(dart scripts/bump_version.dart 2>/dev/null | tail -1)
           EXIT_CODE=$?
-          NEW_VERSION=$(echo "$OUTPUT" | tail -1)
           
           if [ $EXIT_CODE -eq 0 ] && [ -n "$NEW_VERSION" ]; then
             echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
@@ -82,13 +83,12 @@ jobs:
           else
             echo "version_bumped=false" >> $GITHUB_OUTPUT
             echo "No version bump needed or error occurred"
-            echo "$OUTPUT"
           fi
 
       - name: Generate CHANGELOG
         if: steps.bump_version.outputs.version_bumped == 'true'
         run: |
-          dart scripts/generate_changelog.dart ${{ steps.bump_version.outputs.new_version }}
+          dart scripts/generate_changelog.dart "${{ steps.bump_version.outputs.new_version }}"
 
       - name: Commit changes
         if: steps.bump_version.outputs.version_bumped == 'true'
