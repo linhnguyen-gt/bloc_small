@@ -75,9 +75,14 @@ void main() {
         expect(subject.isClosed, isTrue);
       });
 
-      test('should throw when adding to disposed subject', () async {
+      test('should silently ignore when adding to disposed subject', () async {
+        final initialValue = subject.value;
         await subject.dispose();
-        expect(() => subject.add(1), throwsStateError);
+        expect(subject.isDisposed, isTrue);
+        // Should not throw - silently ignores to prevent errors from async operations
+        expect(() => subject.add(1), returnsNormally);
+        // Verify value was not added (value is cleared on dispose, so use valueOr)
+        expect(subject.valueOr(initialValue), equals(initialValue));
       });
 
       test('should not dispose twice', () async {
