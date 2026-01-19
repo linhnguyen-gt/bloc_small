@@ -299,14 +299,12 @@ void main() {
       });
 
       test('retry should retry on error', () async {
-        var attemptCount = 0;
         final testSubject = ReactiveSubject<int>();
         final retried = testSubject.retry(2);
 
         retried.stream.listen(
           (_) {},
           onError: (error) {
-            attemptCount++;
           },
         );
 

@@ -142,7 +142,7 @@ void main() {
             return 'success';
           },
           maxAttempts: 3,
-          delay: Duration(milliseconds: 10),
+          delay: const Duration(milliseconds: 10),
         );
 
         expect(callCount, equals(2));
@@ -158,7 +158,7 @@ void main() {
               throw Exception('Persistent failure');
             },
             maxAttempts: 3,
-            delay: Duration(milliseconds: 10),
+            delay: const Duration(milliseconds: 10),
           );
           fail('Should have thrown an exception');
         } catch (e) {
@@ -178,7 +178,7 @@ void main() {
               throw Exception('Failure');
             },
             maxAttempts: 3,
-            delay: Duration(milliseconds: 50),
+            delay: const Duration(milliseconds: 50),
           );
         } catch (_) {
           // Expected to fail
@@ -272,7 +272,7 @@ void main() {
             return 'success';
           },
           maxAttempts: 3,
-          delay: Duration(milliseconds: 10),
+          delay: const Duration(milliseconds: 10),
         );
 
         expect(callCount, equals(2));
@@ -288,7 +288,7 @@ void main() {
               throw Exception('Persistent failure');
             },
             maxAttempts: 3,
-            delay: Duration(milliseconds: 10),
+            delay: const Duration(milliseconds: 10),
           );
           fail('Should have thrown an exception');
         } catch (e) {

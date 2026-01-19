@@ -1,14 +1,14 @@
 #!/usr/bin/env dart
 // Script to automatically bump version based on conventional commits.
-///
-/// Usage:
-///   dart scripts/bump_version.dart
-///
-/// Version bump rules:
-/// - feat: → MINOR (3.1.1 → 3.2.0)
-/// - fix: → PATCH (3.1.1 → 3.1.2)
-/// - BREAKING CHANGE or ! → MAJOR (3.1.1 → 4.0.0)
-/// - Other → PATCH
+//
+// Usage:
+//   dart scripts/bump_version.dart
+//
+// Version bump rules:
+// - feat: → MINOR (3.1.1 → 3.2.0)
+// - fix: → PATCH (3.1.1 → 3.1.2)
+// - BREAKING CHANGE or ! → MAJOR (3.1.1 → 4.0.0)
+// - Other → PATCH
 
 import 'dart:io';
 
@@ -66,7 +66,7 @@ void main() async {
   if (commits.isEmpty && lastTag != null) {
     // No new commits, no version bump needed
     // Output current version but don't update pubspec.yaml
-    print(currentVersion);
+    stdout.writeln(currentVersion);
     exit(0);
   }
 
@@ -131,7 +131,7 @@ void main() async {
   await pubspecFile.writeAsString(updatedContent);
 
   // Output new version for use in workflow
-  print(newVersion);
+  stdout.writeln(newVersion);
   
   // Output bump type for logging
   stderr.writeln('Version bumped: $currentVersion → $newVersion ($bumpType)');

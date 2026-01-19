@@ -1,11 +1,11 @@
 #!/usr/bin/env dart
 // Script to generate CHANGELOG.md entry from conventional commits.
-///
-/// Usage:
-///   dart scripts/generate_changelog.dart VERSION
-///
-/// Example:
-///   dart scripts/generate_changelog.dart 3.2.0
+//
+// Usage:
+//   dart scripts/generate_changelog.dart VERSION
+//
+// Example:
+//   dart scripts/generate_changelog.dart 3.2.0
 
 import 'dart:io';
 
@@ -243,5 +243,5 @@ void main(List<String> args) async {
   final newContent = '${'# Changelog\n\n'}${buffer.toString()}$contentWithoutHeader';
   await changelogFile.writeAsString(newContent);
 
-  print('CHANGELOG updated for version $version');
+  stdout.writeln('CHANGELOG updated for version $version');
 }
