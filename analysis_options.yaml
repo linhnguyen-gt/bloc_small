@@ -1,7 +1,13 @@
 include: package:flutter_lints/flutter.yaml
+
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
 analyzer:
+  exclude:
+    # Deliberate compile-failure fixtures. `analyze_fixtures_test.dart` runs the
+    # analyzer against these and asserts they are rejected, so they must not
+    # count against the normal `flutter analyze` run.
+    - test/fixtures/**
   language:
     strict-casts: false
     strict-raw-types: true
@@ -15,7 +21,8 @@ linter:
     - always_put_control_body_on_new_line
     - always_put_required_named_parameters_first
     - annotate_overrides
-    #    - avoid_dynamic_calls
+    - avoid_dynamic_calls
+    - use_build_context_synchronously
     - avoid_empty_else
     - avoid_init_to_null
     - avoid_multiple_declarations_per_line
@@ -51,7 +58,6 @@ linter:
     - prefer_const_constructors_in_immutables
     - prefer_const_declarations
     - prefer_contains
-    - prefer_equal_for_default_values
     - prefer_final_fields
     - prefer_final_locals
     - prefer_for_elements_to_map_fromIterable

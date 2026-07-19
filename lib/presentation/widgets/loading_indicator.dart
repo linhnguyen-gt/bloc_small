@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// A platform-aware loading indicator widget.
@@ -24,7 +23,7 @@ class LoadingIndicator extends StatelessWidget {
       color: backgroundColor,
       child: Center(
         child:
-            Platform.isIOS
+            defaultTargetPlatform == TargetPlatform.iOS
                 ? const CupertinoActivityIndicator(color: Colors.black)
                 : const CircularProgressIndicator(),
       ),

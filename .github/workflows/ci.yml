@@ -36,8 +36,30 @@ jobs:
         with:
           file: coverage/lcov.info
 
+  # Nothing else in CI compiles for web, so a re-introduced `dart:io` import in
+  # lib/ would break every web consumer without failing a single check.
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.7"
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        working-directory: example
+        run: flutter pub get
+
+      - name: Build example for web
+        working-directory: example
+        run: flutter build web
+
   version:
-    needs: test
+    needs: [test, build-web]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     permissions:
@@ -119,7 +141,7 @@ jobs:
           prerelease: false
 
   publish:
-    needs: [test, version]
+    needs: [test, build-web, version]
     if: |
       github.event_name == 'push' && 
       (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') &&

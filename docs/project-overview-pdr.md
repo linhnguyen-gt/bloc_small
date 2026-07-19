@@ -37,7 +37,7 @@ Create an intuitive, developer-friendly state management solution that:
 
 ### 4. Error Handling
 - Standardized error handling with `blocCatch` and `cubitCatch`
-- Built-in exception types (NetworkException, ValidationException, TimeoutException)
+- Built-in exception types (NetworkException, ValidationException, AppTimeoutException)
 - Error handler mixin for consistent error management
 
 ### 5. Navigation Integration

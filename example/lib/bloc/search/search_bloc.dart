@@ -1,12 +1,14 @@
 import 'package:bloc_small/bloc_small.dart';
+import 'package:injectable/injectable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'search_bloc.freezed.dart';
 part 'search_event.dart';
 part 'search_state.dart';
 
-@injectable
+@lazySingleton
 class SearchBloc extends MainBloc<SearchEvent, SearchState>
-    with BlocErrorHandlerMixin {
+    with BaseErrorHandlerMixin {
   final ReactiveSubject<String> _searchQuery = ReactiveSubject<String>();
   late final ReactiveSubject<List<String>> _searchResults;
 

@@ -90,7 +90,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 **BLoC Pattern:**
 
 ```dart
-@injectable
+@lazySingleton
 class CounterBloc extends MainBloc<CounterEvent, CounterState> {
   CounterBloc() : super(const CounterState.initial()) {
     on<Increment>(_onIncrement);
@@ -101,7 +101,7 @@ class CounterBloc extends MainBloc<CounterEvent, CounterState> {
 **Cubit Pattern:**
 
 ```dart
-@injectable
+@lazySingleton
 class CounterCubit extends MainCubit<CounterState> {
   CounterCubit() : super(const CounterState.initial());
 
@@ -134,14 +134,16 @@ void main() {
 }
 ```
 
-> **Important**: The `RegisterModule` class with the `CommonBloc` singleton is essential. If you don't include this Dependency Injection setup, your app will encounter errors. The `CommonBloc` is used internally by `bloc_small` for managing common functionalities like loading states across your app.
+> **Important**: `getIt.registerCore()` is required. It registers `CommonBloc` — used
+> internally for app-wide loading state — as a lazy singleton, and it is the only
+> registration path for it. Without this call your app will throw on its first page.
 
 Make sure to call `configureInjectionApp()` before running your app
 
 ### 2. Define your BLoC
 
 ```dart
-@injectable
+@lazySingleton
 class CountBloc extends MainBloc<CountEvent, CountState> {
   CountBloc() : super(const CountState.initial()) {
     on<Increment>(_onIncrementCounter);
@@ -244,7 +246,7 @@ If you prefer a simpler approach without events, you can use Cubit instead of BL
 ### 1. Define your Cubit
 
 ```dart
-@injectable
+@lazySingleton
 class CounterCubit extends MainCubit<CounterState> {
   CounterCubit() : super(const CounterState.initial());
 
@@ -333,9 +335,48 @@ class _CounterPageState extends BaseCubitPageState<CounterPage, CountCubit> {
 | Complexity | More boilerplate    | Simpler implementation |
 | Use Case | Complex state logic | Simple state changes |
 
+## Bloc ownership
+
+**The DI container owns every bloc and cubit. Widgets consume them and never close them.**
+
+Base pages provide their state manager with `BlocProvider.value`, so disposing a page
+does not close the bloc behind it. The same instance stays usable when the page is
+pushed again. Two rules follow:
+
+1. **Register a page's state manager as a singleton or lazy singleton.**
+   `registerFactory` is not supported for a type used as a base page's `B`. A factory
+   hands out a new instance per resolution, and because pages never close what they did
+   not create, nothing would dispose them — GetIt does not track factory instances. In
+   debug builds this is caught at page build time with an explanatory `StateError`.
+
+   ```dart
+   // Correct
+   getIt.registerLazySingleton<CountBloc>(CountBloc.new);   // or @lazySingleton
+   
+   // Rejected in debug builds
+   getIt.registerFactory<CountBloc>(CountBloc.new);
+   ```
+
+2. **`CommonBloc` is app-wide.** `registerCore()` registers it as a lazy singleton, so
+   every page observes the same loading state. Call `resetCore()` to tear it down in
+   tests or after a hot restart.
+
+3. **Do not annotate your router for codegen.** `registerAppRouter` registers the
+   instance you hand it, so an `@LazySingleton()` on the router as well would register
+   it twice and make `getIt.init()` throw.
+
+   ```dart
+   @AutoRouterConfig(replaceInRouteName: 'Page,Route')
+   class AppRouter extends BaseAppRouter { ... }   // no @LazySingleton
+   ```
+
 ## Using StatelessWidget
 
 bloc_small also supports StatelessWidget with similar functionality to StatefulWidget implementations.
+
+`BaseBlocPage` and `BaseCubitPage` are `StatefulWidget`s. Their `buildPage` receives the
+state manager as an argument — the same instance the page provides to the widget tree —
+so what a page renders and what it sends events to cannot drift apart.
 
 ### 1. Using BLoC with StatelessWidget
 
@@ -344,9 +385,8 @@ class MyHomePage extends BaseBlocPage<CountBloc> {
   const MyHomePage({super.key});
 
   @override
-  Widget buildPage(BuildContext context) {
+  Widget buildPage(BuildContext context, CountBloc bloc) {
     return buildLoadingOverlay(
-      context,
       child: Scaffold(
         appBar: AppBar(title: const Text('Counter Example')),
         body: Center(
@@ -376,9 +416,8 @@ class CounterPage extends BaseCubitPage<CountCubit> {
   const CounterPage({super.key});
 
   @override
-  Widget buildPage(BuildContext context) {
+  Widget buildPage(BuildContext context, CountCubit cubit) {
     return buildLoadingOverlay(
-      context,
       child: Scaffold(
         appBar: AppBar(title: const Text('Counter Example')),
         body: Center(
@@ -650,13 +689,13 @@ await blocCatch(
 );
 ```
 
-### Error Handling with BlocErrorHandlerMixin
+### Error Handling with BaseErrorHandlerMixin
 
 `bloc_small` provides a mixin for standardized error handling and logging:
 
 ```dart
-@injectable
-class CountBloc extends MainBloc<CountEvent, CountState> with BlocErrorHandlerMixin {
+@lazySingleton
+class CountBloc extends MainBloc<CountEvent, CountState> with BaseErrorHandlerMixin {
   CountBloc() : super(const CountState.initial()) {
     on<Increment>(_onIncrement);
   }
@@ -679,7 +718,7 @@ class CountBloc extends MainBloc<CountEvent, CountState> with BlocErrorHandlerMi
 The mixin provides:
 
 - Automatic error logging with stack traces
-- Built-in support for common exceptions (NetworkException, ValidationException, TimeoutException)
+- Built-in support for common exceptions (NetworkException, ValidationException, AppTimeoutException)
 - Automatic loading state cleanup
 - Helper method for error messages
 
@@ -711,7 +750,7 @@ bloc_small provides lifecycle hooks to manage state and resources based on widge
 #### Using Lifecycle Hooks in BLoC
 
 ```dart
-@injectable
+@lazySingleton
 class CounterBloc extends MainBloc<CounterEvent, CounterState> {
   Timer? _timer;
 

@@ -1,12 +1,14 @@
 import 'package:bloc_small/bloc_small.dart';
+import 'package:injectable/injectable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'count_bloc.freezed.dart';
 part 'count_event.dart';
 part 'count_state.dart';
 
-@injectable
+@lazySingleton
 class CountBloc extends MainBloc<CountEvent, CountState>
-    with BlocErrorHandlerMixin {
+    with BaseErrorHandlerMixin {
   CountBloc() : super(const CountState.initial()) {
     on<Increment>(_onIncrementCounter);
     on<Decrement>(_onDecrementCounter);

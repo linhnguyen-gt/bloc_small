@@ -15,50 +15,21 @@ import 'package:bloc_small_example/home.dart' as _i2;
 import 'package:bloc_small_example/reactive_subject/reacttive_subject_screen.dart'
     as _i3;
 import 'package:bloc_small_example/search_page.dart' as _i4;
-import 'package:flutter/material.dart' as _i6;
 
 /// generated route for
 /// [_i1.CounterPage]
-class CounterRoute extends _i5.PageRouteInfo<CounterRouteArgs> {
-  CounterRoute({_i6.Key? key, List<_i5.PageRouteInfo>? children})
-    : super(
-        CounterRoute.name,
-        args: CounterRouteArgs(key: key),
-        initialChildren: children,
-      );
+class CounterRoute extends _i5.PageRouteInfo<void> {
+  const CounterRoute({List<_i5.PageRouteInfo>? children})
+    : super(CounterRoute.name, initialChildren: children);
 
   static const String name = 'CounterRoute';
 
   static _i5.PageInfo page = _i5.PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<CounterRouteArgs>(
-        orElse: () => const CounterRouteArgs(),
-      );
-      return _i1.CounterPage(key: args.key);
+      return const _i1.CounterPage();
     },
   );
-}
-
-class CounterRouteArgs {
-  const CounterRouteArgs({this.key});
-
-  final _i6.Key? key;
-
-  @override
-  String toString() {
-    return 'CounterRouteArgs{key: $key}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! CounterRouteArgs) return false;
-    return key == other.key;
-  }
-
-  @override
-  int get hashCode => key.hashCode;
 }
 
 /// generated route for

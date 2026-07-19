@@ -1,27 +1,29 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:bloc_small_example/di/di.dart';
+import 'package:bloc_small_example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:bloc_small_example/main.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
-  testWidgets('Verify Platform version', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+  setUp(() async {
+    await GetIt.I.reset();
+    configureInjectionApp();
+  });
 
-    // Verify that platform version is retrieved.
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text && widget.data!.startsWith('Running on:'),
-      ),
-      findsOneWidget,
-    );
+  tearDown(() async {
+    await GetIt.I.reset();
+  });
+
+  // Smoke test: the example boots end to end against the real DI setup, which
+  // is what catches a registration mistake in `configureInjectionApp` —
+  // including a bloc registered as a factory, which base pages reject.
+  testWidgets('the example app boots and renders its initial route', (
+    tester,
+  ) async {
+    await tester.pumpWidget(MyApp());
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

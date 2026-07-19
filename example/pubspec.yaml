@@ -25,6 +25,13 @@ dependencies:
     # the parent directory to use the current plugin's version.
     path: ../
 
+  # bloc_small 4.0.0 stopped re-exporting these wholesale, so apps that use
+  # them declare them directly. See the 4.0.0 migration notes.
+  auto_route: ^11.1.0
+  freezed_annotation: ^3.1.0
+  get_it: ^9.2.0
+  injectable: ^2.6.0
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8

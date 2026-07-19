@@ -2,6 +2,7 @@ import 'package:bloc_small/bloc_small.dart';
 
 import '../navigation/app_router.dart';
 import 'di.config.dart';
+import 'package:injectable/injectable.dart';
 
 // The global instance of GetIt for dependency injection
 final getIt = GetIt.instance;

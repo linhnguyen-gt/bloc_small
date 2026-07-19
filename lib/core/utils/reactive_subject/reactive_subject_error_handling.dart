@@ -8,6 +8,11 @@ extension ReactiveSubjectErrorHandlingExtension<T> on ReactiveSubject<T> {
   /// When an error occurs, the [recoveryFn] is called with the error and should return a new ReactiveSubject
   /// that will be used to continue the stream.
   ///
+  /// Each time [recoveryFn] produces a new recovery subject, the previous one
+  /// is disposed — including the final one once the result is disposed.
+  /// Previously every subject a recovery call allocated was dropped without
+  /// ever being disposed, the same per-event leak as `switchMap` (C9b).
+  ///
   /// Parameters:
   /// - [recoveryFn]: A function that takes an error and returns a new ReactiveSubject
   ///
@@ -34,10 +39,25 @@ extension ReactiveSubjectErrorHandlingExtension<T> on ReactiveSubject<T> {
   ReactiveSubject<T> onErrorResumeNext(
     ReactiveSubject<T> Function(Object error) recoveryFn,
   ) {
-    final result = ReactiveSubject<T>();
-    stream
-        .onErrorResume((error, stackTrace) => recoveryFn(error).stream)
-        .listen(result.add, onError: result.addError);
+    ReactiveSubject<T>? activeRecovery;
+
+    void disposeActiveRecovery() {
+      final recovery = activeRecovery;
+      activeRecovery = null;
+      if (recovery != null) {
+        unawaited(recovery.dispose());
+      }
+    }
+
+    final result = _deriveReactiveSubject<T>(
+      stream.onErrorResume((error, stackTrace) {
+        disposeActiveRecovery();
+        final recovery = recoveryFn(error);
+        activeRecovery = recovery;
+        return recovery.stream;
+      }),
+    );
+    result._onDispose(disposeActiveRecovery);
     return result;
   }
 
@@ -45,6 +65,21 @@ extension ReactiveSubjectErrorHandlingExtension<T> on ReactiveSubject<T> {
   ///
   /// If [count] is provided, will retry the specified number of times before giving up.
   /// If [count] is null, will retry indefinitely.
+  ///
+  /// **Known limitation:** `ReactiveSubject` wraps a value stream, not a
+  /// re-runnable task, so "retry" here can only mean "re-subscribe to the
+  /// same source". If the source is `BehaviorSubject`-backed (the default
+  /// constructor), it replays its most recently emitted item *or error* to
+  /// every new subscriber — so re-subscribing after an error immediately
+  /// replays that same cached error again, consuming one of [count]
+  /// attempts without the source ever doing new work. The retries are real
+  /// (each one is a fresh subscription, and the orphan subject each attempt
+  /// used to allocate is now disposed instead of leaked), but they cannot
+  /// cause a different outcome unless something else pushes a new, distinct
+  /// value onto the source in between. For a stream backed by genuinely
+  /// re-runnable work, retry around the work itself (e.g. wrap the
+  /// `Future`-producing function passed to [fromFutureWithError] in your own
+  /// retry loop) rather than retrying the resulting subject.
   ///
   /// Parameters:
   /// - [count]: Optional number of retry attempts
@@ -66,22 +101,28 @@ extension ReactiveSubjectErrorHandlingExtension<T> on ReactiveSubject<T> {
   /// subject.addError('Test error');
   /// ```
   ReactiveSubject<T> retry([int? count]) {
-    final result = ReactiveSubject<T>();
+    ReactiveSubject<T>? activeRetry;
 
-    Stream<T> retryStream = stream;
-    if (count != null) {
-      retryStream = stream.onErrorResume((error, stackTrace) {
-        if (count > 0) {
-          return retry(count - 1).stream;
-        } else {
-          return Stream.error(error, stackTrace);
-        }
-      });
-    } else {
-      retryStream = stream.onErrorResume((error, stackTrace) => retry().stream);
+    void disposeActiveRetry() {
+      final active = activeRetry;
+      activeRetry = null;
+      if (active != null) {
+        unawaited(active.dispose());
+      }
     }
 
-    retryStream.listen(result.add, onError: result.addError);
+    final retryStream = stream.onErrorResume((error, stackTrace) {
+      if (count != null && count <= 0) {
+        return Stream<T>.error(error, stackTrace);
+      }
+      disposeActiveRetry();
+      final next = retry(count == null ? null : count - 1);
+      activeRetry = next;
+      return next.stream;
+    });
+
+    final result = _deriveReactiveSubject<T>(retryStream);
+    result._onDispose(disposeActiveRetry);
     return result;
   }
 
@@ -105,16 +146,12 @@ extension ReactiveSubjectErrorHandlingExtension<T> on ReactiveSubject<T> {
   ReactiveSubject<T> retryWhen(
     Stream<void> Function(Stream<Object>) retryWhenFactory,
   ) {
-    final result = ReactiveSubject<T>();
-
     // Use a simpler approach - just use onErrorResume which is available in RxDart
-    stream
-        .onErrorResume((error, stackTrace) {
-          final errorStream = Stream<Object>.value(error);
-          return retryWhenFactory(errorStream).switchMap((_) => stream);
-        })
-        .listen(result.add, onError: result.addError);
-
-    return result;
+    return _deriveReactiveSubject<T>(
+      stream.onErrorResume((error, stackTrace) {
+        final errorStream = Stream<Object>.value(error);
+        return retryWhenFactory(errorStream).switchMap((_) => stream);
+      }),
+    );
   }
 }

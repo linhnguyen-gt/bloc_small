@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/default_loading.dart';
 import '../base/base_delegate.dart';
+import '../base/i_state_manager.dart';
 import '../bloc/main_bloc_state.dart';
 
 /// A base class for all Cubits in the application.
@@ -48,7 +49,8 @@ abstract class MainCubit<S extends MainBlocState> extends BaseCubitDelegate<S> {
 }
 
 abstract class BaseCubitDelegate<S extends MainBlocState> extends Cubit<S>
-    with BaseDelegate<S> {
+    with BaseDelegate<S>
+    implements IStateManager<S> {
   BaseCubitDelegate(super.initialState);
 
   /// Resets the bloc to its initial state.
@@ -67,6 +69,10 @@ abstract class BaseCubitDelegate<S extends MainBlocState> extends Cubit<S>
   /// }
   /// ```
   void reset(S initialState) {
+    // Guard matches the one on Bloc.add(): emitting after close throws (I6).
+    if (isClosed) {
+      return;
+    }
     emit(initialState);
   }
 

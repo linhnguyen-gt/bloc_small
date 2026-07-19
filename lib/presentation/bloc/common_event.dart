@@ -68,3 +68,24 @@ class SetComponentLoading extends CommonEvent {
   /// ```
   const SetComponentLoading({required this.key, required this.isLoading});
 }
+
+/// Force-clears a loading key regardless of how many operations hold it.
+///
+/// [SetComponentLoading] with `isLoading: false` decrements by one, which
+/// cannot clear a key two operations are holding. This event exists for the
+/// safety timeout, which must be able to dismiss a stuck spinner outright.
+///
+/// Prefer paired [SetComponentLoading] events in normal code — a force-clear
+/// hides a spinner whose operations are still running.
+///
+/// Example:
+/// ```dart
+/// commonBloc.add(const ClearComponentLoading(key: 'data_fetch'));
+/// ```
+class ClearComponentLoading extends CommonEvent {
+  /// Identifier of the loading operation to clear.
+  final String key;
+
+  /// Creates a [ClearComponentLoading] event.
+  const ClearComponentLoading({required this.key});
+}

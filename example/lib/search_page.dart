@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'bloc/search/search_bloc.dart';
 import 'drawer/menu_drawer.dart';
 import 'navigation/app_router.gr.dart';
+import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
 class SearchPage extends StatefulWidget {

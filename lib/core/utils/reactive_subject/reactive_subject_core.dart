@@ -66,13 +66,22 @@ part of 'reactive_subject.dart';
 ///   }
 /// }
 /// ```
+///
+/// Derived subjects (the result of `.map()`, `.where()`, `.switchMap()`, and
+/// every other operator in this library) own the subscription to their
+/// source: disposing a derived subject cancels that subscription, and
+/// disposing the source forwards completion to every subject derived from
+/// it. Neither side can outlive the other by accident.
 class ReactiveSubject<T> {
   /// Creates a ReactiveSubject with a BehaviorSubject.
   ///
   /// [initialValue] is the initial value of the subject, if provided.
   ReactiveSubject({T? initialValue}) : _subject = BehaviorSubject<T>() {
+    assert(() {
+      debugActiveInstanceCount++;
+      return true;
+    }());
     if (initialValue != null) {
-      _value = initialValue;
       add(initialValue);
     }
   }
@@ -99,36 +108,70 @@ class ReactiveSubject<T> {
   /// ```
   ReactiveSubject.broadcast({T? initialValue})
       : _subject = PublishSubject<T>() {
+    assert(() {
+      debugActiveInstanceCount++;
+      return true;
+    }());
     if (initialValue != null) {
-      _value = initialValue;
       add(initialValue);
     }
   }
 
-  late T? _value;
+  /// Creates a ReactiveSubject backed by a caller-supplied [Subject], e.g. a
+  /// [ReplaySubject] for `shareReplay`. Internal only: callers outside this
+  /// library always get a [BehaviorSubject] or [PublishSubject] through the
+  /// public constructors.
+  ReactiveSubject._withSubject(this._subject) {
+    assert(() {
+      debugActiveInstanceCount++;
+      return true;
+    }());
+  }
+
+  /// Debug-only count of `ReactiveSubject` instances that have been
+  /// constructed but not yet disposed. Incremented by every constructor and
+  /// decremented once by [dispose]; compiled out of release builds because
+  /// it only runs inside `assert()`. Tests use it to prove an operator does
+  /// not leak instances (e.g. a per-event subject that is never disposed),
+  /// which is otherwise unobservable from Dart without heap inspection.
+  @visibleForTesting
+  static int debugActiveInstanceCount = 0;
+
+  // Not `late`: a fresh subject legitimately holds no value, and `late` made
+  // `valueOrNull` throw a LateInitializationError instead of returning null (C1).
+  T? _value;
+
+  // Tracks whether a value has ever been set, independent of whether that
+  // value is itself `null`. Using `_value != null` as a stand-in for "has a
+  // value" (the previous approach) meant `ReactiveSubject<String?>()..add(null)`
+  // reported `hasValue == false` and `.value` threw, even though `null` is a
+  // legitimate value for a nullable T (I14).
+  bool _hasValue = false;
 
   /// The current value of the subject.
   ///
   /// Throws a [StateError] if no value has been added and no initial value was provided.
   T get value {
-    if (_value == null) {
+    if (!_hasValue) {
       throw StateError(
         'No value available. Ensure an initial value was provided or a value has been added. '
         'Consider using ReactiveSubject(initialValue: defaultValue) if a default value is appropriate.',
       );
     }
-    return _value!;
+    return _value as T;
   }
 
   /// Returns the current value if available, otherwise returns null.
   /// This is a safe alternative to [value] that doesn't throw exceptions.
-  T? get valueOrNull => _value;
+  T? get valueOrNull => _hasValue ? _value : null;
 
   /// Returns the current value if available, otherwise returns the provided default value.
-  T valueOr(T defaultValue) => _value ?? defaultValue;
+  T valueOr(T defaultValue) => _hasValue ? (_value as T) : defaultValue;
 
-  /// Returns true if the subject has a current value.
-  bool get hasValue => _value != null;
+  /// Returns true if the subject has a current value. This is `true` even if
+  /// that value is `null` (for a nullable `T`) as long as one was set via
+  /// the constructor's `initialValue` or via [add].
+  bool get hasValue => _hasValue;
 
   final Subject<T> _subject;
 
@@ -136,7 +179,11 @@ class ReactiveSubject<T> {
   Stream<T> get stream => _subject.stream;
 
   /// The sink of the underlying subject.
-  Sink<T> get sink => _subject.sink;
+  ///
+  /// Routes writes through [add], so they respect the same dispose guard and
+  /// keep [value]/[hasValue] in sync. Writing directly to the wrapped
+  /// [Subject]'s own sink bypassed both (I15).
+  Sink<T> get sink => _GuardedSink<T>(this);
 
   /// Whether the underlying subject is closed.
   bool get isClosed => _subject.isClosed;
@@ -155,6 +202,7 @@ class ReactiveSubject<T> {
       return; // Silently ignore if disposed to prevent errors from async operations
     }
     _value = value;
+    _hasValue = true;
     if (!_subject.isClosed) {
       _subject.add(value);
     }
@@ -167,6 +215,14 @@ class ReactiveSubject<T> {
     }
     _isDisposed = true;
 
+    // Run resource-cleanup callbacks (e.g. an operator's currently-active
+    // inner subject) before cancelling subscriptions, so nothing they touch
+    // has been torn down yet.
+    for (final callback in _disposeCallbacks) {
+      callback();
+    }
+    _disposeCallbacks.clear();
+
     // Cancel all active subscriptions before closing
     await _cancelAllSubscriptions();
 
@@ -175,6 +231,28 @@ class ReactiveSubject<T> {
 
     // Clear the cached value
     _value = null;
+    _hasValue = false;
+
+    assert(() {
+      debugActiveInstanceCount--;
+      return true;
+    }());
+  }
+
+  final List<void Function()> _disposeCallbacks = [];
+
+  /// Registers a callback that runs once, at the start of [dispose].
+  ///
+  /// Used by operators that own a resource beyond a single
+  /// [StreamSubscription] — for example `switchMap`'s currently-active inner
+  /// subject — so that resource is released regardless of whether disposal
+  /// was triggered by the caller or by the source's `onDone` forwarding.
+  void _onDispose(void Function() callback) {
+    if (_isDisposed) {
+      callback();
+    } else {
+      _disposeCallbacks.add(callback);
+    }
   }
 
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -196,13 +274,13 @@ class ReactiveSubject<T> {
   /// Creates a managed subscription that will be automatically cancelled on dispose
   StreamSubscription<T> listenManaged(
     void Function(T value) onData, {
-    Function? onDone,
+    void Function()? onDone,
     Function? onError,
     bool? cancelOnError,
   }) {
     final subscription = stream.listen(
       onData,
-      onDone: onDone as void Function()?,
+      onDone: onDone,
       onError: onError,
       cancelOnError: cancelOnError,
     );
@@ -211,11 +289,22 @@ class ReactiveSubject<T> {
   }
 
   /// Adds an error to the subject.
+  ///
+  /// If the subject is disposed or already closed, this silently returns
+  /// instead of forwarding to a closed [Subject] — the same guard [add] has
+  /// always had (I13).
   void addError(Object error, [StackTrace? stackTrace]) {
+    if (_isDisposed || _subject.isClosed) {
+      return;
+    }
     _subject.addError(error, stackTrace);
   }
 
   /// Combines the latest values of multiple ReactiveSubjects into a single ReactiveSubject that emits a List of those values.
+  ///
+  /// The result completes once every source subject does (C9c): previously
+  /// it never forwarded completion, so listeners relying on `onDone` (e.g.
+  /// `await for`) would hang forever even after all sources were disposed.
   ///
   /// Usage:
   /// ```dart
@@ -228,14 +317,15 @@ class ReactiveSubject<T> {
   static ReactiveSubject<List<T>> combineLatest<T>(
     List<ReactiveSubject<T>> subjects,
   ) {
-    final result = ReactiveSubject<List<T>>();
-    Rx.combineLatestList(
-      subjects.map((s) => s.stream),
-    ).listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<List<T>>(
+      Rx.combineLatestList(subjects.map((s) => s.stream)),
+    );
   }
 
   /// Merges multiple ReactiveSubjects into a single ReactiveSubject.
+  ///
+  /// The result completes once every source subject does (C9c), matching
+  /// [combineLatest].
   ///
   /// Usage:
   /// ```dart
@@ -246,11 +336,7 @@ class ReactiveSubject<T> {
   /// subject1.add(3); // Prints: 3
   /// ```
   static ReactiveSubject<T> merge<T>(List<ReactiveSubject<T>> subjects) {
-    final result = ReactiveSubject<T>();
-    Rx.merge(
-      subjects.map((s) => s.stream),
-    ).listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<T>(Rx.merge(subjects.map((s) => s.stream)));
   }
 
   /// Creates a ReactiveSubject from a Future, with error handling and completion callback.
@@ -338,44 +424,44 @@ class ReactiveSubject<T> {
     return subject;
   }
 
-  /// Caches the latest value and replays it to new subscribers.
-  /// This is more memory efficient than shareReplay for single value caching.
-  ///
-  /// Example:
-  /// ```dart
-  /// final source = ReactiveSubject<String>();
-  /// final cached = source.cache();
-  ///
-  /// source.add('hello');
-  ///
-  /// // New subscriber gets the cached value immediately
-  /// cached.stream.listen(print); // Prints: hello
-  /// ```
-  ReactiveSubject<T> cache() {
-    if (_subject is BehaviorSubject<T>) {
-      return this; // Already caching behavior
-    }
+}
 
-    final result = ReactiveSubject<T>();
-    T? cachedValue;
-    bool hasCache = false;
+/// Creates a new [ReactiveSubject] that subscribes to [source] and forwards
+/// every event to it, seeding [into] if given rather than a fresh subject.
+///
+/// The subscription is owned by the returned subject (D4): it is cancelled
+/// in the subject's own [ReactiveSubject.dispose], and if [source] finishes,
+/// the returned subject disposes itself so a closed parent cannot leave a
+/// derived subject dangling — without this, listeners waiting on `onDone`
+/// (an `await for` loop, a `StreamBuilder`) would hang forever after the
+/// upstream subject was disposed.
+ReactiveSubject<R> _deriveReactiveSubject<R>(
+  Stream<R> source, {
+  ReactiveSubject<R>? into,
+}) {
+  final result = into ?? ReactiveSubject<R>();
+  final subscription = source.listen(
+    result.add,
+    onError: result.addError,
+    onDone: () => unawaited(result.dispose()),
+  );
+  result._addSubscription(subscription);
+  return result;
+}
 
-    stream.listen((value) {
-      cachedValue = value;
-      hasCache = true;
-      result.add(value);
-    }, onError: result.addError);
+/// A [Sink] that routes writes through [ReactiveSubject.add] and disposal
+/// through [ReactiveSubject.dispose], so both respect the same guard and
+/// value-tracking that direct calls to those methods get. See [ReactiveSubject.sink].
+class _GuardedSink<T> implements Sink<T> {
+  _GuardedSink(this._owner);
 
-    // Create a broadcast subject with cached value
-    final cached = ReactiveSubject<T>.broadcast();
-    final valueToCache = cachedValue;
-    if (hasCache && valueToCache != null) {
-      cached.add(valueToCache);
-    }
-    stream.listen(
-      (value) => cached.add(value),
-      onError: cached.addError,
-    );
-    return cached;
+  final ReactiveSubject<T> _owner;
+
+  @override
+  void add(T data) => _owner.add(data);
+
+  @override
+  void close() {
+    unawaited(_owner.dispose());
   }
 }

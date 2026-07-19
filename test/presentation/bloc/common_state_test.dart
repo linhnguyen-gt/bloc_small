@@ -11,7 +11,7 @@ void main() {
       });
 
       test('should create with provided loading states', () {
-        const loadingStates = {LoadingKey.global: true, 'custom_key': false};
+        const loadingStates = {LoadingKey.global: 1, 'custom_key': 0};
         const state = CommonState(loadingStates: loadingStates);
         expect(state.loadingStates, equals(loadingStates));
       });
@@ -25,21 +25,21 @@ void main() {
       });
 
       test('should return true when global key is true', () {
-        const state = CommonState(loadingStates: {LoadingKey.global: true});
+        const state = CommonState(loadingStates: {LoadingKey.global: 1});
         expect(state.isLoading(), isTrue);
       });
 
       test('should return false when global key is false', () {
-        const state = CommonState(loadingStates: {LoadingKey.global: false});
+        const state = CommonState(loadingStates: {LoadingKey.global: 0});
         expect(state.isLoading(), isFalse);
       });
 
       test('should return correct value for custom key', () {
         const state = CommonState(
           loadingStates: {
-            LoadingKey.global: false,
-            'login': true,
-            'logout': false,
+            LoadingKey.global: 0,
+            'login': 1,
+            'logout': 0,
           },
         );
         expect(state.isLoading(key: 'login'), isTrue);
@@ -48,7 +48,7 @@ void main() {
       });
 
       test('should use global key as default', () {
-        const state = CommonState(loadingStates: {LoadingKey.global: true});
+        const state = CommonState(loadingStates: {LoadingKey.global: 1});
         expect(state.isLoading(), isTrue);
       });
     });
@@ -57,16 +57,16 @@ void main() {
       test('should create new instance with updated loading states', () {
         const initialState = CommonState();
         final updatedState = initialState.copyWith(
-          loadingStates: const {LoadingKey.global: true},
+          loadingStates: const {LoadingKey.global: 1},
         );
 
-        expect(updatedState.loadingStates, equals({LoadingKey.global: true}));
+        expect(updatedState.loadingStates, equals({LoadingKey.global: 1}));
         expect(initialState.loadingStates, isEmpty);
       });
 
       test('should keep original values when null is passed', () {
         const initialState = CommonState(
-          loadingStates: {LoadingKey.global: true},
+          loadingStates: {LoadingKey.global: 1},
         );
         final updatedState = initialState.copyWith();
 
@@ -75,24 +75,48 @@ void main() {
 
       test('should replace all loading states', () {
         const initialState = CommonState(
-          loadingStates: {LoadingKey.global: true, 'key1': true},
+          loadingStates: {LoadingKey.global: 1, 'key1': 1},
         );
         final updatedState = initialState.copyWith(
-          loadingStates: const {'key2': false},
+          loadingStates: const {'key2': 0},
         );
 
-        expect(updatedState.loadingStates, equals({'key2': false}));
+        expect(updatedState.loadingStates, equals({'key2': 0}));
         expect(updatedState.loadingStates.containsKey('key1'), isFalse);
+      });
+    });
+
+    group('hashCode contract (I19)', () {
+      // `==` compares the maps order-independently, but hashCode used
+      // Object.hashAll over entries, which is order-*dependent*. Equal states
+      // therefore hashed differently and both survived in a Set.
+      test('I19: equal states built in different orders hash the same', () {
+        final a = CommonState(
+          loadingStates: Map<String, int>.fromEntries([
+            const MapEntry('a', 1),
+            const MapEntry('b', 2),
+          ]),
+        );
+        final b = CommonState(
+          loadingStates: Map<String, int>.fromEntries([
+            const MapEntry('b', 2),
+            const MapEntry('a', 1),
+          ]),
+        );
+
+        expect(a, equals(b));
+        expect(a.hashCode, equals(b.hashCode));
+        expect({a, b}, hasLength(1));
       });
     });
 
     group('Equality', () {
       test('should be equal when loading states are the same', () {
         const state1 = CommonState(
-          loadingStates: {LoadingKey.global: true, 'key1': false},
+          loadingStates: {LoadingKey.global: 1, 'key1': 0},
         );
         const state2 = CommonState(
-          loadingStates: {LoadingKey.global: true, 'key1': false},
+          loadingStates: {LoadingKey.global: 1, 'key1': 0},
         );
 
         expect(state1, equals(state2));
@@ -100,30 +124,30 @@ void main() {
       });
 
       test('should not be equal when loading states differ', () {
-        const state1 = CommonState(loadingStates: {LoadingKey.global: true});
-        const state2 = CommonState(loadingStates: {LoadingKey.global: false});
+        const state1 = CommonState(loadingStates: {LoadingKey.global: 1});
+        const state2 = CommonState(loadingStates: {LoadingKey.global: 0});
 
         expect(state1, isNot(equals(state2)));
       });
 
       test('should not be equal when keys differ', () {
-        const state1 = CommonState(loadingStates: {'key1': true});
-        const state2 = CommonState(loadingStates: {'key2': true});
+        const state1 = CommonState(loadingStates: {'key1': 1});
+        const state2 = CommonState(loadingStates: {'key2': 1});
 
         expect(state1, isNot(equals(state2)));
       });
 
       test('should not be equal when map sizes differ', () {
-        const state1 = CommonState(loadingStates: {LoadingKey.global: true});
+        const state1 = CommonState(loadingStates: {LoadingKey.global: 1});
         const state2 = CommonState(
-          loadingStates: {LoadingKey.global: true, 'key1': false},
+          loadingStates: {LoadingKey.global: 1, 'key1': 0},
         );
 
         expect(state1, isNot(equals(state2)));
       });
 
       test('should be equal to itself', () {
-        const state = CommonState(loadingStates: {LoadingKey.global: true});
+        const state = CommonState(loadingStates: {LoadingKey.global: 1});
 
         expect(state, equals(state));
         expect(identical(state, state), isTrue);
@@ -138,7 +162,7 @@ void main() {
 
     group('toString', () {
       test('should return string representation', () {
-        const state = CommonState(loadingStates: {LoadingKey.global: true});
+        const state = CommonState(loadingStates: {LoadingKey.global: 1});
         final string = state.toString();
 
         expect(string, contains('CommonState'));
@@ -147,7 +171,7 @@ void main() {
 
       test('should include loading states in string', () {
         const state = CommonState(
-          loadingStates: {LoadingKey.global: true, 'custom': false},
+          loadingStates: {LoadingKey.global: 1, 'custom': 0},
         );
         final string = state.toString();
 
@@ -166,10 +190,10 @@ void main() {
       test('should handle multiple keys', () {
         const state = CommonState(
           loadingStates: {
-            'key1': true,
-            'key2': false,
-            'key3': true,
-            'key4': false,
+            'key1': 1,
+            'key2': 0,
+            'key3': 1,
+            'key4': 0,
           },
         );
 
@@ -182,9 +206,9 @@ void main() {
       test('should handle special characters in keys', () {
         const state = CommonState(
           loadingStates: {
-            'key-with-dash': true,
-            'key_with_underscore': false,
-            'key.with.dot': true,
+            'key-with-dash': 1,
+            'key_with_underscore': 0,
+            'key.with.dot': 1,
           },
         );
 
@@ -197,19 +221,19 @@ void main() {
     group('Immutability', () {
       test('should not modify original state when copying', () {
         const originalState = CommonState(
-          loadingStates: {LoadingKey.global: true},
+          loadingStates: {LoadingKey.global: 1},
         );
         final copiedState = originalState.copyWith(
-          loadingStates: const {LoadingKey.global: false},
+          loadingStates: const {LoadingKey.global: 0},
         );
 
-        expect(originalState.loadingStates[LoadingKey.global], isTrue);
-        expect(copiedState.loadingStates[LoadingKey.global], isFalse);
+        expect(originalState.loadingStates[LoadingKey.global], equals(1));
+        expect(copiedState.loadingStates[LoadingKey.global], equals(0));
       });
 
       test('should create independent copies', () {
-        const state1 = CommonState(loadingStates: {LoadingKey.global: true});
-        final state2 = state1.copyWith(loadingStates: const {'new_key': true});
+        const state1 = CommonState(loadingStates: {LoadingKey.global: 1});
+        final state2 = state1.copyWith(loadingStates: const {'new_key': 1});
 
         expect(state1.loadingStates.containsKey('new_key'), isFalse);
         expect(state2.loadingStates.containsKey('new_key'), isTrue);

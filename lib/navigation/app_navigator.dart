@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import '../presentation/base/base_app_router.dart';
 import 'i_navigator.dart';
 
-/// Handles navigation operations using auto_route
+/// Handles navigation operations using auto_route.
 class AppNavigator implements INavigator {
   /// Creates an [AppNavigator] instance with the provided [BaseAppRouter]
   const AppNavigator(this._appRouter, {this.enableNavigationLogs = true});
@@ -17,111 +17,80 @@ class AppNavigator implements INavigator {
   /// Controls whether navigation logs are printed
   final bool enableNavigationLogs;
 
-  void _throwError() {
-    throw FlutterError(
-      'AppNavigator not found in DI container.\n'
-      'Did you forget to register AppRouter?\n\n'
-      'Add this in your configureInjectionApp():\n'
-      '  getIt.registerAppRouter<AppRouter>(AppRouter());',
-    );
-  }
-
-  /// Pushes a new route onto the navigation stack
+  /// Returns the router, or reports the missing registration and never returns.
   ///
-  /// Returns a Future that completes with the result value when the pushed route is popped
-  @override
-  Future<T?>? push<T extends Object?>(PageRouteInfo route) {
-    if (enableNavigationLogs) {
-      developer.log('push route: ${route.routeName}');
+  /// Typed `Never` on the throwing path so callers do not have to treat every
+  /// return value as nullable just because the router might be absent.
+  BaseAppRouter get _router {
+    final router = _appRouter;
+    if (router == null) {
+      throw FlutterError(
+        'AppNavigator not found in DI container.\n'
+        'Did you forget to register AppRouter?\n\n'
+        'Add this in your configureInjectionApp():\n'
+        '  getIt.registerAppRouter<AppRouter>(AppRouter());',
+      );
     }
-    if (_appRouter == null) {
-      _throwError();
-    }
-    return _appRouter?.push<T>(route);
+    return router;
   }
 
-  /// Replaces the current route with a new one
+  void _log(String message) {
+    if (enableNavigationLogs) {
+      developer.log(message);
+    }
+  }
+
+  @override
+  Future<T?> push<T extends Object?>(PageRouteInfo route) {
+    _log('push route: ${route.routeName}');
+    return _router.push<T>(route);
+  }
+
+  @override
+  Future<T?> replace<T extends Object?>(PageRouteInfo route) {
+    _log('replace route: ${route.routeName}');
+    return _router.replace<T>(route);
+  }
+
+  @override
+  Future<bool> pop<T extends Object?>([T? result]) {
+    _log('pop route: ${result.runtimeType}');
+    return _router.maybePop<T>(result);
+  }
+
+  @override
+  Future<bool> popTop<T extends Object?>([T? result]) {
+    _log('popTop route: ${result.runtimeType}');
+    return _router.maybePopTop();
+  }
+
+  /// Pops routes until [route] is at the top of the stack.
   ///
-  /// Returns a Future that completes with the result value when the new route is popped
+  /// The target route keeps its existing instance, so its state survives and
+  /// the `Future` returned by the original `push` completes. The previous
+  /// implementation used `pushAndPopUntil(route, predicate: (_) => false)`,
+  /// which removed *every* route including the target and pushed a fresh one —
+  /// discarding its state and leaving the original push future to hang.
   @override
-  Future<T?>? replace<T extends Object?>(PageRouteInfo route) {
-    if (enableNavigationLogs) {
-      developer.log('replace route: ${route.routeName}');
-    }
-    if (_appRouter == null) {
-      _throwError();
-    }
-    return _appRouter?.replace<T>(route);
+  Future<void> popUntil(PageRouteInfo route) async {
+    _log('popUntil route: ${route.routeName}');
+    _router.popUntilRouteWithName(route.routeName);
   }
 
-  /// Pops the current route off the navigation stack
+  @override
+  Future<void> replaceAllWith(PageRouteInfo route) {
+    _log('replaceAllWith route: ${route.routeName}');
+    return _router.replaceAll([route]);
+  }
+
+  /// Clears the entire navigation stack and shows [route] as its only entry.
   ///
-  /// If [result] is provided, it will be passed to the previous route
-  /// Returns a Future&lt;bool&gt; indicating whether the pop was successful
+  /// Equivalent to [replaceAllWith], as the documentation has always claimed.
+  /// The previous implementation also pushed [route] a second time, leaving two
+  /// entries on the stack so that "back" reached a duplicate instead of exiting.
   @override
-  Future<bool>? pop<T extends Object?>([T? result]) {
-    if (enableNavigationLogs) {
-      developer.log('pop route: ${result.runtimeType}');
-    }
-    if (_appRouter == null) {
-      _throwError();
-    }
-    return _appRouter!.maybePop<T>(result);
-  }
-
-  /// Pops all routes until reaching the specified route
-  ///
-  /// The specified route will be pushed onto the stack
-  @override
-  Future<void>? popUntil(PageRouteInfo route) {
-    if (enableNavigationLogs) {
-      developer.log('popUntil route: ${route.routeName}');
-    }
-    if (_appRouter == null) {
-      _throwError();
-    }
-    return _appRouter?.pushAndPopUntil(route, predicate: (_) => false);
-  }
-
-  @override
-  Future<bool>? popTop<T extends Object?>([T? result]) {
-    if (enableNavigationLogs) {
-      developer.log('popTop route: ${result.runtimeType}');
-    }
-    if (_appRouter == null) {
-      _throwError();
-    }
-
-    return _appRouter?.maybePopTop();
-  }
-
-  /// Replaces all routes in the stack with a single new route
-  ///
-  /// This effectively resets the navigation stack with only the specified route
-  @override
-  Future<void>? replaceAllWith(PageRouteInfo route) {
-    if (enableNavigationLogs) {
-      developer.log('replaceAllWith route: ${route.routeName}');
-    }
-    if (_appRouter == null) {
-      _throwError();
-    }
-    return _appRouter?.replaceAll([route]);
-  }
-
-  /// Clears the entire navigation stack and pushes a new route
-  ///
-  /// This is equivalent to [replaceAllWith] in the current implementation
-  @override
-  Future<void>? clearAndPush(PageRouteInfo route) {
-    if (enableNavigationLogs) {
-      developer.log('clearAndPush route: ${route.routeName}');
-    }
-
-    if (_appRouter == null) {
-      _throwError();
-    }
-    _appRouter?.replaceAll([route]);
-    return _appRouter?.push(route);
+  Future<void> clearAndPush(PageRouteInfo route) {
+    _log('clearAndPush route: ${route.routeName}');
+    return _router.replaceAll([route]);
   }
 }

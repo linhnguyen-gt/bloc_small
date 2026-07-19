@@ -1,183 +1,103 @@
+import 'dart:async' as async;
 import 'dart:developer' as developer;
 
-import '../../presentation/bloc/main_bloc.dart';
-import '../../presentation/bloc/main_bloc_event.dart';
-import '../../presentation/bloc/main_bloc_state.dart';
-import '../../presentation/cubit/main_cubit.dart';
 import 'exceptions.dart';
 
-/// A mixin that provides error handling capabilities for Blocs.
+/// Standardized error handling for Blocs and Cubits.
 ///
-/// This mixin can be used to add standardized error handling to any Bloc
-/// that extends [MainBloc].
+/// This is the single error-handler mixin. It replaces the previous four
+/// overlapping names — `BlocErrorHandlerMixin`, `CubitErrorHandlerMixin`
+/// (byte-identical to each other), the abstract `BaseErrorHandlerMixin`, and
+/// the separate `CubitErrorHandler`. None of them carried bloc- or
+/// cubit-specific behaviour, so nothing is lost by collapsing them, and there
+/// is now exactly one implementation of [retryOperation] and [getErrorMessage].
 ///
-/// Usage:
+/// It declares no `on` clause, so it applies to both:
 /// ```dart
-/// class MyBloc extends MainBloc<MyEvent, MyState> with BlocErrorHandler<MyEvent, MyState> {
-///   MyBloc() : super(MyInitialState());
-///
-///   Future<void> _onSomeEvent(SomeEvent event, Emitter<MyState> emit) async {
-///     await blocCatch(
-///       actions: () async {
-///         // Your logic here that might throw
-///         throw Exception('Something went wrong');
-///       },
-///       onError: handleError, // Uses the mixin's error handler
-///     );
+/// class MyBloc extends MainBloc<MyEvent, MyState> with BaseErrorHandlerMixin {
+///   Future<void> _onFetch(Fetch event, Emitter<MyState> emit) async {
+///     await blocCatch(actions: _fetch, onError: handleError);
 ///   }
+/// }
 ///
-///   // Optionally override handleError for custom handling
-///   @override
-///   Future<void> handleError(Object error, StackTrace stackTrace) async {
-///     // Custom error handling
-///     super.handleError(error, stackTrace);
-///     emit(state.copyWith(error: error.toString()));
+/// class MyCubit extends MainCubit<MyState> with BaseErrorHandlerMixin {
+///   Future<void> fetch() async {
+///     await cubitCatch(actions: _fetch, onError: handleError);
 ///   }
 /// }
 /// ```
 ///
-/// The mixin provides:
-/// - Default error logging
-/// - Integration with [blocCatch]
-/// - Extensible error handling through method override
-
-/// Base mixin containing shared error handling functionality.
-/// This mixin defines the contract for error handling capabilities
-/// that should be implemented by both Bloc and Cubit error handlers.
+/// The mixin deliberately does **not** hide loading. See [handleError].
 mixin BaseErrorHandlerMixin {
-  /// Retries an operation until it succeeds or reaches the maximum number of attempts.
+  /// Retries [operation] until it succeeds or [maxAttempts] is reached.
+  ///
+  /// Returns the operation's value — the previous signature declared `<T>` but
+  /// returned `Future<void>`, discarding the result it had just awaited.
+  ///
+  /// Retries on [Exception] only. An [Error] signals a bug rather than a
+  /// transient failure, and retrying one re-runs whatever side effects the
+  /// operation already performed — an emit-after-close `StateError` used to
+  /// produce three duplicate requests before finally rethrowing.
   ///
   /// Parameters:
-  /// - [operation]: A function that returns a Future to be retried
-  /// - [maxAttempts]: The maximum number of attempts to retry the operation (default: 3)
-  /// - [delay]: The delay between attempts (default: 1 second)
+  /// - [operation]: the work to attempt
+  /// - [maxAttempts]: how many times to try in total (default: 3)
+  /// - [delay]: pause between attempts (default: 1 second)
   ///
-  /// Returns:
-  /// - The result of the operation if it succeeds
-  /// - Throws the last error if all attempts fail
-  Future<void> retryOperation<T>({
+  /// Throws the last error if every attempt fails.
+  Future<T> retryOperation<T>({
     required Future<T> Function() operation,
     int maxAttempts = 3,
     Duration delay = const Duration(seconds: 1),
-  });
+  }) async {
+    int attempts = 0;
+    while (true) {
+      try {
+        return await operation();
+      } on Exception {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          rethrow;
+        }
+        await Future<void>.delayed(delay);
+      }
+    }
+  }
 
   /// Converts an error object into a user-friendly message.
   ///
-  /// Handles common exceptions like:
+  /// Handles:
   /// - [NetworkException]
   /// - [ValidationException]
-  /// - [TimeoutException]
+  /// - [AppTimeoutException] and `dart:async`'s `TimeoutException`
+  /// - any other [AppException], via its own message
+  String getErrorMessage(Object error) {
+    return switch (error) {
+      NetworkException() => 'Please check your internet connection',
+      AppTimeoutException() || async.TimeoutException() =>
+        'The operation timed out',
+      // Covers ValidationException and any future AppException subtype, which
+      // otherwise fell through to the generic message.
+      AppException() => error.message,
+      _ => 'An unexpected error occurred',
+    };
+  }
+
+  /// Logs [error] and its [stackTrace].
   ///
-  /// Returns a localized error message string.
-  String getErrorMessage(Object error);
-
-  /// Hides any loading indicators or progress states.
-  /// Should be implemented by the concrete class to handle UI state.
-  void hideLoading();
-}
-
-/// A mixin that provides error handling capabilities for Blocs.
-/// Implements [BaseErrorHandlerMixin] and adds specific Bloc error handling.
-mixin BlocErrorHandlerMixin<
-  Event extends MainBlocEvent,
-  State extends MainBlocState
->
-    on MainBloc<Event, State>
-    implements BaseErrorHandlerMixin {
-  @override
-  Future<void> retryOperation<T>({
-    required Future<T> Function() operation,
-    int maxAttempts = 3,
-    Duration delay = const Duration(seconds: 1),
-  }) async {
-    int attempts = 0;
-    while (attempts < maxAttempts) {
-      try {
-        await operation();
-        return;
-      } catch (e) {
-        attempts++;
-        if (attempts == maxAttempts) {
-          rethrow;
-        }
-        await Future.delayed(delay);
-      }
-    }
-  }
-
-  @override
-  String getErrorMessage(Object error) {
-    if (error is NetworkException) {
-      return 'Please check your internet connection';
-    } else if (error is ValidationException) {
-      return error.message;
-    } else if (error is TimeoutException) {
-      return 'The operation timed out';
-    }
-    return 'An unexpected error occurred';
-  }
-
+  /// Does **not** hide loading. `catchError`'s `finally` owns that, and it is
+  /// the only place guaranteed to pair with the matching `showLoading`. Hiding
+  /// here too would decrement the loading refcount twice for a single
+  /// increment, clearing the spinner while a concurrent operation on the same
+  /// key was still running.
   Future<void> handleError(Object error, StackTrace stackTrace) async {
     developer.log(
-      'Bloc error occurred',
+      'Error occurred',
       error: error,
       name: runtimeType.toString(),
       time: DateTime.now(),
       level: 1000,
       stackTrace: stackTrace,
     );
-
-    hideLoading();
-  }
-}
-
-/// A mixin that provides error handling capabilities for Cubits.
-/// Implements [BaseErrorHandlerMixin] and adds specific Cubit error handling.
-mixin CubitErrorHandlerMixin<State extends MainBlocState> on MainCubit<State>
-    implements BaseErrorHandlerMixin {
-  @override
-  Future<void> retryOperation<T>({
-    required Future<T> Function() operation,
-    int maxAttempts = 3,
-    Duration delay = const Duration(seconds: 1),
-  }) async {
-    int attempts = 0;
-    while (attempts < maxAttempts) {
-      try {
-        await operation();
-        return;
-      } catch (e) {
-        attempts++;
-        if (attempts == maxAttempts) {
-          rethrow;
-        }
-        await Future.delayed(delay);
-      }
-    }
-  }
-
-  @override
-  String getErrorMessage(Object error) {
-    if (error is NetworkException) {
-      return 'Please check your internet connection';
-    } else if (error is ValidationException) {
-      return error.message;
-    } else if (error is TimeoutException) {
-      return 'The operation timed out';
-    }
-    return 'An unexpected error occurred';
-  }
-
-  Future<void> handleError(Object error, StackTrace stackTrace) async {
-    developer.log(
-      'Cubit error occurred',
-      error: error,
-      name: runtimeType.toString(),
-      time: DateTime.now(),
-      level: 1000,
-      stackTrace: stackTrace,
-    );
-
-    hideLoading();
   }
 }
