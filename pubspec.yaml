@@ -14,7 +14,6 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   get_it: ^9.2.0
-  injectable: ^2.6.0
   rxdart: ^0.28.0
   auto_route: ^11.1.0
   freezed_annotation: ^3.1.0

@@ -227,6 +227,26 @@ Still re-exported, because they appear in this package's own signatures: `GetIt`
 `AutoRoute`, `PageRouteInfo`, and the common `flutter_bloc` types (`Bloc`, `Cubit`,
 `BlocBuilder`, `BlocProvider`, `Emitter`, …).
 
+#### `injectable` is no longer a dependency of this package
+
+Dropping the wholesale re-export left `injectable` declared but unused — no file under
+`lib/` imports it. It stayed in `dependencies` only to feed the old export, so keeping it
+would have forced a DI-framework choice, and every future `injectable` major, onto
+consumers that may not use it at all.
+
+`bloc_small` works with `injectable` exactly as before — `registerCore()`, `@module`
+registrations and `@injectableInit` are unaffected, since that integration always lived in
+the consuming app's own codegen. Apps that use the annotations simply declare the package
+themselves, as the re-export section above already instructs:
+
+```yaml
+dependencies:
+  injectable: ^2.6.0   # or ^3.0.0 — bloc_small no longer constrains this
+```
+
+Apps that resolved `injectable` transitively through `bloc_small` without declaring it
+will need to add that line.
+
 #### Web support
 
 * `checkCompatibility()` removed. It was dead logic — `Platform.version.startsWith('2')`
