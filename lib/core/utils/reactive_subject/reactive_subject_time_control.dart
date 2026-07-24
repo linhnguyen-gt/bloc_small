@@ -14,9 +14,7 @@ extension ReactiveSubjectTimeControlExtension<T> on ReactiveSubject<T> {
   /// subject.add('c'); // After 1 second, prints: c
   /// ```
   ReactiveSubject<T> debounceTime(Duration duration) {
-    final result = ReactiveSubject<T>();
-    stream.debounceTime(duration).listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<T>(stream.debounceTime(duration));
   }
 
   /// Emits the first item emitted by the source ReactiveSubject in each time window of a specified duration.
@@ -31,9 +29,7 @@ extension ReactiveSubjectTimeControlExtension<T> on ReactiveSubject<T> {
   /// subject.add(3); // After 1 second, prints: 3
   /// ```
   ReactiveSubject<T> throttleTime(Duration duration) {
-    final result = ReactiveSubject<T>();
-    stream.throttleTime(duration).listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<T>(stream.throttleTime(duration));
   }
 
   /// Buffers values from the source ReactiveSubject until the closing stream emits.
@@ -92,8 +88,6 @@ extension ReactiveSubjectTimeControlExtension<T> on ReactiveSubject<T> {
   /// buffered.dispose();
   /// ```
   ReactiveSubject<List<T>> buffer(Stream<dynamic> closing) {
-    final result = ReactiveSubject<List<T>>();
-    stream.buffer(closing).listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<List<T>>(stream.buffer(closing));
   }
 }

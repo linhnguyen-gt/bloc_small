@@ -91,11 +91,10 @@ bloc_small/
 #### Exception Types
 - `NetworkException` - Network-related errors
 - `ValidationException` - Validation errors
-- `TimeoutException` - Timeout errors
+- `AppTimeoutException` - Timeout errors
 
 #### Error Handlers
-- `BlocErrorHandlerMixin` - Mixin for BLoC error handling
-- `CubitErrorHandlerMixin` - Mixin for Cubit error handling
+- `BaseErrorHandlerMixin` - Single mixin providing error handling for both BLoCs and Cubits
 - Standardized error logging and management
 
 ### 5. Navigation (`lib/navigation/`)
@@ -116,13 +115,13 @@ bloc_small/
 
 ### 6. Dependency Injection (`lib/core/di/`)
 
-#### `CoreModule`
-- Injectable module for core dependencies
-- Registers `CommonBloc` as singleton
-
 #### `CoreInjection` Extension
-- `registerCore()` - Registers core dependencies
-- `registerAppRouter<T>()` - Registers router and navigator
+- `registerCore()` - Registers `CommonBloc` as a lazy singleton. The only
+  registration path for it; a package-internal `@module` is never scanned by a
+  consuming app's codegen, which is why `CoreModule` was removed in 4.0.0.
+- `resetCore()` - Closes and unregisters `CommonBloc`, for tests and hot restart
+- `registerAppRouter<T>()` - Registers the router instance it is handed, plus
+  `AppNavigator` under both its own type and `INavigator`
 
 ### 7. Reactive Programming (`lib/core/utils/`)
 
@@ -156,7 +155,7 @@ bloc_small/
 
 ### 2. Mixin Pattern
 - `BaseDelegate` provides shared functionality via mixin
-- `BlocErrorHandlerMixin` and `CubitErrorHandlerMixin` for error handling
+- `BaseErrorHandlerMixin` for error handling (BLoCs and Cubits alike)
 
 ### 3. Dependency Injection
 - GetIt for service location

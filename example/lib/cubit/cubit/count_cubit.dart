@@ -1,10 +1,12 @@
 import 'package:bloc_small/bloc_small.dart';
+import 'package:injectable/injectable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'count_cubit.freezed.dart';
 part 'count_state.dart';
 
-@injectable
-class CountCubit extends MainCubit<CountState> with CubitErrorHandlerMixin {
+@lazySingleton
+class CountCubit extends MainCubit<CountState> with BaseErrorHandlerMixin {
   CountCubit() : super(CountState.initial());
 
   Future<void> increment() async {

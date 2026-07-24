@@ -1,3 +1,5 @@
+import 'dart:async' as async;
+
 import 'package:bloc_small/core/error/bloc_error_handler.dart';
 import 'package:bloc_small/core/error/exceptions.dart';
 import 'package:bloc_small/presentation/bloc/main_bloc.dart';
@@ -28,7 +30,7 @@ class TestState extends MainBlocState {
 
 // Test Bloc with error handler
 class TestBloc extends MainBloc<TestEvent, TestState>
-    with BlocErrorHandlerMixin {
+    with BaseErrorHandlerMixin {
   TestBloc() : super(const TestState());
 
   bool loadingHidden = false;
@@ -40,7 +42,7 @@ class TestBloc extends MainBloc<TestEvent, TestState>
 }
 
 // Test Cubit with error handler
-class TestCubit extends MainCubit<TestState> with CubitErrorHandlerMixin {
+class TestCubit extends MainCubit<TestState> with BaseErrorHandlerMixin {
   TestCubit() : super(const TestState());
 
   bool loadingHidden = false;
@@ -52,7 +54,7 @@ class TestCubit extends MainCubit<TestState> with CubitErrorHandlerMixin {
 }
 
 void main() {
-  group('BlocErrorHandlerMixin', () {
+  group('BaseErrorHandlerMixin', () {
     late TestBloc bloc;
 
     setUp(() {
@@ -67,7 +69,7 @@ void main() {
       flutter_test.test(
         'should return network error message for NetworkException',
         () {
-          final error = NetworkException('Connection failed');
+          const error = NetworkException('Connection failed');
           final message = bloc.getErrorMessage(error);
           expect(message, equals('Please check your internet connection'));
         },
@@ -76,16 +78,28 @@ void main() {
       flutter_test.test(
         'should return validation message for ValidationException',
         () {
-          final error = ValidationException('Invalid input');
+          const error = ValidationException('Invalid input');
           final message = bloc.getErrorMessage(error);
           expect(message, equals('Invalid input'));
         },
       );
 
       flutter_test.test(
-        'should return timeout message for TimeoutException',
+        'should return timeout message for AppTimeoutException',
         () {
-          final error = TimeoutException('Request timeout');
+          const error = AppTimeoutException('Request timeout');
+          final message = bloc.getErrorMessage(error);
+          expect(message, equals('The operation timed out'));
+        },
+      );
+
+      // I4: before the rename, the local TimeoutException shadowed
+      // dart:async's, so a real Future.timeout error fell through to the
+      // generic branch.
+      flutter_test.test(
+        'I4: should return timeout message for dart:async TimeoutException',
+        () {
+          final error = async.TimeoutException('Request timeout');
           final message = bloc.getErrorMessage(error);
           expect(message, equals('The operation timed out'));
         },
@@ -99,22 +113,27 @@ void main() {
     });
 
     group('handleError', () {
-      flutter_test.test('should hide loading when error occurs', () async {
+      // handleError must NOT hide loading. catchError's `finally` owns that
+      // and is the only place guaranteed to pair with the matching
+      // showLoading; hiding in both decrements a refcounted key twice for a
+      // single increment, clearing the spinner while a concurrent operation
+      // on the same key is still running.
+      flutter_test.test('should not hide loading when error occurs', () async {
         final error = Exception('Test error');
         final stackTrace = StackTrace.current;
 
         await bloc.handleError(error, stackTrace);
 
-        expect(bloc.loadingHidden, isTrue);
+        expect(bloc.loadingHidden, isFalse);
       });
 
       flutter_test.test('should log error information', () async {
-        final error = NetworkException('Connection failed');
+        const error = NetworkException('Connection failed');
         final stackTrace = StackTrace.current;
 
         // Should not throw
         await bloc.handleError(error, stackTrace);
-        expect(bloc.loadingHidden, isTrue);
+        expect(bloc.loadingHidden, isFalse);
       });
     });
 
@@ -155,7 +174,10 @@ void main() {
           await bloc.retryOperation(
             operation: () async {
               callCount++;
-              throw Exception('Persistent failure');
+              if (callCount > 0) {
+                throw Exception('Persistent failure');
+              }
+              return 'unreachable';
             },
             maxAttempts: 3,
             delay: const Duration(milliseconds: 10),
@@ -191,7 +213,7 @@ void main() {
     });
   });
 
-  group('CubitErrorHandlerMixin', () {
+  group('BaseErrorHandlerMixin', () {
     late TestCubit cubit;
 
     setUp(() {
@@ -206,7 +228,7 @@ void main() {
       flutter_test.test(
         'should return network error message for NetworkException',
         () {
-          final error = NetworkException('Connection failed');
+          const error = NetworkException('Connection failed');
           final message = cubit.getErrorMessage(error);
           expect(message, equals('Please check your internet connection'));
         },
@@ -215,16 +237,16 @@ void main() {
       flutter_test.test(
         'should return validation message for ValidationException',
         () {
-          final error = ValidationException('Invalid input');
+          const error = ValidationException('Invalid input');
           final message = cubit.getErrorMessage(error);
           expect(message, equals('Invalid input'));
         },
       );
 
       flutter_test.test(
-        'should return timeout message for TimeoutException',
+        'should return timeout message for AppTimeoutException',
         () {
-          final error = TimeoutException('Request timeout');
+          const error = AppTimeoutException('Request timeout');
           final message = cubit.getErrorMessage(error);
           expect(message, equals('The operation timed out'));
         },
@@ -238,13 +260,13 @@ void main() {
     });
 
     group('handleError', () {
-      flutter_test.test('should hide loading when error occurs', () async {
+      flutter_test.test('should not hide loading when error occurs', () async {
         final error = Exception('Test error');
         final stackTrace = StackTrace.current;
 
         await cubit.handleError(error, stackTrace);
 
-        expect(cubit.loadingHidden, isTrue);
+        expect(cubit.loadingHidden, isFalse);
       });
     });
 
@@ -285,7 +307,10 @@ void main() {
           await cubit.retryOperation(
             operation: () async {
               callCount++;
-              throw Exception('Persistent failure');
+              if (callCount > 0) {
+                throw Exception('Persistent failure');
+              }
+              return 'unreachable';
             },
             maxAttempts: 3,
             delay: const Duration(milliseconds: 10),

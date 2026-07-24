@@ -14,11 +14,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// subject.add(2); // Prints: Value emitted: 2, then 2
   /// ```
   ReactiveSubject<T> doOnData(void Function(T event) onData) {
-    final newSubject = ReactiveSubject<T>();
-    stream
-        .doOnData(onData)
-        .listen(newSubject.add, onError: newSubject.addError);
-    return newSubject;
+    return _deriveReactiveSubject<T>(stream.doOnData(onData));
   }
 
   /// Performs a side-effect action for each error event emitted by the source ReactiveSubject.
@@ -35,11 +31,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   ReactiveSubject<T> doOnError(
     void Function(Object error, StackTrace stackTrace) onError,
   ) {
-    final newSubject = ReactiveSubject<T>();
-    stream
-        .doOnError(onError)
-        .listen(newSubject.add, onError: newSubject.addError);
-    return newSubject;
+    return _deriveReactiveSubject<T>(stream.doOnError(onError));
   }
 
   /// Adds debugging capabilities to the ReactiveSubject by logging events.
@@ -75,26 +67,20 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
     void Function(T value)? onValue,
     void Function(Object error)? onError,
   }) {
-    final result = ReactiveSubject<T>();
-
-    stream.listen(
-      (value) {
-        if (tag != null) {
-          debugPrint('[$tag] Value: $value');
-        }
-        onValue?.call(value);
-        result.add(value);
-      },
-      onError: (error) {
-        if (tag != null) {
-          debugPrint('[$tag] Error: $error');
-        }
-        onError?.call(error);
-        result.addError(error);
-      },
-    );
-
-    return result;
+    final logged = stream
+        .doOnData((value) {
+          if (tag != null) {
+            debugPrint('[$tag] Value: $value');
+          }
+          onValue?.call(value);
+        })
+        .doOnError((error, stackTrace) {
+          if (tag != null) {
+            debugPrint('[$tag] Error: $error');
+          }
+          onError?.call(error);
+        });
+    return _deriveReactiveSubject<T>(logged);
   }
 
   /// Emits the previous and current values as a pair.
@@ -110,9 +96,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// subject.add(3); // Prints: [2, 3]
   /// ```
   ReactiveSubject<List<T>> pairwise() {
-    final result = ReactiveSubject<List<T>>();
-    stream.pairwise().listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<List<T>>(stream.pairwise());
   }
 
   /// Emits the time interval between consecutive emissions.
@@ -124,9 +108,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// timed.stream.listen((interval) => print('Value: ${interval.value}, Interval: ${interval.interval}'));
   /// ```
   ReactiveSubject<TimeInterval<T>> timeInterval() {
-    final result = ReactiveSubject<TimeInterval<T>>();
-    stream.timeInterval().listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<TimeInterval<T>>(stream.timeInterval());
   }
 
   /// Emits each item with a timestamp indicating when it was emitted.
@@ -138,9 +120,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// timestamped.stream.listen((ts) => print('Value: ${ts.value}, Time: ${ts.timestamp}'));
   /// ```
   ReactiveSubject<Timestamped<T>> timestamp() {
-    final result = ReactiveSubject<Timestamped<T>>();
-    stream.timestamp().listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<Timestamped<T>>(stream.timestamp());
   }
 
   /// Skips the last [count] items emitted by the source ReactiveSubject.
@@ -157,9 +137,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// subject.add(4); // Prints: 2
   /// ```
   ReactiveSubject<T> skipLast(int count) {
-    final result = ReactiveSubject<T>();
-    stream.skipLast(count).listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<T>(stream.skipLast(count));
   }
 
   /// Takes the last [count] items emitted by the source ReactiveSubject.
@@ -176,9 +154,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// subject.dispose(); // Prints: 2, 3
   /// ```
   ReactiveSubject<T> takeLast(int count) {
-    final result = ReactiveSubject<T>();
-    stream.takeLast(count).listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<T>(stream.takeLast(count));
   }
 
   /// Emits items from the source ReactiveSubject while the [test] function returns true.
@@ -196,11 +172,7 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// subject.add(4); // Does not print
   /// ```
   ReactiveSubject<T> takeWhileInclusive(bool Function(T event) test) {
-    final result = ReactiveSubject<T>();
-    stream
-        .takeWhileInclusive(test)
-        .listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<T>(stream.takeWhileInclusive(test));
   }
 
   /// Listens to the stream and calls the provided callbacks.
@@ -225,13 +197,13 @@ extension ReactiveSubjectUtilitiesExtension<T> on ReactiveSubject<T> {
   /// ```
   StreamSubscription<T> listen(
     void Function(T value) onData, {
-    Function? onDone,
+    void Function()? onDone,
     Function? onError,
     bool? cancelOnError,
   }) {
     return stream.listen(
       onData,
-      onDone: onDone as void Function()?,
+      onDone: onDone,
       onError: onError,
       cancelOnError: cancelOnError,
     );

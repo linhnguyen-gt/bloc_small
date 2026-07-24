@@ -10,7 +10,6 @@ library;
 export 'constants/default_loading.dart';
 export 'di/di.dart';
 export 'error/bloc_error_handler.dart';
-export 'error/cubit_error_handler.dart';
 export 'error/error_state.dart';
 export 'error/exceptions.dart';
 export 'utils/reactive_subject/reactive_subject.dart';

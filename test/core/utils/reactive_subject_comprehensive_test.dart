@@ -23,15 +23,16 @@ void main() {
 
       test('should create without initial value', () async {
         final emptySubject = ReactiveSubject<int>();
-        // Add a value first to initialize _value
-        emptySubject.add(1);
-        await Future.delayed(Duration.zero);
-        expect(emptySubject.hasValue, isTrue);
+        // A fresh subject holds no value; valueOrNull must report that
+        // without throwing (C1).
+        expect(emptySubject.hasValue, isFalse);
+        expect(emptySubject.valueOrNull, isNull);
         await emptySubject.dispose();
       });
 
       test('valueOr should return default when no value', () async {
         final emptySubject = ReactiveSubject<int>();
+        expect(emptySubject.valueOr(42), equals(42));
         emptySubject.add(10);
         await Future.delayed(Duration.zero);
         expect(emptySubject.valueOr(42), equals(10));
@@ -40,10 +41,31 @@ void main() {
 
       test('should throw when accessing value without initial value', () async {
         final emptySubject = ReactiveSubject<int?>();
-        // Test that accessing value throws an error (LateInitializationError or StateError)
-        expect(() => emptySubject.value, throwsA(anything));
+        // Must be a StateError, not a LateInitializationError: a LateError
+        // here means `late T? _value` was never initialised (C1).
+        expect(() => emptySubject.value, throwsA(isA<StateError>()));
         await emptySubject.dispose();
       });
+
+      test(
+        'a null value counts as a value, not as absence of one (I14)',
+        () async {
+          final nullableSubject = ReactiveSubject<String?>();
+          expect(nullableSubject.hasValue, isFalse);
+
+          nullableSubject.add(null);
+          await Future.delayed(Duration.zero);
+
+          // Before the fix, `hasValue`/`value` used `_value != null` as a
+          // proxy for "has a value", so a legitimately-null value was
+          // indistinguishable from "no value set" and `.value` threw.
+          expect(nullableSubject.hasValue, isTrue);
+          expect(nullableSubject.value, isNull);
+          expect(nullableSubject.valueOrNull, isNull);
+
+          await nullableSubject.dispose();
+        },
+      );
 
       test('should add and emit values', () async {
         final values = <int>[];
@@ -154,6 +176,33 @@ void main() {
         await distinct.dispose();
         await userSubject.dispose();
       });
+
+      test(
+        'distinctBy is distinct-among-every-value-ever-seen, not distinct-until-changed (D12)',
+        () async {
+          final userSubject = ReactiveSubject<Map<String, dynamic>>();
+          final distinct = userSubject.distinctBy((user) => user['id']);
+          final values = <Map<String, dynamic>>[];
+          distinct.stream.listen(values.add);
+
+          userSubject.add({'id': 1, 'name': 'Alice'});
+          userSubject.add({'id': 2, 'name': 'Bob'});
+          // id 1 reappears after another key was seen in between: a true
+          // distinct-until-changed operator would let this through (the
+          // immediate predecessor has a different key), but this operator
+          // remembers every key for the subject's lifetime, so it is
+          // filtered out here too. D12: this is the confirmed, intentional
+          // behavior — only the docs were wrong, not the code.
+          userSubject.add({'id': 1, 'name': 'Alice Again'});
+
+          await Future.delayed(Duration.zero);
+          expect(values.length, equals(2));
+          expect(values.map((u) => u['id']), equals(<int>[1, 2]));
+
+          await distinct.dispose();
+          await userSubject.dispose();
+        },
+      );
     });
 
     group('Time-based Operations', () {
@@ -280,7 +329,9 @@ void main() {
         started.stream.listen(values.add);
 
         await Future.delayed(Duration.zero);
-        expect(values.first, equals(-1));
+        // Assert the full emission list: `values.first` passes even when the
+        // seed is emitted twice, which is exactly what hides I10.
+        expect(values, equals(<int>[-1, 0]));
 
         await started.dispose();
       });
@@ -303,22 +354,59 @@ void main() {
         await recovered.dispose();
       });
 
-      test('retry should retry on error', () async {
-        final testSubject = ReactiveSubject<int>();
-        final retried = testSubject.retry(2);
+      test(
+        'retry() does not leak an orphan subject per attempt (I2 leak half of item 11)',
+        () async {
+          final baseline = ReactiveSubject.debugActiveInstanceCount;
+          final testSubject = ReactiveSubject<int>();
+          final retried = testSubject.retry(2);
 
-        retried.stream.listen(
-          (_) {},
-          onError: (error) {
-          },
-        );
+          final errors = <Object>[];
+          retried.stream.listen((_) {}, onError: errors.add);
 
-        testSubject.addError('test error');
-        await Future.delayed(const Duration(milliseconds: 100));
+          testSubject.addError('test error');
+          await Future.delayed(const Duration(milliseconds: 100));
 
-        await retried.dispose();
-        await testSubject.dispose();
-      });
+          await retried.dispose();
+          await testSubject.dispose();
+
+          // Before the fix, every retry attempt allocated a fresh
+          // ReactiveSubject via a recursive `retry(count - 1)` call and
+          // never disposed the ones it stopped using — the same per-event
+          // leak class as switchMap/onErrorResumeNext.
+          expect(ReactiveSubject.debugActiveInstanceCount, equals(baseline));
+        },
+      );
+
+      test(
+        'retry() cannot re-run work on a BehaviorSubject-backed source: '
+        'it just replays the same cached error (documented limitation, item 11)',
+        () async {
+          // ReactiveSubject wraps a value stream, not a task factory. Its
+          // default constructor is BehaviorSubject-backed, which replays
+          // its most recently emitted item OR error to every new
+          // subscriber. retry()'s only mechanism is "subscribe again", so
+          // each retry attempt immediately re-receives the exact same
+          // cached error instead of giving the source a chance to produce
+          // a different outcome. This probe proves that determinism: with
+          // count=2, retry re-subscribes exactly twice, replaying the same
+          // error each time, then gives up — never anything else.
+          final testSubject = ReactiveSubject<int>();
+          final retried = testSubject.retry(2);
+
+          final errors = <Object>[];
+          retried.stream.listen((_) {}, onError: errors.add);
+
+          testSubject.addError('boom');
+          await Future.delayed(const Duration(milliseconds: 50));
+
+          expect(errors, equals(<Object>['boom']));
+
+          await retried.dispose();
+          await testSubject.dispose();
+        },
+      );
+
     });
 
     group('Side Effects', () {
@@ -444,6 +532,36 @@ void main() {
 
         await grouped.dispose();
       });
+
+      test(
+        'a groupBy snapshot never changes after it was emitted (I11)',
+        () async {
+          final grouped = subject.groupBy(
+            (value) => value % 2 == 0 ? 'even' : 'odd',
+          );
+          final values = <Map<String, List<int>>>[];
+          grouped.stream.listen(values.add);
+
+          subject.add(1);
+          await Future.delayed(Duration.zero);
+          // Snapshot right after the first odd value: must never grow later.
+          final snapshotAfterFirst = values.last;
+          final oddListAfterFirst = List<int>.of(snapshotAfterFirst['odd']!);
+
+          subject.add(2);
+          subject.add(3);
+          await Future.delayed(Duration.zero);
+
+          // Before the fix, `Map.from(groups)` was a shallow copy that still
+          // shared its List values with every later emission, so this
+          // already-delivered snapshot's 'odd' list grew from [1] to [1, 3]
+          // after the fact.
+          expect(snapshotAfterFirst['odd'], equals(oddListAfterFirst));
+          expect(snapshotAfterFirst['odd'], equals(<int>[1]));
+
+          await grouped.dispose();
+        },
+      );
     });
 
     group('Debug', () {
@@ -483,7 +601,7 @@ void main() {
         await shared.dispose();
       });
 
-      test('shareReplay should replay values', () async {
+      test('shareReplay(maxSize: 2) replays the last 2 values, not 1 (I9)', () async {
         final shared = subject.shareReplay(maxSize: 2);
 
         subject.add(1);
@@ -496,9 +614,48 @@ void main() {
         shared.stream.listen(values.add);
 
         await Future.delayed(Duration.zero);
-        expect(values.length, greaterThan(0));
+        // Before the fix, the result was always built on the default
+        // BehaviorSubject-backed constructor, which can only replay 1
+        // regardless of maxSize, so a late subscriber only ever saw [3].
+        expect(values, equals(<int>[2, 3]));
 
         await shared.dispose();
+      });
+    });
+
+    group('Cache', () {
+      test(
+        "cache()'s own docstring example works: a late subscriber gets the cached value immediately (C8)",
+        () async {
+          // Must be `.broadcast()` (PublishSubject-backed): the default
+          // constructor is already BehaviorSubject-backed, so cache() takes
+          // its "already caching" shortcut and returns `source` unchanged,
+          // trivially passing without ever exercising cache()'s own logic.
+          final source = ReactiveSubject<String>.broadcast();
+          final cached = source.cache();
+
+          source.add('hello');
+          await Future.delayed(Duration.zero);
+
+          final values = <String>[];
+          // Subscribing after 'hello' was already added is the whole point:
+          // a replaying subject must hand it to this late listener anyway.
+          cached.stream.listen(values.add);
+          await Future.delayed(Duration.zero);
+
+          expect(values, equals(<String>['hello']));
+
+          source.add('world');
+          await Future.delayed(Duration.zero);
+          expect(values, equals(<String>['hello', 'world']));
+
+          await cached.dispose();
+          await source.dispose();
+        },
+      );
+
+      test('cache() on an already-replaying subject returns itself', () async {
+        expect(subject.cache(), same(subject));
       });
     });
 

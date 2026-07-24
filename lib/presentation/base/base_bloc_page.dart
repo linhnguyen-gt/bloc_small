@@ -32,7 +32,7 @@ import 'mixins/loading_overlay_mixin.dart';
 ///   const MyHomePage({super.key});
 ///
 ///   @override
-///   Widget buildPage(BuildContext context) {
+///   Widget buildPage(BuildContext context, MyBloc bloc) {
 ///     return buildLoadingOverlay(
 ///       child: Scaffold(
 ///         appBar: AppBar(title: const Text('My Page')),
@@ -55,13 +55,7 @@ import 'mixins/loading_overlay_mixin.dart';
 /// with bloc integration, with all the necessary functionality inherited from the base class.
 abstract class BaseBlocPage<B extends MainBloc>
     extends BasePageStatelessDelegate<B> with LoadingOverlayMixin {
-  BaseBlocPage({super.key});
-
-  /// Access the stateManager as a Bloc with the correct type.
-  ///
-  /// This property provides strongly-typed access to the state manager as a Bloc,
-  /// allowing for event-based state management usage with the add() method.
-  B get bloc => stateManager;
+  const BaseBlocPage({super.key});
 
   @override
   Widget buildLoadingOverlay({

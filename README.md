@@ -1,68 +1,33 @@
 # bloc_small
 
-<div align="center">
+[![pub package](https://img.shields.io/pub/v/bloc_small.svg)](https://pub.dev/packages/bloc_small)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-repo)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-
-A lightweight and simplified BLoC (Business Logic Component) library for Flutter, built on top of the [flutter_bloc](https://pub.dev/packages/flutter_bloc) package. `bloc_small` simplifies state management, making it more intuitive while maintaining the core benefits of the BLoC pattern.
-
-[Getting Started](#installation) • [Documentation](docs/)
-
-## Documentation
-
-Comprehensive documentation is available in the [`docs/`](docs/) directory:
-
-- **[Project Overview & PDR](docs/project-overview-pdr.md)** - Product vision, features, and requirements
-- **[Codebase Summary](docs/codebase-summary.md)** - Overview of codebase structure and components
-- **[Code Standards](docs/code-standards.md)** - Coding conventions and best practices
-- **[System Architecture](docs/system-architecture.md)** - Architecture diagrams and design patterns
-- **[Example Application](example/README.md)** - Complete example app with all features demonstrated
-
-</div>
-
-<summary>Table of Contents</summary>
-
-1. [Features](#features)
-2. [Installation](#installation)
-3. [Core Concepts](#core-concepts)
-4. [Basic Usage](#basic-usage)
-5. [Using Cubit](#using-cubit-alternative-approach)
-6. [Auto Route Integration](#if-you-want-to-use-auto-route-integration)
-7. [Advanced Usage](#advanced-usage)
-8. [Best Practices](#best-practices)
-9. [API Reference](#api-reference)
-10. [Contributing](#contributing)
-11. [License](#license)
+A lightweight, streamlined implementation of the BLoC pattern for Flutter state management. Built on [flutter_bloc](https://pub.dev/packages/flutter_bloc), `bloc_small` simplifies dependency injection, error handling, and async operations while maintaining full BLoC benefits.
 
 ## Features
 
-- Simplified BLoC pattern implementation using [flutter_bloc](https://pub.dev/packages/flutter_bloc)
-- Easy-to-use reactive programming with Dart streams
-- Automatic resource management and disposal
-- Integration with [GetIt](https://pub.dev/packages/get_it) for dependency injection
-- Support for loading states and error handling
-- Streamlined state updates and event handling
-- Built-in support for asynchronous operations
-- Seamless integration with [freezed](https://pub.dev/packages/freezed) for immutable state and event classes
-- Enhanced `ReactiveSubject` with powerful stream transformation methods [rxdart](https://pub.dev/packages/rxdart)
-- Optional integration with [auto_route](https://pub.dev/packages/auto_route) for type-safe navigation, including:
-  - Platform-adaptive transitions
-  - Deep linking support
-  - Nested navigation
-  - Compile-time route verification
-  - Clean and consistent navigation API
+- **Simplified BLoC & Cubit** — Easy-to-use state management via `MainBloc` and `MainCubit`
+- **Dependency Injection** — Integrated GetIt setup with automatic `CommonBloc` registration
+- **Error & Loading State Management** — Built-in `blocCatch`/`cubitCatch` and loading overlay helpers
+- **Freezed Integration** — Full support for immutable states and events
+- **ReactiveSubject API** — RxDart-powered stream transformations (`map`, `switchMap`, `debounceTime`, etc.)
+- **auto_route Integration** — Optional type-safe navigation with deep linking
+- **Stateless & Stateful Widgets** — `BaseBlocPage`/`BaseCubitPage` for both patterns
 
-## Installation
+## Installation & Requirements
 
-Add `bloc_small` to your `pubspec.yaml` file:
+**Requirements:**
+- Flutter >=3.38.0
+- Dart >=3.9.2
+
+Add to `pubspec.yaml`:
 
 ```yaml
 dependencies:
   bloc_small:
 
 dev_dependencies:
-# available in pubspec.yaml
   build_runner:
   auto_route_generator:
   freezed:
@@ -75,93 +40,72 @@ Then run:
 flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
-> **Note**: Remember to run the build runner command every time you make changes to files that use Freezed or Injectable annotations. This generates the necessary code for your BLoCs, events, and states.
+> Run this command whenever you modify Freezed or Injectable annotations.
 
 ## Core Concepts
 
-| Class | Description | Base Class | Purpose |
-|-------|-------------|------------|----------|
-| `MainBloc` | Foundation for BLoC pattern implementation | `MainBlocDelegate` | Handles events and emits states |
-| `MainCubit` | Simplified state management alternative | `MainCubitDelegate` | Direct state mutations without events |
-| `MainBlocEvent` | Base class for all events | - | Triggers state changes in BLoCs |
-| `MainBlocState` | Base class for all states | - | Represents application state |
-| `CommonBloc` | Global functionality manager | - | Manages loading states and common features |
+| Class | Purpose |
+|-------|---------|
+| `MainBloc` | Foundation for event-driven state management |
+| `MainCubit` | Simplified state management without events |
+| `MainBlocEvent` | Base class for all BLoC events |
+| `MainBlocState` | Base class for all states |
+| `CommonBloc` | App-wide loading and common state |
 
-**BLoC Pattern:**
+**BLoC Example:**
 
 ```dart
-@injectable
-class CounterBloc extends MainBloc<CounterEvent, CounterState> {
-  CounterBloc() : super(const CounterState.initial()) {
+@lazySingleton
+class CountBloc extends MainBloc<CountEvent, CountState> {
+  CountBloc() : super(const CountState.initial()) {
     on<Increment>(_onIncrement);
+  }
+
+  Future<void> _onIncrement(Increment event, Emitter<CountState> emit) async {
+    await blocCatch(actions: () async {
+      await Future.delayed(Duration(seconds: 1));
+      emit(state.copyWith(count: state.count + 1));
+    });
   }
 }
 ```
 
-**Cubit Pattern:**
+**Cubit Example:**
 
 ```dart
-@injectable
-class CounterCubit extends MainCubit<CounterState> {
-  CounterCubit() : super(const CounterState.initial());
+@lazySingleton
+class CountCubit extends MainCubit<CountState> {
+  CountCubit() : super(const CountState.initial());
 
-  void increment() => emit(state.copyWith(count: state.count + 1));
+  Future<void> increment() async {
+    await cubitCatch(actions: () async {
+      emit(state.copyWith(count: state.count + 1));
+    });
+  }
 }
 ```
 
 ## Basic Usage
 
-### 1. Set up Dependency Injection
-
-Use GetIt and Injectable for dependency injection:
+### 1. Set Up Dependency Injection
 
 ```dart
 @InjectableInit()
 void configureInjectionApp() {
-  // Step 1: Register core dependencies from package bloc_small
-  getIt.registerCore();
-
-  // Step 2: Register your app dependencies
-  getIt.init();
+  getIt.registerCore();  // Registers CommonBloc — required
+  getIt.init();          // Registers your app dependencies
 }
-```
 
-```dart
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  configureInjectionApp(); // Initialize both core and app dependencies
+  configureInjectionApp();
   runApp(MyApp());
 }
 ```
 
-> **Important**: The `RegisterModule` class with the `CommonBloc` singleton is essential. If you don't include this Dependency Injection setup, your app will encounter errors. The `CommonBloc` is used internally by `bloc_small` for managing common functionalities like loading states across your app.
+> **Important:** `getIt.registerCore()` is required and registers `CommonBloc` as a lazy singleton. Omitting it will throw on first page load.
 
-Make sure to call `configureInjectionApp()` before running your app
-
-### 2. Define your BLoC
-
-```dart
-@injectable
-class CountBloc extends MainBloc<CountEvent, CountState> {
-  CountBloc() : super(const CountState.initial()) {
-    on<Increment>(_onIncrementCounter);
-    on<Decrement>(_onDecrementCounter);
-  }
-
-  Future<void> _onIncrementCounter(Increment event, Emitter<CountState> emit) async {
-    await blocCatch(actions: () async {
-      await Future.delayed(Duration(seconds: 2));
-      emit(state.copyWith(count: state.count + 1));
-    });
-  }
-
-  void _onDecrementCounter(Decrement event, Emitter<CountState> emit) {
-    if (state.count > 0) emit(state.copyWith(count: state.count - 1));
-  }
-}
-```
-
-### 3. Define Events and States with Freezed
+### 2. Define Events & States with Freezed
 
 ```dart
 abstract class CountEvent extends MainBlocEvent {
@@ -175,265 +119,114 @@ sealed class Increment extends CountEvent with _$Increment {
 }
 
 @freezed
-sealed class Decrement extends CountEvent with _$Decrement {
-  const Decrement._() : super._();
-  const factory Decrement() = _Decrement;
-}
-```
-
-```dart
-@freezed
 sealed class CountState extends MainBlocState with _$CountState {
   const CountState._();
   const factory CountState.initial({@Default(0) int count}) = _Initial;
 }
 ```
 
-### 4. Create a StatefulWidget with BaseBlocPageState
-
-```dart
-class MyHomePage extends StatefulWidget {
-  MyHomePage({required this.title});
-
-  final String title;
-
-  @override
-  MyHomePageState createState() => _MyHomePageState();
-}
-
-class MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
-  @override
-  Widget buildPage(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: BlocBuilder<CountBloc, CountState>(
-          builder: (context, state) {
-            return Text(
-              '${state.count}',
-            );
-          },
-        ),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () => bloc.add(Increment()),
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-          ),
-          FloatingActionButton(
-            onPressed: () => bloc.add(Decrement()),
-            tooltip: 'decrement',
-            child: Icon(Icons.remove),
-          ),
-        ],
-      ),
-    );
-  }
-}
-```
-
-## Using Cubit (Alternative Approach)
-
-If you prefer a simpler approach without events, you can use Cubit instead of BLoC:
-
-### 1. Define your Cubit
-
-```dart
-@injectable
-class CounterCubit extends MainCubit<CounterState> {
-  CounterCubit() : super(const CounterState.initial());
-
-  Future<void> increment() async {
-    await cubitCatch(
-      actions: () async {
-        await Future.delayed(Duration(seconds: 1));
-        emit(state.copyWith(count: state.count + 1));
-      },
-      keyLoading: 'increment',
-    );
-  }
-
-  void decrement() {
-    if (state.count > 0) {
-      emit(state.copyWith(count: state.count - 1));
-    }
-  }
-}
-```
-
-### 2. Define Cubit State with Freezed
-
-```dart
-@freezed
-sealed class CountState extends MainBlocState with _$CountState {
-  const CountState._();
-  const factory CountState.initial({@Default(0) int count}) = _Initial;
-}
-```
-
-### 3. Create a StatefulWidget with BaseCubitPageState
+### 3. Create a Page
 
 ```dart
 class CounterPage extends StatefulWidget {
-  const CounterPage({super.key});
-
   @override
   State<CounterPage> createState() => _CounterPageState();
 }
 
-class _CounterPageState extends BaseCubitPageState<CounterPage, CountCubit> {
+class _CounterPageState extends BaseBlocPageState<CounterPage, CountBloc> {
   @override
   Widget buildPage(BuildContext context) {
-    return buildLoadingOverlay(
-      loadingKey: 'increment',
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Counter Example')),
-        body: Center(
-          child: BlocBuilder<CountCubit, CountState>(
-            builder: (context, state) {
-              return Text(
-                '${state.count}',
-                style: const TextStyle(fontSize: 48),
-              );
-            },
-          ),
-        ),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              onPressed: () => cubit.increment(),
-              child: const Icon(Icons.add),
-            ),
-            const SizedBox(height: 16),
-            FloatingActionButton(
-              onPressed: () => cubit.decrement(),
-              child: const Icon(Icons.remove),
-            ),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Counter')),
+      body: BlocBuilder<CountBloc, CountState>(
+        builder: (context, state) => Text('${state.count}'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => bloc.add(Increment()),
+        child: const Icon(Icons.add),
       ),
     );
   }
 }
 ```
 
-<summary>Key differences when using Cubit</summary>
+## Using Cubit
 
-| Feature | BLoC                | Cubit |
-|---------|---------------------|-------|
-| Event Handling | Uses events         | Direct method calls |
-| Base Class | `MainBloc`          | `MainCubit` |
-| Widget State | `BaseBlocPageState` | `BaseCubitPageState` |
-| Complexity | More boilerplate    | Simpler implementation |
-| Use Case | Complex state logic | Simple state changes |
+Cubit simplifies state management by using direct method calls instead of events:
+
+```dart
+@lazySingleton
+class CountCubit extends MainCubit<CountState> {
+  CountCubit() : super(const CountState.initial());
+
+  void increment() => emit(state.copyWith(count: state.count + 1));
+}
+```
+
+Use `BaseCubitPageState` and `BaseCubitPage` for page widgets. Call methods directly:
+
+```dart
+floatingActionButton: FloatingActionButton(
+  onPressed: () => cubit.increment(),
+  child: const Icon(Icons.add),
+)
+```
+
+| Aspect | BLoC | Cubit |
+|--------|------|-------|
+| Events | ✓ | ✗ |
+| Complexity | Higher | Lower |
+| Use Case | Complex logic | Simple updates |
+
+## Bloc Ownership Rules
+
+**The DI container owns every bloc and cubit. Widgets consume, never close them.**
+
+1. **Register page state managers as singleton/lazy singleton** — `registerFactory` is not supported and will throw in debug builds. Factories create new instances per resolution, and pages never dispose what they didn't create.
+
+   ```dart
+   getIt.registerLazySingleton<CountBloc>(CountBloc.new);  // ✓
+   // getIt.registerFactory<CountBloc>(CountBloc.new);     // ✗
+   ```
+
+2. **`CommonBloc` is app-wide** — Registered via `registerCore()`. Call `resetCore()` in tests/hot-restart.
+
+3. **Do not annotate your router for codegen** — `registerAppRouter` registers the instance you provide. Annotating it with `@LazySingleton` would register it twice, causing `getIt.init()` to throw.
+
+   ```dart
+   @AutoRouterConfig()
+   class AppRouter extends BaseAppRouter { }  // No @LazySingleton
+   ```
 
 ## Using StatelessWidget
 
-bloc_small also supports StatelessWidget with similar functionality to StatefulWidget implementations.
-
-### 1. Using BLoC with StatelessWidget
+`BaseBlocPage` and `BaseCubitPage` receive the state manager in `buildPage`:
 
 ```dart
-class MyHomePage extends BaseBlocPage<CountBloc> {
-  const MyHomePage({super.key});
-
-  @override
-  Widget buildPage(BuildContext context) {
-    return buildLoadingOverlay(
-      context,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Counter Example')),
-        body: Center(
-          child: BlocBuilder<CountBloc, CountState>(
-            builder: (context, state) {
-              return Text(
-                '${state.count}',
-                style: const TextStyle(fontSize: 48),
-              );
-            },
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => bloc.add(const Increment()),
-          child: const Icon(Icons.add),
-        ),
-      ),
-    );
-  }
-}
-```
-
-### 2. Using Cubit with StatelessWidget
-
-```dart
-class CounterPage extends BaseCubitPage<CountCubit> {
+class CounterPage extends BaseBlocPage<CountBloc> {
   const CounterPage({super.key});
 
   @override
-  Widget buildPage(BuildContext context) {
-    return buildLoadingOverlay(
-      context,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Counter Example')),
-        body: Center(
-          child: BlocBuilder<CountCubit, CountState>(
-            builder: (context, state) {
-              return Text(
-                '${state.count}',
-                style: const TextStyle(fontSize: 48),
-              );
-            },
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => cubit.increment(),
-          child: const Icon(Icons.add),
-        ),
+  Widget buildPage(BuildContext context, CountBloc bloc) {
+    return Scaffold(
+      body: BlocBuilder<CountBloc, CountState>(
+        builder: (context, state) => Text('${state.count}'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => bloc.add(Increment()),
+        child: const Icon(Icons.add),
       ),
     );
   }
 }
 ```
 
-### Key Features of StatelessWidget Implementation
+## auto_route Integration
 
-| Feature | Description |
-|---------|-------------|
-| Base Classes | `BaseBlocPage` and `BaseCubitPage` |
-| DI Support | Automatic dependency injection |
-| Loading Management | Built-in loading overlay support |
-| Navigation | Integrated navigation capabilities |
-| State Management | Full BLoC/Cubit pattern support |
-
-### When to Use StatelessWidget vs StatefulWidget
-
-| Use Case | Widget Type |
-|----------|------------|
-| Simple UI without local state | StatelessWidget |
-| Complex UI with local state | StatefulWidget |
-| Performance-critical screens | StatelessWidget |
-| Screens with lifecycle needs | StatefulWidget |
-
-## If you want to use Auto Route Integration
-
-1. Add auto_route to your dependencies:
-
-```yaml
-dev_dependencies:
-  auto_route_generator:
-```
-
-2. Create your router:
+1. **Create Router:**
 
 ```dart
 @AutoRouterConfig()
-@LazySingleton()
 class AppRouter extends BaseAppRouter {
   @override
   List<AutoRoute> get routes => [
@@ -443,26 +236,15 @@ class AppRouter extends BaseAppRouter {
 }
 ```
 
-3. Register Router in Dependency Injection
-
-Register your router during app initialization:
+2. **Register & Configure:**
 
 ```dart
 void configureInjectionApp() {
-  // Register AppRouter (recommended)
   getIt.registerAppRouter<AppRouter>(AppRouter(), enableNavigationLogs: true);
-
-  // Register other dependencies
   getIt.registerCore();
   getIt.init();
 }
-```
 
-4. Setup MaterialApp
-
-Configure your MaterialApp to use auto_route:
-
-```dart
 class MyApp extends StatelessWidget {
   final _router = getIt<AppRouter>();
 
@@ -470,394 +252,117 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       routerConfig: _router.config(),
-      // ... other MaterialApp properties
     );
   }
 }
 ```
 
-5. Navigation
-
-Use the provided `AppNavigator` for consistent navigation across your app:
+3. **Navigate:**
 
 ```dart
-class MyWidget extends StatelessWidget {
-  final navigator = getIt.getNavigator();
-
-  void _onNavigate() {
-    navigator?.push(const HomeRoute());
-  }
-}
-```
-
-Use the bloc and cubit provided `AppNavigator`:
-
-```dart
-class _MyWidgetState extends BaseBlocPageState<MyWidget, MyWidgetBloc> {
-  void _onNavigate() {
-    navigator?.push(const HomeRoute());
-  }
-}
-```
-
-```dart
-class _MyWidgetState extends BaseCubitPageState<MyWidget, MyWidgetCubit> {
-  void _onNavigate() {
-    navigator?.push(const HomeRoute());
-  }
-}
-```
-
-```dart
-// Basic navigation
+final navigator = getIt.getNavigator();
 navigator?.push(const HomeRoute());
-
-// Navigation with parameters
-navigator?.push(UserRoute(userId: 123));
 ```
 
-#### Best Practices
+## Loading Overlay
 
-1. Always register AppRouter in your DI setup
-2. Use the type-safe methods provided by AppNavigator
-3. Handle potential initialization errors
-4. Consider creating a navigation service class for complex apps
-
-#### Features
-
-- Type-safe routing
-- Automatic route generation
-- Platform-adaptive transitions
-- Deep linking support
-- Nested navigation
-- Integration with dependency injection
-
-#### Benefits
-
-- Compile-time route verification
-- Clean and consistent navigation API
-- Reduced boilerplate code
-- Better development experience
-- Easy integration with bloc_small package
-
-For more complex navigation scenarios and detailed documentation, refer to the [auto_route documentation](https://pub.dev/packages/auto_route).
-
-Note: While you can use any navigation solution, this package is optimized to work with auto_route.
-The integration between auto_route and this package provides
-
-If you choose a different navigation solution, you'll need to implement your own navigation registration strategy.
-
-## Advanced Usage
-
-### Handling Loading States
-
-`bloc_small` provides a convenient way to manage loading states and display loading indicators using the `CommonBloc` and the `buildLoadingOverlay` method.
-
-#### Using buildLoadingOverlay
-
-When using `BaseBlocPageState`, you can easily add a loading overlay to your entire page:
+Wrap your page content with `buildLoadingOverlay` to display a loading indicator:
 
 ```dart
-class MyHomePageState extends BaseBlocPageState<MyHomePage, CountBloc> {
-  @override
-  Widget buildPage(BuildContext context) {
-    return buildLoadingOverlay(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('You have pushed the button this many times:'),
-              BlocBuilder<CountBloc, CountState>(
-                builder: (context, state) {
-                  return Text('${state.count}');
-                },
-              )
-            ],
-          ),
-        ),
-        floatingActionButton: Wrap(
-          spacing: 5,
-          children: [
-            FloatingActionButton(
-              onPressed: () => bloc.add(Increment()),
-              tooltip: 'Increment',
-              child: Icon(Icons.add),
-            ),
-            FloatingActionButton(
-              onPressed: () => bloc.add(Decrement()),
-              tooltip: 'decrement',
-              child: Icon(Icons.remove),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+Widget buildPage(BuildContext context) {
+  return buildLoadingOverlay(
+    child: Scaffold(...),
+    loadingKey: 'myKey',  // Optional: for multiple loading states
+  );
 }
 ```
 
-The `buildLoadingOverlay` method wraps your page content and automatically displays a loading indicator when the loading state is active.
-
-#### Customizing the Loading Overlay
-
-You can customize the loading overlay by providing a `loadingWidget` and specifying a `loadingKey`:
+Control it from your bloc/cubit:
 
 ```dart
-buildLoadingOverlay(
-  child: YourPageContent(),
-  loadingWidget: YourCustomLoadingWidget(),
-  loadingKey:'customLoadingKey'
-)
-```
-
-#### Activating the Loading State
-
-To show or hide the loading overlay, use the `showLoading` and `hideLoading` methods in your BLoC:
-
-```dart
-class YourBloc extends MainBloc<YourEvent, YourState> {
-  Future<void> someAsyncOperation() async {
-    showLoading(); // or showLoading(key: 'customLoadingKey');
-    try {
-      // Perform async operation
-    } finally {
-      hideLoading(); // or hideLoading(key: 'customLoadingKey');
-    }
+await blocCatch(actions: () async {
+  showLoading();
+  try {
+    // Your async operation
+  } finally {
+    hideLoading();
   }
-}
+});
 ```
 
-This approach provides a clean and consistent way to handle loading states across your application, with the flexibility to use global or component-specific loading indicators.
+## Error Handling
 
-### Error Handling
-
-Use the `blocCatch` method in your BLoC to handle errors:
+Use `blocCatch` or `cubitCatch` to wrap async operations and handle errors automatically:
 
 ```dart
 await blocCatch(
   actions: () async {
-    // Your async logic here
-    throw Exception('Something went wrong');
+    // Your code here
   },
   onError: (error) {
-    // Handle the error
-    print('Error occurred: $error');
-  }
+    print('Error: $error');
+  },
 );
 ```
 
-### Error Handling with BlocErrorHandlerMixin
-
-`bloc_small` provides a mixin for standardized error handling and logging:
+For standardized error handling, use `BaseErrorHandlerMixin`:
 
 ```dart
-@injectable
-class CountBloc extends MainBloc<CountEvent, CountState> with BlocErrorHandlerMixin {
-  CountBloc() : super(const CountState.initial()) {
-    on<Increment>(_onIncrement);
-  }
-
+@lazySingleton
+class CountBloc extends MainBloc<CountEvent, CountState> with BaseErrorHandlerMixin {
+  // ...
+  
   Future<void> _onIncrement(Increment event, Emitter<CountState> emit) async {
     await blocCatch(
-      actions: () async {
-        // Your async logic that might throw
-        if (state.count > 5) {
-          throw ValidationException('Count cannot exceed 5');
-        }
-        emit(state.copyWith(count: state.count + 1));
-      },
-      onError: handleError, // Uses the mixin's error handler
+      actions: () async { /* ... */ },
+      onError: handleError,  // Uses mixin's error handler
     );
   }
 }
 ```
 
-The mixin provides:
-
-- Automatic error logging with stack traces
-- Built-in support for common exceptions (NetworkException, ValidationException, TimeoutException)
-- Automatic loading state cleanup
-- Helper method for error messages
-
-You can get error messages without state emission:
-
-```dart
-String message = getErrorMessage(error); // Returns user-friendly error message
-```
-
-For custom error handling, override the handleError method:
-
-```dart
-@override
-Future<void> handleError(Object error, StackTrace stackTrace) async {
-  // Always call super to maintain logging
-  super.handleError(error, stackTrace);
-  
-  // Add your custom error handling here
-  if (error is CustomException) {
-    // Handle custom exception
-  }
-}
-```
-
-### Lifecycle Management
-
-bloc_small provides lifecycle hooks to manage state and resources based on widget lifecycle events.
-
-#### Using Lifecycle Hooks in BLoC
-
-```dart
-@injectable
-class CounterBloc extends MainBloc<CounterEvent, CounterState> {
-  Timer? _timer;
-
-  CounterBloc() : super(const CounterState.initial()) {
-    on<StartTimer>(_onStartTimer);
-  }
-
-  @override
-  void onDependenciesChanged() {
-    // Called when dependencies change (e.g., Theme, Locale)
-    add(const CounterEvent.checkDependencies());
-  }
-
-  @override
-  void onDeactivate() {
-    // Called when widget is temporarily removed
-    _timer?.cancel();
-  }
-
-  Future<void> _onStartTimer(StartTimer event, Emitter<CounterState> emit) async {
-    _timer = Timer.periodic(Duration(seconds: 1), (_) {
-      add(const CounterEvent.increment());
-    });
-  }
-}
-```
-
-#### Implementation in Widget
-
-```dart
-class CounterPage extends StatefulWidget {
-  @override
-  State<CounterPage> createState() => _CounterPageState();
-}
-
-class _CounterPageState extends BaseBlocPageState<CounterPage, CounterBloc> {
-  @override
-  Widget buildPage(BuildContext context) {
-    return buildLoadingOverlay(
-      child: Scaffold(
-        body: BlocBuilder<CounterBloc, CounterState>(
-          builder: (context, state) => Text('Count: ${state.count}'),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => bloc.add(const StartTimer()),
-          child: Icon(Icons.play_arrow),
-        ),
-      ),
-    );
-  }
-}
-```
-
-The lifecycle hooks are automatically managed by the base classes and provide:
-
-- Automatic resource cleanup
-- State synchronization with system changes
-- Proper handling of widget lifecycle events
-- Memory leak prevention
+The mixin provides automatic logging, error message generation, and loading state cleanup.
 
 ## ReactiveSubject
 
-`ReactiveSubject<T>` is a wrapper around RxDart's BehaviorSubject/PublishSubject, providing a simplified API for reactive programming.
+`ReactiveSubject<T>` wraps RxDart's `BehaviorSubject`/`PublishSubject` with a simplified API.
 
 ### API Reference
 
-#### Core API
+**Constructors & Core:**
 
-| Category | Method/Property | Description |
-|----------|----------------|-------------|
-| **Constructors** | `ReactiveSubject({T? initialValue})` | Creates new with BehaviorSubject |
-| | `ReactiveSubject.broadcast()` | Creates new with PublishSubject |
-| **Properties** | `value` | Current value |
-| | `stream` | Underlying stream |
-| | `isClosed` | Check if closed |
-| | `isDisposed` | Check if disposed |
-| **Core Methods** | `add(T value)` | Add new value |
-| | `addError(Object error)` | Add error |
-| | `dispose()` | Release resources |
-| | `listen()` | Subscribe to stream |
+| Method | Description |
+|--------|-------------|
+| `ReactiveSubject({T? initialValue})` | Creates with BehaviorSubject |
+| `ReactiveSubject.broadcast()` | Creates with PublishSubject |
+| `add(T value)` | Add new value |
+| `dispose()` | Release resources |
 
-#### Transformation Methods
+**Transformation:**
 
-| Method | Description | Example |
-|--------|-------------|---------|
-| `map<R>()` | Transform values | `subject.map((i) => i * 2)` |
-| `where()` | Filter values | `subject.where((i) => i > 0)` |
-| `switchMap()` | Switch streams | `subject.switchMap((i) => api.fetch(i))` |
-| `distinct()` | Remove duplicates | `subject.distinct()` |
-| `scan()` | Accumulate values | `subject.scan((sum, val) => sum + val)` |
+| Method | Example |
+|--------|---------|
+| `map<R>()` | `subject.map((i) => i * 2)` |
+| `where()` | `subject.where((i) => i > 0)` |
+| `switchMap()` | `subject.switchMap((i) => api.fetch(i))` |
+| `debounceTime()` | `subject.debounceTime(300.ms)` |
+| `distinct()` | `subject.distinct()` |
 
-#### Time Control
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `debounceTime()` | Delay emissions | `subject.debounceTime(300.ms)` |
-| `throttleTime()` | Rate limit | `subject.throttleTime(1.seconds)` |
-| `buffer()` | Collect over time | `subject.buffer(timer)` |
-
-#### Error Handling
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `retry()` | Retry on error | `subject.retry(3)` |
-| `onErrorResumeNext()` | Recover from error | `subject.onErrorResumeNext(backup)` |
-| `debug()` | Debug stream | `subject.debug(tag: 'MyStream')` |
-
-#### State Management
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `share()` | Share subscription | `subject.share()` |
-| `shareReplay()` | Cache and replay | `subject.shareReplay(maxSize: 2)` |
-| `groupBy()` | Group values | `subject.groupBy((val) => val.type)` |
-
-#### Static Methods
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `combineLatest()` | Combine multiple subjects | `ReactiveSubject.combineLatest([s1, s2])` |
-| `merge()` | Merge multiple subjects | `ReactiveSubject.merge([s1, s2])` |
-| `fromFutureWithError()` | Create from Future | `ReactiveSubject.fromFutureWithError(future)` |
-
-### Basic Usage Example
+**Example:**
 
 ```dart
-// Create and initialize
 final subject = ReactiveSubject<int>(initialValue: 0);
-
-// Transform and handle errors
 final stream = subject
     .map((i) => i * 2)
     .debounceTime(Duration(milliseconds: 300))
-    .retry(3)
-    .debug(tag: 'MyStream');
-
-// Subscribe
-final subscription = stream.listen(
-  print,
-  onError: handleError,
-);
-
-// Cleanup
+    .listen(print);
 await subject.dispose();
 ```
 
+## Contributing
+
+Contributions welcome! Please open an issue or pull request on [GitHub](https://github.com/linhnguyen-gt/bloc_small).
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License. See [LICENSE](LICENSE) file for details.

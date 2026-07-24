@@ -114,13 +114,13 @@ Provides shared functionality:
 Exception (Base)
     ├── NetworkException
     ├── ValidationException
-    └── TimeoutException
+    └── AppTimeoutException
 
 Error Handler Mixins
-    ├── BlocErrorHandlerMixin
+    ├── BaseErrorHandlerMixin
     │   └── Used with MainBloc
     │
-    └── CubitErrorHandlerMixin
+    └── BaseErrorHandlerMixin
         └── Used with MainCubit
 
 Error Handling Flow
@@ -135,8 +135,7 @@ Error Handling Flow
 
 ```
 GetIt (Service Locator)
-    ├── CoreModule
-    │   └── CommonBloc (Singleton)
+    ├── CommonBloc (LazySingleton, via registerCore())
     │
     ├── AppRouter (LazySingleton)
     │   └── BaseAppRouter implementation
@@ -321,12 +320,13 @@ class MyPageState extends BaseBlocPageState<MyPage, MyBloc> {
   }
 }
 
-// StatelessWidget with BLoC
+// StatelessWidget with BLoC — buildPage receives the bloc
 class MyPage extends BaseBlocPage<MyBloc> {
+  const MyPage({super.key});
+
   @override
-  Widget buildPage(BuildContext context) {
+  Widget buildPage(BuildContext context, MyBloc bloc) {
     return buildLoadingOverlay(
-      context,
       child: Scaffold(/* ... */),
     );
   }
@@ -339,7 +339,7 @@ class MyPage extends BaseBlocPage<MyBloc> {
 
 ```dart
 class MyBloc extends MainBloc<MyEvent, MyState> 
-    with BlocErrorHandlerMixin {
+    with BaseErrorHandlerMixin {
   @override
   Future<void> handleError(Object error, StackTrace stackTrace) async {
     super.handleError(error, stackTrace);

@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
 import '../../core/constants/default_loading.dart';
-import '../../navigation/app_navigator.dart';
+import '../../navigation/i_navigator.dart';
 import '../bloc/common_bloc.dart';
 import '../bloc/main_bloc_state.dart';
 
@@ -49,15 +49,35 @@ import '../bloc/main_bloc_state.dart';
 /// }
 /// ```
 mixin BaseDelegate<S extends MainBlocState> {
-  AppNavigator? navigator;
-  late final WeakReference<CommonBloc> _commonBlocRef;
+  INavigator? navigator;
+
+  // A plain nullable field, not `late final WeakReference`. Two reasons:
+  //
+  // 1. Idempotence. A state manager owned by the DI container outlives the
+  //    pages that wire it, so pushing the same page a second time re-runs this
+  //    setter on the same instance. `late final` made that a fatal
+  //    LateInitializationError on the second push.
+  // 2. Liveness. CommonBloc is an app-wide singleton held by the DI container
+  //    for the process lifetime, so a weak reference bought nothing and only
+  //    added a failure mode where the target could read as null.
+  CommonBloc? _commonBloc;
 
   set commonBloc(CommonBloc bloc) {
-    _commonBlocRef = WeakReference(bloc);
+    _commonBloc = bloc;
   }
 
-  CommonBloc get commonBloc =>
-      _commonBlocRef.target ?? (throw StateError('CommonBloc not initialized'));
+  CommonBloc get commonBloc {
+    final bloc = _commonBloc;
+    if (bloc == null) {
+      throw StateError(
+        'CommonBloc was never injected into this $runtimeType.\n'
+        'Base pages wire it automatically. This usually means the state '
+        'manager was obtained directly (e.g. context.read<$runtimeType>() or '
+        'getIt<$runtimeType>()) and used before any page rendered it.',
+      );
+    }
+    return bloc;
+  }
 
   /// Shows the loading overlay for a specific key.
   ///
@@ -143,7 +163,9 @@ mixin BaseDelegate<S extends MainBlocState> {
         showLoading(key: keyLoading);
       }
       await actions.call();
-    } catch (e, stackTrace) {
+    } on Exception catch (e, stackTrace) {
+      // Exceptions are expected, recoverable failures — route them to the
+      // caller's handler or log them and carry on.
       if (onError != null) {
         await onError(e, stackTrace);
       } else {
@@ -154,6 +176,23 @@ mixin BaseDelegate<S extends MainBlocState> {
           stackTrace: stackTrace,
         );
       }
+    } on Error catch (e, stackTrace) {
+      // An Error is a bug, not a recoverable condition. Log it, then let it
+      // reach the zone handler and any crash reporter.
+      //
+      // A bare `catch` previously absorbed these too: a cubit closed during an
+      // await would throw StateError from emit, get swallowed, and leave stale
+      // UI with no crash report and no sign anything had gone wrong.
+      //
+      // The `finally` below still runs, so loading state is cleaned up before
+      // the error propagates.
+      developer.log(
+        'Unrecoverable error: $e',
+        name: 'Error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     } finally {
       if (isLoading) {
         hideLoading(key: keyLoading);
@@ -162,10 +201,5 @@ mixin BaseDelegate<S extends MainBlocState> {
         await onFinally();
       }
     }
-  }
-
-  void dispose() {
-    navigator = null;
-    // Cleanup other resources
   }
 }

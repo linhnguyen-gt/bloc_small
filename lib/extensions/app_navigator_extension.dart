@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../navigation/app_navigator.dart';
+import '../navigation/i_navigator.dart';
 
-/// Extension on [GetIt] to provide type-safe access to [AppNavigator].
+/// Extension on [GetIt] to provide type-safe access to the navigator.
 ///
-/// This extension adds a convenient method to safely retrieve the [AppNavigator]
-/// instance from the dependency injection container.
+/// This extension adds a convenient method to safely retrieve the [INavigator]
+/// implementation from the dependency injection container.
 extension AppNavigatorExtension on GetIt {
-  /// Retrieves the [AppNavigator] instance from the DI container.
+  /// Retrieves the [INavigator] implementation from the DI container.
   ///
   /// This method provides a type-safe way to access the navigation service.
   /// It includes built-in error checking to ensure the navigator is properly registered.
   ///
   /// Returns:
-  ///   - [AppNavigator]: The registered navigator instance
+  ///   - [INavigator]: The registered navigator instance
   ///
   /// Throws:
-  ///   - [FlutterError]: If [AppNavigator] is not registered in the DI container
+  ///   - [FlutterError]: If no navigator is registered in the DI container
   ///
   /// Example:
   /// ```dart
@@ -27,8 +27,8 @@ extension AppNavigatorExtension on GetIt {
   /// // Use it for navigation
   /// navigator.push(const HomeRoute());
   /// ```
-  AppNavigator getNavigator() {
-    if (!isRegistered<AppNavigator>()) {
+  INavigator getNavigator() {
+    if (!isRegistered<INavigator>()) {
       throw FlutterError(
         'AppNavigator not found in DI container.\n'
         'Did you forget to register AppRouter?\n\n'
@@ -36,6 +36,6 @@ extension AppNavigatorExtension on GetIt {
         '  getIt.registerAppRouter<AppRouter>(AppRouter());',
       );
     }
-    return get<AppNavigator>();
+    return get<INavigator>();
   }
 }

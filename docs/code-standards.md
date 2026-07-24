@@ -156,7 +156,7 @@ class MyBloc extends MainBloc<MyEvent, MyState> {
 Shared functionality provided via mixins:
 ```dart
 class MyBloc extends MainBloc<MyEvent, MyState> 
-    with BlocErrorHandlerMixin {
+    with BaseErrorHandlerMixin {
   // ...
 }
 ```
@@ -203,7 +203,7 @@ Use provided exception types:
 ```dart
 throw NetworkException('Failed to fetch data');
 throw ValidationException('Invalid input');
-throw TimeoutException('Request timed out');
+throw AppTimeoutException('Request timed out');
 ```
 
 ## State Management

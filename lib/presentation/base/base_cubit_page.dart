@@ -32,7 +32,7 @@ import 'mixins/loading_overlay_mixin.dart';
 ///   const MyCounterPage({super.key});
 ///
 ///   @override
-///   Widget buildPage(BuildContext context) {
+///   Widget buildPage(BuildContext context, CounterCubit cubit) {
 ///     return buildLoadingOverlay(
 ///       child: Scaffold(
 ///         appBar: AppBar(title: const Text('Counter')),
@@ -68,13 +68,7 @@ import 'mixins/loading_overlay_mixin.dart';
 /// 4. Still provides all the same infrastructure for loading states and error handling
 abstract class BaseCubitPage<C extends MainCubit>
     extends BasePageStatelessDelegate<C> with LoadingOverlayMixin {
-  BaseCubitPage({super.key});
-
-  /// Access the stateManager as a Cubit with the correct type.
-  ///
-  /// This property provides strongly-typed access to the state manager as a Cubit,
-  /// allowing for direct method calls on the cubit instance.
-  C get cubit => stateManager;
+  const BaseCubitPage({super.key});
 
   @override
   Widget buildLoadingOverlay({

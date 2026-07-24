@@ -2,9 +2,13 @@
 // Script to automatically bump version based on conventional commits.
 //
 // Usage:
-//   dart scripts/bump_version.dart
+//   dart scripts/bump_version.dart [patch|minor|major|auto]
 //
-// Version bump rules:
+// An explicit bump type (patch/minor/major) overrides commit detection and
+// forces a bump even when there are no new commits since the last tag. Passing
+// `auto` (or no argument) falls back to conventional-commit detection.
+//
+// Version bump rules (auto mode):
 // - feat: → MINOR (3.1.1 → 3.2.0)
 // - fix: → PATCH (3.1.1 → 3.1.2)
 // - BREAKING CHANGE or ! → MAJOR (3.1.1 → 4.0.0)
@@ -12,7 +16,16 @@
 
 import 'dart:io';
 
-void main() async {
+void main(List<String> args) async {
+  // Optional explicit bump type from the workflow_dispatch input.
+  final override = args.isNotEmpty && args.first != 'auto' ? args.first : null;
+  const validBumps = {'patch', 'minor', 'major'};
+  if (override != null && !validBumps.contains(override)) {
+    stderr.writeln('Error: invalid bump type "$override" '
+        '(expected patch, minor, major, or auto)');
+    exit(1);
+  }
+
   final pubspecFile = File('pubspec.yaml');
   if (!await pubspecFile.exists()) {
     stderr.writeln('Error: pubspec.yaml not found');
@@ -63,41 +76,47 @@ void main() async {
       .where((c) => c.isNotEmpty)
       .toList();
 
-  if (commits.isEmpty && lastTag != null) {
+  // An explicit override forces a bump even with no new commits.
+  if (override == null && commits.isEmpty && lastTag != null) {
     // No new commits, no version bump needed
     // Output current version but don't update pubspec.yaml
     stdout.writeln(currentVersion);
     exit(0);
   }
 
-  // Determine bump type
-  String bumpType = 'patch';
-  bool hasBreakingChange = false;
-  bool hasFeature = false;
-
-  for (final commit in commits) {
-    final commitLower = commit.toLowerCase();
-    
-    // Check for breaking changes
-    if (commitLower.contains('breaking change') ||
-        commitLower.contains('!') ||
-        commit.startsWith('BREAKING CHANGE')) {
-      hasBreakingChange = true;
-      break;
-    }
-    
-    // Check for features
-    if (commit.startsWith('feat') || commit.startsWith('feat(')) {
-      hasFeature = true;
-    }
-  }
-
-  if (hasBreakingChange) {
-    bumpType = 'major';
-  } else if (hasFeature) {
-    bumpType = 'minor';
+  // Determine bump type: explicit override wins, otherwise detect from commits.
+  String bumpType;
+  if (override != null) {
+    bumpType = override;
   } else {
     bumpType = 'patch';
+    bool hasBreakingChange = false;
+    bool hasFeature = false;
+
+    for (final commit in commits) {
+      final commitLower = commit.toLowerCase();
+
+      // Check for breaking changes
+      if (commitLower.contains('breaking change') ||
+          commitLower.contains('!') ||
+          commit.startsWith('BREAKING CHANGE')) {
+        hasBreakingChange = true;
+        break;
+      }
+
+      // Check for features
+      if (commit.startsWith('feat') || commit.startsWith('feat(')) {
+        hasFeature = true;
+      }
+    }
+
+    if (hasBreakingChange) {
+      bumpType = 'major';
+    } else if (hasFeature) {
+      bumpType = 'minor';
+    } else {
+      bumpType = 'patch';
+    }
   }
 
   // Calculate new version

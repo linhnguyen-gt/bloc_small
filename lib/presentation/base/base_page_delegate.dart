@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../core/constants/default_loading.dart';
-import '../../navigation/app_navigator.dart';
+import '../../navigation/i_navigator.dart';
 import '../bloc/common_bloc.dart';
+import 'i_state_manager.dart';
 
 /// A base delegate class for StatefulWidget states that use either Bloc or Cubit.
 ///
@@ -27,15 +28,18 @@ import '../bloc/common_bloc.dart';
 /// - [buildPageLoading]: Loading indicator widget
 abstract class BasePageDelegate<
   T extends StatefulWidget,
-  B extends StateStreamableSource<Object?>
+  B extends IStateManager<Object?>
 >
     extends State<T> {
   GetIt get di => GetIt.I;
 
-  late final AppNavigator? navigator =
-      di.isRegistered<AppNavigator>() ? di<AppNavigator>() : null;
+  late final INavigator? navigator =
+      di.isRegistered<INavigator>() ? di<INavigator>() : null;
 
-  late final CommonBloc commonBloc = di<CommonBloc>()..navigator = navigator;
+  // No navigator wiring here. CommonBloc is an app-wide singleton and only
+  // manages loading state; assigning a per-page navigator onto it let the most
+  // recently pushed page silently win for the entire app.
+  late final CommonBloc commonBloc = di<CommonBloc>();
 
   /// The state manager instance for this page, automatically initialized with dependencies.
   ///
@@ -55,23 +59,26 @@ abstract class BasePageDelegate<
   /// cubit.increment();
   /// ```
   ///
-  /// The state manager is automatically disposed when the page is disposed.
-  late final B stateManager =
-      di<B>() as dynamic
-        ..commonBloc = commonBloc
-        ..navigator = navigator;
+  /// The state manager is owned by the DI container, **not** by this page.
+  /// It is not closed when the page is disposed, so the same instance can be
+  /// rendered again by a later page.
+  late final B stateManager = _resolveStateManager();
 
-  @override
-  void dispose() {
-    super.dispose();
+  B _resolveStateManager() {
+    debugAssertSingletonRegistration<B>(di);
+    return di<B>()
+      ..commonBloc = commonBloc
+      ..navigator = navigator;
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<B>(create: (_) => stateManager),
-        BlocProvider<CommonBloc>(create: (_) => commonBloc),
+        // `.value`, not `create:` — the DI container created these and still
+        // hands them out, so the widget must not close them on teardown.
+        BlocProvider<B>.value(value: stateManager),
+        BlocProvider<CommonBloc>.value(value: commonBloc),
       ],
       child: buildPageListeners(child: Stack(children: [buildPage(context)])),
     );
@@ -171,7 +178,6 @@ abstract class BasePageDelegate<
   /// ```
   ///
   /// Features:
-  /// - Animated opacity transitions
   /// - Support for multiple loading states
   /// - Custom loading indicator support
   /// - Efficient rebuilds using buildWhen

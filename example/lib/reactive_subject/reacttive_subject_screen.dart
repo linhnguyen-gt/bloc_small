@@ -1,4 +1,3 @@
-import 'package:bloc_small/bloc_small.dart';
 import 'package:bloc_small_example/reactive_subject/reactive_subject_improvements_demo.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +13,7 @@ import 'shopping_cart.dart';
 import 'stock_price.dart';
 import 'temperature_converter.dart';
 import 'api_retry_example.dart';
+import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
 class ReactiveSubjectScreen extends StatelessWidget {

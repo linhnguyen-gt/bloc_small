@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 
 import 'cubit/cubit/count_cubit.dart';
 import 'navigation/app_router.gr.dart';
+import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
 class CounterPage extends BaseCubitPage<CountCubit> {
-  CounterPage({super.key});
+  const CounterPage({super.key});
 
   @override
-  Widget buildPage(BuildContext context) {
+  Widget buildPage(BuildContext context, CountCubit cubit) {
     return buildLoadingOverlay(
       loadingKey: 'increment',
       child: Scaffold(

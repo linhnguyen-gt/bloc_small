@@ -17,11 +17,9 @@ extension ReactiveSubjectCombinationsExtension<T> on ReactiveSubject<T> {
     ReactiveSubject<S> other,
     R Function(T event, S latestFromOther) combiner,
   ) {
-    final result = ReactiveSubject<R>();
-    stream
-        .withLatestFrom(other.stream, combiner)
-        .listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<R>(
+      stream.withLatestFrom(other.stream, combiner),
+    );
   }
 
   /// Prepends a given value to the source ReactiveSubject.
@@ -34,9 +32,13 @@ extension ReactiveSubjectCombinationsExtension<T> on ReactiveSubject<T> {
   /// subject.add(2); // Prints: 2
   /// ```
   ReactiveSubject<T> startWith(T startValue) {
-    final result = ReactiveSubject<T>(initialValue: startValue);
-    stream.startWith(startValue).listen(result.add, onError: result.addError);
-    return result;
+    // Seed via the subject's initialValue only. Also applying
+    // `stream.startWith(startValue)` seeded a second time, emitting the start
+    // value twice (I10).
+    return _deriveReactiveSubject<T>(
+      stream,
+      into: ReactiveSubject<T>(initialValue: startValue),
+    );
   }
 
   /// Applies an accumulator function over the source ReactiveSubject, and returns each intermediate result as a ReactiveSubject.
@@ -53,10 +55,6 @@ extension ReactiveSubjectCombinationsExtension<T> on ReactiveSubject<T> {
     R initialValue,
     R Function(R accumulated, T current, int index) accumulator,
   ) {
-    final result = ReactiveSubject<R>();
-    stream
-        .scan(accumulator, initialValue)
-        .listen(result.add, onError: result.addError);
-    return result;
+    return _deriveReactiveSubject<R>(stream.scan(accumulator, initialValue));
   }
 }

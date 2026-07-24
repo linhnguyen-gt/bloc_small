@@ -37,7 +37,7 @@ Create an intuitive, developer-friendly state management solution that:
 
 ### 4. Error Handling
 - Standardized error handling with `blocCatch` and `cubitCatch`
-- Built-in exception types (NetworkException, ValidationException, TimeoutException)
+- Built-in exception types (NetworkException, ValidationException, AppTimeoutException)
 - Error handler mixin for consistent error management
 
 ### 5. Navigation Integration
@@ -67,15 +67,18 @@ Create an intuitive, developer-friendly state management solution that:
 
 ### Dependencies
 - `flutter_bloc: ^9.1.1` - Core BLoC functionality
-- `get_it: ^9.0.5` - Dependency injection
-- `injectable: ^2.6.0` - Code generation for DI
+- `get_it: ^9.2.0` - Dependency injection
 - `rxdart: ^0.28.0` - Reactive programming
 - `auto_route: ^11.1.0` - Type-safe navigation (optional)
 - `freezed_annotation: ^3.1.0` - Immutable classes
 
+`injectable` is deliberately absent: no file under `lib/` imports it, and `registerCore()`
+integrates with it purely through the consuming app's own codegen. Apps that use
+`@injectable` annotations declare the package themselves and are free to pick 2.x or 3.x.
+
 ### Dev Dependencies
 - `flutter_lints: ^6.0.0` - Linting rules
-- `mockito: ^5.4.5` - Mocking for tests
+- `provider: ^6.1.2` - Coexistence regression tests
 - `bloc_test: ^10.0.0` - BLoC testing utilities
 
 ## Target Audience

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/default_loading.dart';
 import '../base/base_delegate.dart';
+import '../base/i_state_manager.dart';
 import 'main_bloc_event.dart';
 import 'main_bloc_state.dart';
 
@@ -57,7 +58,8 @@ abstract class BaseBlocDelegate<
   S extends MainBlocState
 >
     extends Bloc<E, S>
-    with BaseDelegate<S> {
+    with BaseDelegate<S>
+    implements IStateManager<S> {
   BaseBlocDelegate(super.initialState);
 
   /// Adds an event to the bloc if it's not closed.
@@ -88,6 +90,10 @@ abstract class BaseBlocDelegate<
   /// }
   /// ```
   void reset(S initialState) {
+    // Guard matches the one on add(): emitting after close throws (I6).
+    if (isClosed) {
+      return;
+    }
     // ignore: invalid_use_of_visible_for_testing_member
     emit(initialState);
   }
