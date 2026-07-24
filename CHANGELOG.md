@@ -1,5 +1,26 @@
 # Changelog
 
+## 5.0.0
+
+*Released on 2026-07-24*
+
+### Breaking Changes
+
+* drop unused injectable dependency and refresh lockfiles ([c97317e](https://github.com/linhnguyen-gt/bloc_small/commit/c97317e305fb260c7c6f6f697b30f3301396150c))
+* 4.0.0 critical defect remediation ([3fce478](https://github.com/linhnguyen-gt/bloc_small/commit/3fce4788b46a9585ea606ae016fa3d7b68785f57))
+
+### Documentation
+
+* rewrite README to professional standard ([0f536b0](https://github.com/linhnguyen-gt/bloc_small/commit/0f536b0bbccc331807629aad683c8dcc0579bb72))
+* correct AGENTS.md against 4.0.0 behavior ([e46bf9d](https://github.com/linhnguyen-gt/bloc_small/commit/e46bf9d7b8c646c2f082ad96e7881141a1720f1e))
+
+### Other
+
+* Merge pull request #11 from linhnguyen-gt/fix/4.0.0-critical-defect-remediation ([0437da2](https://github.com/linhnguyen-gt/bloc_small/commit/0437da2f64cf5344d11f7f1cd93eb79ed8c78a7c))
+* track project docs, ignore .claude tooling dir ([81dcb41](https://github.com/linhnguyen-gt/bloc_small/commit/81dcb41ac1d54f31a2ff3f3ebb0e3c601798f04a))
+* gate release behind manual dispatch with bump-type input ([a50ff69](https://github.com/linhnguyen-gt/bloc_small/commit/a50ff69e563560de558c834f1fec5ab7b56464d1))
+* update package versions in pubspec.lock and example/pubspec.lock ([9539811](https://github.com/linhnguyen-gt/bloc_small/commit/9539811ed64a7b8c4540c4f1440bc6f63b220ccc))
+
 ## 4.0.0
 
 *Released on 2026-07-19*
