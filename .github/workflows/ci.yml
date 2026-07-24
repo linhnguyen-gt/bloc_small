@@ -6,6 +6,17 @@ on:
   pull_request:
     branches: [master, main]
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        type: choice
+        required: true
+        default: auto
+        options:
+          - auto
+          - patch
+          - minor
+          - major
 
 jobs:
   test:
@@ -60,7 +71,7 @@ jobs:
 
   version:
     needs: [test, build-web]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -95,7 +106,7 @@ jobs:
           set +e
           # Capture stdout (version) separately from stderr (log message)
           # Version is printed to stdout, log message to stderr
-          NEW_VERSION=$(dart scripts/bump_version.dart 2>/dev/null | tail -1)
+          NEW_VERSION=$(dart scripts/bump_version.dart "${{ inputs.bump }}" 2>/dev/null | tail -1)
           EXIT_CODE=$?
           
           if [ $EXIT_CODE -eq 0 ] && [ -n "$NEW_VERSION" ]; then
@@ -143,8 +154,7 @@ jobs:
   publish:
     needs: [test, build-web, version]
     if: |
-      github.event_name == 'push' && 
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') &&
+      github.event_name == 'workflow_dispatch' &&
       needs.version.outputs.version_bumped == 'true'
     runs-on: ubuntu-latest
     steps:
